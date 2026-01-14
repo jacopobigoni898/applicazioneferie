@@ -41,6 +41,6 @@ export const Spacing = {
   md: 16, // Standard padding
   lg: 24,
   xl: 32,
-  title: 48, //titolo paddingo top
-  mgLeftTitle: 30,
+  title: 28, //titolo paddingo top
+  titleleft: 16, //margin left per il titolo della pagina
 };

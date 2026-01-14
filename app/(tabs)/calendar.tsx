@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import { Colors, Spacing, Typography } from "../../src/core/theme/theme";
 import CalendarComp from "../../src/presentation/component/calendar/CalendarComponent";
+//import { LinearGradient } from "expo-linear-gradient";
 
 export default function CalendarScreen() {
   return (
@@ -19,9 +20,9 @@ export default function CalendarScreen() {
 const styles = StyleSheet.create({
   title: {
     fontSize: Typography.size.xl,
-    fontWeight: Typography.weight.bold,
+    fontWeight: Typography.weight.medium,
     paddingTop: Spacing.title,
-    marginLeft: Spacing.mgLeftTitle,
+    marginLeft: Spacing.titleleft,
   },
   background: {
     backgroundColor: Colors.background,
