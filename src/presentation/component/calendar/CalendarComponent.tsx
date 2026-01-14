@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
-    paddingTop: 64,
+    paddingTop: 54,
     paddingHorizontal: 10,
   },
   title: {
@@ -279,6 +279,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
+    marginBottom: 24,
   },
   buttonDisabled: {
     backgroundColor: "#CCCCCC", // Grigio disabilitato
