@@ -9,7 +9,6 @@ export enum RequestType {
   STRAORDINARIO_DIURNO = "diurno",
   STRAORDINARIO_NOTTURNO = "notturno",
   STRAORDINARIO_FESTIVO = "festivo",
-  BANCA_ORE = "banca_ore",
 }
 
 // Liste pronte per essere usate nei dropdown
@@ -27,7 +26,6 @@ export const OVERTIME_OPTIONS = [
     value: RequestType.STRAORDINARIO_NOTTURNO,
   },
   { label: "Straordinario Festivo", value: RequestType.STRAORDINARIO_FESTIVO },
-  { label: "Banca Ore", value: RequestType.BANCA_ORE },
 ];
 
 // Enum per le modalità di visualizzazione (evitiamo errori di battitura)
