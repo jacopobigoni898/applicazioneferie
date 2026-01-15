@@ -5,37 +5,36 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  TextInput,
   TouchableWithoutFeedback,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
-import { Colors, Typography } from "../../../core/theme/theme"; // Assicurati che il percorso sia giusto
+import { Colors } from "../../../core/theme/theme";
 
-// Dati per i menu a tendina
-const absenceTypes = [
-  { label: "Ferie Annuali", value: "ferie" },
-  { label: "Malattia", value: "malattia" },
-  { label: "Permesso ROL", value: "rol" },
-  { label: "Congedo Matrimoniale", value: "congedo" },
-];
+import {
+  ABSENCE_OPTIONS,
+  OVERTIME_OPTIONS,
+} from "../../../domain/entities/TypeRequest";
 
-const overtimeTypes = [
-  { label: "Straordinario Diurno", value: "diurno" },
-  { label: "Straordinario Notturno", value: "notturno" },
-  { label: "Straordinario Festivo", value: "festivo" },
-  { label: "Banca Ore", value: "banca_ore" },
-];
+// Assicurati che il percorso di importazione sia corretto in base alla tua struttura file
+import { RequestStatus } from "../../../domain/entities/RequestStatus";
+// Importiamo le interfacce specifiche per costruire l'oggetto giusto
+import { HolidayRequest } from "../../../domain/entities/HolidayRequest";
+import { SickRequest } from "../../../domain/entities/SickRequest";
+import { PermitsRequest } from "../../../domain/entities/PermitsRequest";
+import { ExtraordinaryRequest } from "../../../domain/entities/RequestExtraordinary";
 
 interface RequestModalProps {
   visible: boolean;
   onClose: () => void;
-  startDate: string | null;
-  endDate: string | null;
-  mainType: string; // 'assenza' o 'straordinari'
-  onSubmit: (data: any) => void;
+  startDate: Date | null;
+  endDate: Date | null;
+  mainType: "assenza" | "straordinari";
+  onSubmit: (
+    data: ExtraordinaryRequest | HolidayRequest | PermitsRequest | SickRequest
+  ) => void;
 }
 
 const RequestModal = ({
@@ -47,95 +46,158 @@ const RequestModal = ({
   onSubmit,
 }: RequestModalProps) => {
   const [subType, setSubType] = useState<string | null>(null);
-  const [notes, setNotes] = useState("");
   const [isFocus, setIsFocus] = useState(false);
 
-  // Resetta i campi ogni volta che la modale si apre
   useEffect(() => {
     if (visible) {
       setSubType(null);
-      setNotes("");
     }
   }, [visible]);
 
-  // Seleziona la lista giusta in base a cosa hai scelto nel calendario
   const currentOptions =
-    mainType === "straordinari" ? overtimeTypes : absenceTypes;
+    mainType === "straordinari" ? OVERTIME_OPTIONS : ABSENCE_OPTIONS;
 
+  // --- MODIFICA: LOGICA DI COSTRUZIONE OGGETTI ---
   const handleSubmit = () => {
     if (!subType) {
-      // Piccolo controllo di sicurezza
-      alert("Per favore seleziona una specifica (es. Ferie)");
+      alert("Seleziona una motivazione!");
       return;
     }
 
-    // Impacchetta i dati
-    const requestData = {
-      startDate,
-      endDate,
-      mainType,
-      subType,
-      notes,
-    };
+    if (!startDate || !endDate) {
+      alert("Date non valide!");
+      return;
+    }
 
-    onSubmit(requestData);
+    // DATI COMUNI (Mock: id_utente e stato andrebbero presi dal contesto auth/backend)
+    const MOCK_USER_ID = 1;
+    const NEW_REQUEST_ID = 0; // Il backend genererà l'ID reale
+    // Assumiamo che RequestStatus sia un Enum, usiamo un valore di default (es. PENDING/1)
+    // Se RequestStatus è una stringa, metti "In Attesa"
+    const DEFAULT_STATUS = RequestStatus.PENDING;
+
+    let requestPayload:
+      | ExtraordinaryRequest
+      | HolidayRequest
+      | PermitsRequest
+      | SickRequest;
+
+    // 1. GESTIONE STRAORDINARI
+    if (mainType === "straordinari") {
+      const extraRequest: ExtraordinaryRequest = {
+        id_richiesta: NEW_REQUEST_ID,
+        id_utente: MOCK_USER_ID,
+        data_inizio: startDate,
+        data_fine: endDate,
+        stato_approvazione: DEFAULT_STATUS,
+      };
+      requestPayload = extraRequest;
+    }
+    // 2. GESTIONE ASSENZE (Ferie, Malattia, Permessi)
+    else {
+      // Normalizziamo la stringa per il confronto (dipende dai valori nel tuo ABSENCE_OPTIONS)
+      const typeLower = subType.toLowerCase();
+
+      if (typeLower.includes("ferie")) {
+        // --- FERIE ---
+        const holidayRequest: HolidayRequest = {
+          id_richiesta: NEW_REQUEST_ID,
+          id_utente: MOCK_USER_ID,
+          data_inizio: startDate,
+          data_fine: endDate,
+          stato_approvazione: DEFAULT_STATUS,
+        };
+        requestPayload = holidayRequest;
+      } else if (typeLower.includes("malattia")) {
+        // --- MALATTIA ---
+        const sickRequest: SickRequest = {
+          id_richiesta: NEW_REQUEST_ID,
+          id_utente: MOCK_USER_ID,
+          data_inizio: startDate,
+          data_fine: endDate,
+          stato_approvazione: DEFAULT_STATUS,
+          certificato_medico: "", // Placeholder: Manca input file nella UI
+        };
+        requestPayload = sickRequest;
+      } else {
+        // --- ALTRI PERMESSI (ROL, EX-FEST, ecc.) ---
+        const permitsRequest: PermitsRequest = {
+          id_richiesta: NEW_REQUEST_ID,
+          id_utente: MOCK_USER_ID,
+          tipo_permesso: subType, // Passiamo la stringa specifica (es. "ROL")
+          data_inizio: startDate,
+          data_fine: endDate,
+          stato_approvazione: DEFAULT_STATUS,
+        };
+        requestPayload = permitsRequest;
+      }
+    }
+
+    // Log per debug
+    console.log("--------------------------------------------------");
+    console.log(
+      `[RequestModal] Invio richiesta tipo: ${mainType} - ${subType}`
+    );
+    console.log(JSON.stringify(requestPayload, null, 2));
+    console.log("--------------------------------------------------");
+
+    // Invio al padre
+    onSubmit(requestPayload);
+  };
+
+  const formatDate = (date: Date | null) => {
+    return date ? date.toLocaleDateString("it-IT") : "--/--/----";
   };
 
   return (
     <Modal
-      animationType="fade"
+      animationType="slide"
       transparent={true}
       visible={visible}
       onRequestClose={onClose}
     >
-      {/* Cliccare fuori chiude la tastiera */}
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.overlay}>
-          {/* Cliccare sulla modale NON deve chiuderla */}
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <KeyboardAvoidingView
               behavior={Platform.OS === "ios" ? "padding" : "height"}
               style={styles.modalContainer}
             >
               <View style={styles.content}>
-                {/* Intestazione */}
-                <Text style={styles.headerTitle}>Completa Richiesta</Text>
+                <View style={styles.handleIndicator} />
+
+                <Text style={styles.headerTitle}>Nuova Richiesta</Text>
                 <Text style={styles.subHeader}>
                   {mainType === "assenza"
-                    ? "Nuova Assenza"
-                    : "Nuovo Straordinario"}
+                    ? "Assenza / Permesso"
+                    : "Straordinario"}
                 </Text>
 
-                {/* Riepilogo Date */}
                 <View style={styles.dateRow}>
                   <View style={styles.dateBox}>
                     <Text style={styles.dateLabel}>Dal:</Text>
                     <Text style={styles.dateValue}>
-                      {startDate?.split("-").reverse().join("/")}
+                      {formatDate(startDate)}
                     </Text>
                   </View>
                   <View style={styles.dateBox}>
                     <Text style={styles.dateLabel}>Al:</Text>
-                    <Text style={styles.dateValue}>
-                      {endDate?.split("-").reverse().join("/")}
-                    </Text>
+                    <Text style={styles.dateValue}>{formatDate(endDate)}</Text>
                   </View>
                 </View>
 
-                {/* Dropdown Scelta Tipo */}
-                <Text style={styles.label}>Specifica il motivo:</Text>
+                <Text style={styles.label}>Motivazione:</Text>
                 <Dropdown
                   style={[
                     styles.dropdown,
-                    isFocus && { borderColor: Colors.primary || "orange" },
+                    isFocus && { borderColor: Colors.primary },
                   ]}
                   placeholderStyle={styles.placeholderStyle}
                   selectedTextStyle={styles.selectedTextStyle}
                   data={currentOptions}
-                  maxHeight={300}
                   labelField="label"
                   valueField="value"
-                  placeholder={!isFocus ? "Seleziona..." : "..."}
+                  placeholder="Seleziona..."
                   value={subType}
                   onFocus={() => setIsFocus(true)}
                   onBlur={() => setIsFocus(false)}
@@ -144,19 +206,6 @@ const RequestModal = ({
                     setIsFocus(false);
                   }}
                 />
-
-                {/* Campo Note */}
-                <Text style={styles.label}>Note aggiuntive (opzionale):</Text>
-                <TextInput
-                  style={styles.textArea}
-                  multiline={true}
-                  numberOfLines={3}
-                  placeholder="Scrivi qui eventuali dettagli..."
-                  value={notes}
-                  onChangeText={setNotes}
-                />
-
-                {/* Bottoni */}
                 <View style={styles.buttonRow}>
                   <TouchableOpacity
                     style={styles.cancelButton}
@@ -164,7 +213,6 @@ const RequestModal = ({
                   >
                     <Text style={styles.cancelButtonText}>Annulla</Text>
                   </TouchableOpacity>
-
                   <TouchableOpacity
                     style={[
                       styles.confirmButton,
@@ -173,11 +221,11 @@ const RequestModal = ({
                     onPress={handleSubmit}
                     disabled={!subType}
                   >
-                    <Text style={styles.confirmButtonText}>
-                      Invia Richiesta
-                    </Text>
+                    <Text style={styles.confirmButtonText}>Invia</Text>
                   </TouchableOpacity>
                 </View>
+
+                <View style={{ height: 20 }} />
               </View>
             </KeyboardAvoidingView>
           </TouchableWithoutFeedback>
@@ -190,30 +238,37 @@ const RequestModal = ({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)", // Sfondo nero semi-trasparente
-    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
     alignItems: "center",
   },
   modalContainer: {
-    width: "90%",
-    maxWidth: 400,
+    width: "100%",
   },
   content: {
     backgroundColor: "white",
-    borderRadius: 20,
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
     padding: 20,
-    // Ombre
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 5,
+  },
+  handleIndicator: {
+    width: 40,
+    height: 5,
+    backgroundColor: "#E0E0E0",
+    borderRadius: 3,
+    alignSelf: "center",
+    marginBottom: 15,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#333",
     textAlign: "center",
+    color: "#333",
   },
   subHeader: {
     fontSize: 14,
@@ -221,7 +276,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 20,
     textTransform: "uppercase",
-    fontWeight: "600",
   },
   dateRow: {
     flexDirection: "row",
@@ -231,26 +285,10 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 12,
   },
-  dateBox: {
-    alignItems: "center",
-    width: "45%",
-  },
-  dateLabel: {
-    fontSize: 12,
-    color: "#888",
-    marginBottom: 2,
-  },
-  dateValue: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  label: {
-    marginBottom: 8,
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#333",
-  },
+  dateBox: { alignItems: "center", width: "45%" },
+  dateLabel: { fontSize: 12, color: "#888" },
+  dateValue: { fontSize: 16, fontWeight: "bold", color: "#333" },
+  label: { marginBottom: 8, fontWeight: "500", color: "#333" },
   dropdown: {
     height: 50,
     borderColor: "#E0E0E0",
@@ -261,22 +299,7 @@ const styles = StyleSheet.create({
   },
   placeholderStyle: { fontSize: 16, color: "#999" },
   selectedTextStyle: { fontSize: 16, color: "#333" },
-  textArea: {
-    height: 80,
-    borderColor: "#E0E0E0",
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingTop: 12,
-    textAlignVertical: "top",
-    marginBottom: 20,
-    backgroundColor: "#FAFAFA",
-  },
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
-  },
+  buttonRow: { flexDirection: "row", marginTop: 10 },
   cancelButton: {
     flex: 1,
     padding: 15,
@@ -285,25 +308,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#F0F0F0",
     alignItems: "center",
   },
-  cancelButtonText: {
-    color: "#666",
-    fontWeight: "bold",
-  },
+  cancelButtonText: { color: "#666", fontWeight: "bold" },
   confirmButton: {
     flex: 1,
     padding: 15,
     marginLeft: 10,
     borderRadius: 10,
-    backgroundColor: Colors.primary || "#FF9800", // Usa il colore del tuo tema
+    backgroundColor: Colors.primary || "orange",
     alignItems: "center",
   },
-  disabledButton: {
-    backgroundColor: "#CCC",
-  },
-  confirmButtonText: {
-    color: "white",
-    fontWeight: "bold",
-  },
+  confirmButtonText: { color: "white", fontWeight: "bold" },
+  disabledButton: { backgroundColor: "#CCC" },
 });
 
 export default RequestModal;
