@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     marginLeft: Spacing.titleleft,
   },
   header: {
-    marginBottom: Spacing.marginbottomtitle,
+    //marginBottom: Spacing.marginbottomtitle,
     backgroundColor: Colors.top,
   },
   top: {

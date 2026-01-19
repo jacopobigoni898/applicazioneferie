@@ -4,7 +4,7 @@ export const Colors = {
   secondary: "#f0f0f0",
   accent: "#ff6b6b",
   evidence: "#deba67",
-  top: "#ffe786", //colore per il titolo
+  top: "#ffffff", //colore per il titolo
   // UI colors
   background: "#ffffff",
   surface: "#f9f9f9", // Per card o modali
