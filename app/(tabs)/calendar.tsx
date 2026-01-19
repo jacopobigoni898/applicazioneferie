@@ -17,7 +17,9 @@ export default function CalendarScreen() {
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.header}>
-        <Text style={styles.title}>Calendario</Text>
+        <View style={styles.titleBlock}>
+          <Text style={styles.title}>Calendario</Text>
+        </View>
       </View>
       <View style={styles.top}>
         <CalendarComp></CalendarComp>
@@ -34,8 +36,15 @@ const styles = StyleSheet.create({
   title: {
     fontSize: Typography.size.xl,
     fontWeight: Typography.weight.medium,
-    paddingTop: Spacing.title,
+    borderBottomWidth: 4,
+    borderBottomColor: Colors.primary,
+    paddingBottom: Spacing.xs,
+  },
+  titleBlock: {
+    alignSelf: "flex-start",
+    alignItems: "flex-start",
     marginLeft: Spacing.titleleft,
+    paddingTop: Spacing.title,
   },
   header: {
     //marginBottom: Spacing.marginbottomtitle,

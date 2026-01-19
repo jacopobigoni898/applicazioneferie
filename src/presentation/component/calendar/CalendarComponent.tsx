@@ -163,7 +163,7 @@ export default function CalendarComp() {
 
       {/* 3. MODIFICA QUI: data={CALENDAR_VIEW_OPTIONS} invece di dropdownData */}
       <Dropdown
-        style={[styles.dropdown, isFocus && { borderColor: Colors.primary }]}
+        style={[styles.dropdown, isFocus && styles.dropdownFocus]}
         placeholderStyle={styles.placeholderStyle}
         selectedTextStyle={styles.selectedTextStyle}
         inputSearchStyle={styles.inputSearchStyle}
@@ -254,19 +254,29 @@ const styles = StyleSheet.create({
   dropdown: {
     marginBottom: Spacing.xl,
     height: 50,
-    borderColor: "#E0E0E0",
-    borderWidth: 1,
-    borderRadius: 24,
+    borderColor: Colors.border,
+    borderWidth: 1.25,
+    borderRadius: 18,
     paddingHorizontal: 16,
-    backgroundColor: Colors.secondary,
+    backgroundColor: Colors.surface,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  dropdownFocus: {
+    borderColor: Colors.primary,
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    elevation: 8,
   },
   placeholderStyle: { fontSize: 16, color: "#999" },
-  selectedTextStyle: { fontSize: 16, color: Colors.textPrimary || "#000" },
+  selectedTextStyle: {
+    fontSize: 16,
+    color: Colors.textPrimary || "#000",
+    fontWeight: Typography.weight.medium,
+  },
   iconStyle: { width: 20, height: 20 },
   inputSearchStyle: { height: 40, fontSize: 16 },
   subtitle: {
