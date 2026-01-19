@@ -3,7 +3,6 @@ import {
   Modal,
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
@@ -12,6 +11,7 @@ import {
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { Colors } from "../../../core/theme/theme";
+import { requestModalStyles } from "../../../core/style/commonStyles";
 
 import {
   ABSENCE_OPTIONS,
@@ -157,43 +157,47 @@ const RequestModal = ({
       onRequestClose={onClose}
     >
       <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.overlay}>
+        <View style={requestModalStyles.overlay}>
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <KeyboardAvoidingView
               behavior={Platform.OS === "ios" ? "padding" : "height"}
-              style={styles.modalContainer}
+              style={requestModalStyles.modalContainer}
             >
-              <View style={styles.content}>
-                <View style={styles.handleIndicator} />
+              <View style={requestModalStyles.content}>
+                <View style={requestModalStyles.handleIndicator} />
 
-                <Text style={styles.headerTitle}>Nuova Richiesta</Text>
-                <Text style={styles.subHeader}>
+                <Text style={requestModalStyles.headerTitle}>
+                  Nuova Richiesta
+                </Text>
+                <Text style={requestModalStyles.subHeader}>
                   {mainType === "assenza"
                     ? "Assenza / Permesso"
                     : "Straordinario"}
                 </Text>
 
-                <View style={styles.dateRow}>
-                  <View style={styles.dateBox}>
-                    <Text style={styles.dateLabel}>Dal:</Text>
-                    <Text style={styles.dateValue}>
+                <View style={requestModalStyles.dateRow}>
+                  <View style={requestModalStyles.dateBox}>
+                    <Text style={requestModalStyles.dateLabel}>Dal:</Text>
+                    <Text style={requestModalStyles.dateValue}>
                       {formatDate(startDate)}
                     </Text>
                   </View>
-                  <View style={styles.dateBox}>
-                    <Text style={styles.dateLabel}>Al:</Text>
-                    <Text style={styles.dateValue}>{formatDate(endDate)}</Text>
+                  <View style={requestModalStyles.dateBox}>
+                    <Text style={requestModalStyles.dateLabel}>Al:</Text>
+                    <Text style={requestModalStyles.dateValue}>
+                      {formatDate(endDate)}
+                    </Text>
                   </View>
                 </View>
 
-                <Text style={styles.label}>Motivazione:</Text>
+                <Text style={requestModalStyles.label}>Motivazione:</Text>
                 <Dropdown
                   style={[
-                    styles.dropdown,
+                    requestModalStyles.dropdown,
                     isFocus && { borderColor: Colors.primary },
                   ]}
-                  placeholderStyle={styles.placeholderStyle}
-                  selectedTextStyle={styles.selectedTextStyle}
+                  placeholderStyle={requestModalStyles.placeholderStyle}
+                  selectedTextStyle={requestModalStyles.selectedTextStyle}
                   data={currentOptions}
                   labelField="label"
                   valueField="value"
@@ -206,22 +210,26 @@ const RequestModal = ({
                     setIsFocus(false);
                   }}
                 />
-                <View style={styles.buttonRow}>
+                <View style={requestModalStyles.buttonRow}>
                   <TouchableOpacity
-                    style={styles.cancelButton}
+                    style={requestModalStyles.cancelButton}
                     onPress={onClose}
                   >
-                    <Text style={styles.cancelButtonText}>Annulla</Text>
+                    <Text style={requestModalStyles.cancelButtonText}>
+                      Annulla
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[
-                      styles.confirmButton,
-                      !subType && styles.disabledButton,
+                      requestModalStyles.confirmButton,
+                      !subType && requestModalStyles.disabledButton,
                     ]}
                     onPress={handleSubmit}
                     disabled={!subType}
                   >
-                    <Text style={styles.confirmButtonText}>Invia</Text>
+                    <Text style={requestModalStyles.confirmButtonText}>
+                      Invia
+                    </Text>
                   </TouchableOpacity>
                 </View>
 
@@ -234,91 +242,5 @@ const RequestModal = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
-    alignItems: "center",
-  },
-  modalContainer: {
-    width: "100%",
-  },
-  content: {
-    backgroundColor: "white",
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  handleIndicator: {
-    width: 40,
-    height: 5,
-    backgroundColor: "#E0E0E0",
-    borderRadius: 3,
-    alignSelf: "center",
-    marginBottom: 15,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#333",
-  },
-  subHeader: {
-    fontSize: 14,
-    color: "#666",
-    textAlign: "center",
-    marginBottom: 20,
-    textTransform: "uppercase",
-  },
-  dateRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
-    backgroundColor: "#F5F5F5",
-    padding: 15,
-    borderRadius: 12,
-  },
-  dateBox: { alignItems: "center", width: "45%" },
-  dateLabel: { fontSize: 12, color: "#888" },
-  dateValue: { fontSize: 16, fontWeight: "bold", color: "#333" },
-  label: { marginBottom: 8, fontWeight: "500", color: "#333" },
-  dropdown: {
-    height: 50,
-    borderColor: "#E0E0E0",
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    marginBottom: 20,
-  },
-  placeholderStyle: { fontSize: 16, color: "#999" },
-  selectedTextStyle: { fontSize: 16, color: "#333" },
-  buttonRow: { flexDirection: "row", marginTop: 10 },
-  cancelButton: {
-    flex: 1,
-    padding: 15,
-    marginRight: 10,
-    borderRadius: 10,
-    backgroundColor: "#F0F0F0",
-    alignItems: "center",
-  },
-  cancelButtonText: { color: "#666", fontWeight: "bold" },
-  confirmButton: {
-    flex: 1,
-    padding: 15,
-    marginLeft: 10,
-    borderRadius: 10,
-    backgroundColor: Colors.primary || "orange",
-    alignItems: "center",
-  },
-  confirmButtonText: { color: "white", fontWeight: "bold" },
-  disabledButton: { backgroundColor: "#CCC" },
-});
 
 export default RequestModal;
