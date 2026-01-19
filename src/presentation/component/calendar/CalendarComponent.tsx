@@ -1,4 +1,13 @@
-import { View, Text, StyleSheet, Alert, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Alert,
+  TouchableOpacity,
+  Platform,
+  Pressable,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import React, { useState, useMemo } from "react";
 import { Calendar, DateData } from "react-native-calendars";
 import { Colors, Typography, Spacing } from "../../../core/theme/theme";
@@ -67,6 +76,12 @@ export default function CalendarComp() {
 
   const [isFocus, setIsFocus] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+
+  const isIOS = Platform.OS === "ios";
+  const selectedOption = CALENDAR_VIEW_OPTIONS.find(
+    (option) => option.value === calendarType
+  );
 
   const weekendMarks = useMemo(() => generateWeekendMarks(), []);
 
@@ -135,10 +150,6 @@ export default function CalendarComp() {
   };
 
   const handleSubmission = (data: any) => {
-    // ... Logica di salvataggio identica a prima ...
-    // (Omissis per brevità, il codice dentro è lo stesso della risposta precedente)
-
-    // Solo per completezza riporto l'inizio:
     const commonData = {
       id_richiesta: Date.now(),
       id_utente: 1,
@@ -161,26 +172,79 @@ export default function CalendarComp() {
         </Text>
       </View>
 
-      {/* 3. MODIFICA QUI: data={CALENDAR_VIEW_OPTIONS} invece di dropdownData */}
-      <Dropdown
-        style={[styles.dropdown, isFocus && styles.dropdownFocus]}
-        placeholderStyle={styles.placeholderStyle}
-        selectedTextStyle={styles.selectedTextStyle}
-        inputSearchStyle={styles.inputSearchStyle}
-        iconStyle={styles.iconStyle}
-        data={CALENDAR_VIEW_OPTIONS} // <--- ECCOLO!
-        maxHeight={300}
-        labelField="label"
-        valueField="value"
-        placeholder={!isFocus ? "Scegli il tipo di calendario" : "..."}
-        value={calendarType}
-        onFocus={() => setIsFocus(true)}
-        onBlur={() => setIsFocus(false)}
-        onChange={(item) => {
-          setCalendarType(item.value);
-          setIsFocus(false);
-        }}
-      />
+      {isIOS ? (
+        <View style={styles.pullDownContainer}>
+          <TouchableOpacity
+            style={[styles.dropdown, styles.iosPicker]}
+            onPress={() => setShowMenu((prev) => !prev)}
+            activeOpacity={0.85}
+          >
+            <Text
+              style={
+                selectedOption?.label
+                  ? styles.selectedTextStyle
+                  : styles.placeholderStyle
+              }
+            >
+              {selectedOption?.label || "Scegli il tipo di calendario"}
+            </Text>
+            <Ionicons
+              name={showMenu ? "chevron-up" : "chevron-down"}
+              size={18}
+              color={Colors.textSecondary}
+            />
+          </TouchableOpacity>
+
+          {showMenu && (
+            <View style={styles.menuOverlay}>
+              <Pressable
+                style={StyleSheet.absoluteFill}
+                onPress={() => setShowMenu(false)}
+              />
+              <View style={styles.pullDownMenu}>
+                {CALENDAR_VIEW_OPTIONS.map((option, index) => (
+                  <Pressable
+                    key={option.value}
+                    style={({ pressed }) => [
+                      styles.menuItem,
+                      pressed && styles.menuItemPressed,
+                      index === CALENDAR_VIEW_OPTIONS.length - 1 && {
+                        borderBottomWidth: 0,
+                      },
+                    ]}
+                    onPress={() => {
+                      setCalendarType(option.value);
+                      setShowMenu(false);
+                    }}
+                  >
+                    <Text style={styles.menuItemText}>{option.label}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          )}
+        </View>
+      ) : (
+        <Dropdown
+          style={[styles.dropdown, isFocus && styles.dropdownFocus]}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          inputSearchStyle={styles.inputSearchStyle}
+          iconStyle={styles.iconStyle}
+          data={CALENDAR_VIEW_OPTIONS}
+          maxHeight={300}
+          labelField="label"
+          valueField="value"
+          placeholder={!isFocus ? "Scegli il tipo di calendario" : "..."}
+          value={calendarType}
+          onFocus={() => setIsFocus(true)}
+          onBlur={() => setIsFocus(false)}
+          onChange={(item) => {
+            setCalendarType(item.value);
+            setIsFocus(false);
+          }}
+        />
+      )}
 
       <View style={{ flex: 1 }}>
         <Calendar
@@ -264,6 +328,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 6,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  iosPicker: {
+    paddingHorizontal: 16,
   },
   dropdownFocus: {
     borderColor: Colors.primary,
@@ -286,5 +356,44 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     paddingBottom: 10,
     paddingLeft: 5,
+  },
+  pullDownContainer: {
+    position: "relative",
+    zIndex: 20,
+  },
+  menuOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  pullDownMenu: {
+    position: "absolute",
+    top: 52,
+    left: 0,
+    right: 0,
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    borderColor: Colors.border,
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.14,
+    shadowRadius: 10,
+    elevation: 10,
+    overflow: "hidden",
+  },
+  menuItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: Colors.surface,
+    borderBottomColor: Colors.border,
+    borderBottomWidth: 1,
+  },
+  menuItemPressed: { backgroundColor: Colors.secondary },
+  menuItemText: {
+    fontSize: 16,
+    color: Colors.textPrimary,
   },
 });
