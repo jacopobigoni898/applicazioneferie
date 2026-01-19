@@ -8,7 +8,7 @@ import {
   Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { Calendar, DateData } from "react-native-calendars";
 import { Colors, Typography, Spacing } from "../../../core/theme/theme";
 import { Dropdown } from "react-native-element-dropdown";
@@ -19,10 +19,6 @@ import { configureCalendarLocale } from "../../../core/utils/calendarConfig";
 // --- IMPORTIAMO LE ENTITÀ E LE OPZIONI (Refactoring Completo) ---
 import RequestModal from "../modal/RequestModal";
 import { RequestStatus } from "../../../domain/entities/RequestStatus";
-import { HolidayRequest } from "../../../domain/entities/HolidayRequest";
-import { SickRequest } from "../../../domain/entities/SickRequest";
-import { PermitsRequest } from "../../../domain/entities/PermitsRequest";
-import { ExtraordinaryRequest } from "../../../domain/entities/RequestExtraordinary";
 import {
   CALENDAR_VIEW_OPTIONS,
   CalendarMode,
@@ -44,7 +40,7 @@ type MarkedDatesType = {
   [date: string]: PeriodSelected;
 };
 
-// ... generateWeekendMarks rimane UGUALE ...
+// Precalcola i weekend dell'anno corrente e del successivo per evidenziarli nel calendario
 const generateWeekendMarks = (): MarkedDatesType => {
   const marks: MarkedDatesType = {};
   const currentYear = new Date().getFullYear();
@@ -68,8 +64,6 @@ const generateWeekendMarks = (): MarkedDatesType => {
 export default function CalendarComp() {
   const [startDate, setStartDate] = useState<string | null>(null);
   const [endDate, setEndDate] = useState<string | null>(null);
-
-  // 1. MODIFICA QUI: Uso l'Enum invece della stringa "assenza" scritta a mano
   const [calendarType, setCalendarType] = useState<string>(
     CalendarMode.ABSENCE
   );
@@ -82,27 +76,33 @@ export default function CalendarComp() {
   const selectedOption = CALENDAR_VIEW_OPTIONS.find(
     (option) => option.value === calendarType
   );
+  const placeholderText = "Scegli il tipo di calendario";
 
   const weekendMarks = useMemo(() => generateWeekendMarks(), []);
 
-  const onDayPress = (day: DateData) => {
-    const selectedDate = day.dateString;
-    if (!startDate || (startDate && endDate && startDate !== endDate)) {
-      setStartDate(selectedDate);
-      setEndDate(selectedDate);
-    } else if (startDate && endDate && startDate === endDate) {
-      if (selectedDate > startDate) {
+  // Gestisce la selezione di range: primo tap imposta start/end uguali, secondo tap estende o resetta
+  const onDayPress = useCallback(
+    (day: DateData) => {
+      const selectedDate = day.dateString;
+      if (!startDate || (startDate && endDate && startDate !== endDate)) {
+        setStartDate(selectedDate);
         setEndDate(selectedDate);
+      } else if (startDate && endDate && startDate === endDate) {
+        if (selectedDate > startDate) {
+          setEndDate(selectedDate);
+        } else {
+          setStartDate(selectedDate);
+          setEndDate(selectedDate);
+        }
       } else {
         setStartDate(selectedDate);
         setEndDate(selectedDate);
       }
-    } else {
-      setStartDate(selectedDate);
-      setEndDate(selectedDate);
-    }
-  };
+    },
+    [startDate, endDate]
+  );
 
+  // Calcola i giorni marcati: weekend pre-selezionati + range evidenziato
   const markedDates = useMemo(() => {
     let marks: MarkedDatesType = { ...weekendMarks };
     if (!startDate) return marks;
@@ -138,6 +138,34 @@ export default function CalendarComp() {
     return marks;
   }, [startDate, endDate, weekendMarks]);
 
+  // Tema memoizzato per evitare ricreazioni ad ogni render
+  const calendarTheme = useMemo(
+    () => ({
+      arrowColor: Colors.textPrimary,
+      todayTextColor: Colors.primary,
+      monthTextColor: Colors.textPrimary,
+      textDayFontWeight: Typography.weight.regular,
+      textMonthFontWeight: Typography.weight.medium,
+      textDayHeaderFontWeight: Typography.weight.medium,
+    }),
+    []
+  );
+
+  const handleOptionSelect = useCallback((value: string) => {
+    setCalendarType(value);
+    setShowMenu(false);
+    setIsFocus(false);
+  }, []);
+
+  const toggleIOSMenu = useCallback(() => {
+    setShowMenu((prev) => !prev);
+  }, []);
+
+  const closeIOSMenu = useCallback(() => {
+    setShowMenu(false);
+  }, []);
+
+  // Conferma: blocca la modal per admin e apre la modale per gli altri
   const handleConfirm = () => {
     if (startDate && endDate) {
       // 2. MODIFICA QUI: Uso l'Enum per il controllo Admin
@@ -149,6 +177,7 @@ export default function CalendarComp() {
     }
   };
 
+  // Salvataggio (placeholder): chiude la modale e resetta il range
   const handleSubmission = (data: any) => {
     const commonData = {
       id_richiesta: Date.now(),
@@ -176,7 +205,7 @@ export default function CalendarComp() {
         <View style={styles.pullDownContainer}>
           <TouchableOpacity
             style={[styles.dropdown, styles.iosPicker]}
-            onPress={() => setShowMenu((prev) => !prev)}
+            onPress={toggleIOSMenu}
             activeOpacity={0.85}
           >
             <Text
@@ -186,7 +215,7 @@ export default function CalendarComp() {
                   : styles.placeholderStyle
               }
             >
-              {selectedOption?.label || "Scegli il tipo di calendario"}
+              {selectedOption?.label || placeholderText}
             </Text>
             <Ionicons
               name={showMenu ? "chevron-up" : "chevron-down"}
@@ -199,7 +228,7 @@ export default function CalendarComp() {
             <View style={styles.menuOverlay}>
               <Pressable
                 style={StyleSheet.absoluteFill}
-                onPress={() => setShowMenu(false)}
+                onPress={closeIOSMenu}
               />
               <View style={styles.pullDownMenu}>
                 {CALENDAR_VIEW_OPTIONS.map((option, index) => (
@@ -211,11 +240,9 @@ export default function CalendarComp() {
                       index === CALENDAR_VIEW_OPTIONS.length - 1 && {
                         borderBottomWidth: 0,
                       },
+                      //serve in modo da non avere il doppio bordo sul ultimo elemento
                     ]}
-                    onPress={() => {
-                      setCalendarType(option.value);
-                      setShowMenu(false);
-                    }}
+                    onPress={() => handleOptionSelect(option.value)}
                   >
                     <Text style={styles.menuItemText}>{option.label}</Text>
                   </Pressable>
@@ -235,31 +262,23 @@ export default function CalendarComp() {
           maxHeight={300}
           labelField="label"
           valueField="value"
-          placeholder={!isFocus ? "Scegli il tipo di calendario" : "..."}
+          placeholder={!isFocus ? placeholderText : "..."}
           value={calendarType}
           onFocus={() => setIsFocus(true)}
           onBlur={() => setIsFocus(false)}
           onChange={(item) => {
-            setCalendarType(item.value);
-            setIsFocus(false);
+            handleOptionSelect(item.value);
           }}
         />
       )}
 
-      <View style={{ flex: 1 }}>
+      <View style={styles.calendarWrapper}>
         <Calendar
-          firstDay={1}
-          markingType="period"
+          firstDay={1} // fa inziare il calendario dal lunedi
+          markingType="period" // dice al calendario di trattare markeddates come intervalli continui
           markedDates={markedDates}
           onDayPress={onDayPress}
-          theme={{
-            arrowColor: Colors.textPrimary,
-            todayTextColor: Colors.primary,
-            monthTextColor: Colors.textPrimary,
-            textDayFontWeight: Typography.weight.regular,
-            textMonthFontWeight: Typography.weight.medium,
-            textDayHeaderFontWeight: Typography.weight.medium,
-          }}
+          theme={calendarTheme}
         />
       </View>
 
@@ -289,7 +308,6 @@ export default function CalendarComp() {
   );
 }
 
-// ... Styles rimangono identici ...
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -391,9 +409,10 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
     borderBottomWidth: 1,
   },
-  menuItemPressed: { backgroundColor: Colors.secondary },
+  menuItemPressed: { backgroundColor: Colors.primary },
   menuItemText: {
     fontSize: 16,
     color: Colors.textPrimary,
   },
+  calendarWrapper: { flex: 1 },
 });
