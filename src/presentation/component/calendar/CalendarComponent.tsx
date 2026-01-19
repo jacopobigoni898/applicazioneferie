@@ -22,7 +22,7 @@ export default function CalendarComp() {
     useRangeSelection();
   //stato del tipo di calendario settato inzialmente a calendario assenze
   const [calendarType, setCalendarType] = useState<string>(
-    CalendarMode.ABSENCE
+    CalendarMode.ABSENCE,
   );
   const [isFocus, setIsFocus] = useState(false);
   //stato della modale quando farla diventare visibile
@@ -31,7 +31,7 @@ export default function CalendarComp() {
   // Stato UI: piattaforma, opzione selezionata e testo placeholder
   const isIOS = Platform.OS === "ios";
   const selectedOption = CALENDAR_VIEW_OPTIONS.find(
-    (option) => option.value === calendarType
+    (option) => option.value === calendarType,
   );
   const placeholderText = "Scegli il tipo di calendario";
 

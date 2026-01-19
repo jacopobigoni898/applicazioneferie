@@ -37,6 +37,7 @@ interface RequestModalProps {
   ) => void;
 }
 
+// Modale per creare richieste di assenza/straordinario
 const RequestModal = ({
   visible,
   onClose,
@@ -50,7 +51,7 @@ const RequestModal = ({
 
   useEffect(() => {
     if (visible) {
-      setSubType(null);
+      setSubType(null); // reset motivazione quando si riapre
     }
   }, [visible]);
 
@@ -61,15 +62,15 @@ const RequestModal = ({
   const handleSubmit = () => {
     if (!subType) {
       alert("Seleziona una motivazione!");
-      return;
+      return; // blocca invio senza motivazione
     }
 
     if (!startDate || !endDate) {
       alert("Date non valide!");
-      return;
+      return; // blocca invio senza date
     }
 
-    // DATI COMUNI (Mock: id_utente e stato andrebbero presi dal contesto auth/backend)
+    // DATI COMUNI (mockati: id_utente/stato dovrebbero venire dal backend)
     const MOCK_USER_ID = 1;
     const NEW_REQUEST_ID = 0; // Il backend genererà l'ID reale
     // Assumiamo che RequestStatus sia un Enum, usiamo un valore di default (es. PENDING/1)
@@ -116,7 +117,7 @@ const RequestModal = ({
           data_inizio: startDate,
           data_fine: endDate,
           stato_approvazione: DEFAULT_STATUS,
-          certificato_medico: "", // Placeholder: Manca input file nella UI
+          certificato_medico: "", // Placeholder: manca upload file nella UI
         };
         requestPayload = sickRequest;
       } else {
@@ -134,7 +135,7 @@ const RequestModal = ({
     }
 
     // Log per debug
-    console.log("--------------------------------------------------");
+    console.log("--------------------------------------------------"); // debug
     console.log(
       `[RequestModal] Invio richiesta tipo: ${mainType} - ${subType}`,
     );
