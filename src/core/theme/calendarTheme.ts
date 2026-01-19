@@ -1,4 +1,4 @@
-import { Colors, Typography } from "../../../core/theme/theme";
+import { Colors, Typography } from "./theme";
 
 export const calendarTheme = {
   arrowColor: Colors.textPrimary,

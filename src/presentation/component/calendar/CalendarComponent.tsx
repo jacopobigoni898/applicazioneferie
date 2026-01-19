@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 import { Alert, Platform, Text, TouchableOpacity, View } from "react-native";
 import { Calendar } from "react-native-calendars";
 import { Dropdown } from "react-native-element-dropdown";
-import { calendarTheme } from "./calendarTheme";
+import { calendarTheme } from "../../../core/theme/calendarTheme";
 import { calendarStyles } from "../../../core/style/commonStyles";
 import { useRangeSelection } from "../../../core/utils/useRangeSelection";
 import { IOSPullDown } from "../ios/IOSPullDown";
