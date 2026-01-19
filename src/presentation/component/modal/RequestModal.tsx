@@ -33,7 +33,7 @@ interface RequestModalProps {
   endDate: Date | null;
   mainType: "assenza" | "straordinari";
   onSubmit: (
-    data: ExtraordinaryRequest | HolidayRequest | PermitsRequest | SickRequest
+    data: ExtraordinaryRequest | HolidayRequest | PermitsRequest | SickRequest,
   ) => void;
 }
 
@@ -136,7 +136,7 @@ const RequestModal = ({
     // Log per debug
     console.log("--------------------------------------------------");
     console.log(
-      `[RequestModal] Invio richiesta tipo: ${mainType} - ${subType}`
+      `[RequestModal] Invio richiesta tipo: ${mainType} - ${subType}`,
     );
     console.log(JSON.stringify(requestPayload, null, 2));
     console.log("--------------------------------------------------");
