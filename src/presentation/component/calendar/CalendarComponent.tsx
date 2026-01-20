@@ -24,6 +24,7 @@ export default function CalendarComp() {
   const [calendarType, setCalendarType] = useState<string>(
     CalendarMode.ABSENCE,
   );
+  //stato del fitro
   const [isFocus, setIsFocus] = useState(false);
   //stato della modale quando farla diventare visibile
   const [modalVisible, setModalVisible] = useState(false);
