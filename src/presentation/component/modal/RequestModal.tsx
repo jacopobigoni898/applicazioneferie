@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import * as AuthSession from "expo-auth-session";
 import {
   Modal,
   View,
@@ -121,7 +122,8 @@ const RequestModal = ({
         value: baseDate,
         mode: "time",
         is24Hour: true,
-        onChange: (event, date) => handleTimeChange(type, event, date || baseDate),
+        onChange: (event, date) =>
+          handleTimeChange(type, event, date || baseDate),
       });
       return;
     }
@@ -153,7 +155,9 @@ const RequestModal = ({
             <TouchableWithoutFeedback>
               <View style={requestModalStyles.pickerSheet}>
                 <View style={requestModalStyles.pickerHeader}>
-                  <Text style={requestModalStyles.pickerTitle}>Seleziona orario</Text>
+                  <Text style={requestModalStyles.pickerTitle}>
+                    Seleziona orario
+                  </Text>
                   <TouchableOpacity onPress={closePickers}>
                     <Text style={requestModalStyles.pickerClose}>Chiudi</Text>
                   </TouchableOpacity>
@@ -227,7 +231,11 @@ const RequestModal = ({
         return;
       }
 
-      finalStartDate = applyTimeToDate(startDate, parsedStart.hour, parsedStart.minute);
+      finalStartDate = applyTimeToDate(
+        startDate,
+        parsedStart.hour,
+        parsedStart.minute,
+      );
       finalEndDate = applyTimeToDate(endDate, parsedEnd.hour, parsedEnd.minute);
 
       if (finalEndDate < finalStartDate) {
@@ -365,7 +373,9 @@ const RequestModal = ({
                           style={requestModalStyles.timeInput}
                           onPress={() => openTimePicker("start")}
                         >
-                          <Text style={requestModalStyles.timeText}>{startTime}</Text>
+                          <Text style={requestModalStyles.timeText}>
+                            {startTime}
+                          </Text>
                         </TouchableOpacity>
                       </View>
                       <View style={requestModalStyles.timeBox}>
@@ -374,7 +384,9 @@ const RequestModal = ({
                           style={requestModalStyles.timeInput}
                           onPress={() => openTimePicker("end")}
                         >
-                          <Text style={requestModalStyles.timeText}>{endTime}</Text>
+                          <Text style={requestModalStyles.timeText}>
+                            {endTime}
+                          </Text>
                         </TouchableOpacity>
                       </View>
                     </View>
