@@ -9,6 +9,9 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import DateTimePicker, {
+  DateTimePickerAndroid,
+} from "@react-native-community/datetimepicker";
 import { Dropdown } from "react-native-element-dropdown";
 import { Colors } from "../../../core/theme/theme";
 import { requestModalStyles } from "../../../core/style/commonStyles";
@@ -16,6 +19,7 @@ import { requestModalStyles } from "../../../core/style/commonStyles";
 import {
   ABSENCE_OPTIONS,
   OVERTIME_OPTIONS,
+  RequestType,
 } from "../../../domain/entities/TypeRequest";
 
 // Assicurati che il percorso di importazione sia corretto in base alla tua struttura file
@@ -48,12 +52,151 @@ const RequestModal = ({
 }: RequestModalProps) => {
   const [subType, setSubType] = useState<string | null>(null);
   const [isFocus, setIsFocus] = useState(false);
+  const [startTime, setStartTime] = useState("09:00");
+  const [endTime, setEndTime] = useState("18:00");
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
+
+  const isSingleDaySelection =
+    startDate && endDate && startDate.toDateString() === endDate.toDateString();
+
+  const isHolidayRequest =
+    subType === RequestType.FERIE || subType?.toLowerCase().includes("ferie");
+
+  const formatDate = (date: Date | null) => {
+    return date ? date.toLocaleDateString("it-IT") : "--/--/----";
+  };
+
+  const formatTimeValue = (date: Date | null) => {
+    if (!date) return "09:00";
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${hours}:${minutes}`;
+  };
+
+  const parseTime = (value: string) => {
+    const match = /^(\d{1,2}):(\d{2})$/.exec(value.trim());
+    if (!match) return null;
+    const hour = Number(match[1]);
+    const minute = Number(match[2]);
+    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
+    return { hour, minute };
+  };
+
+  const applyTimeToDate = (date: Date, hour: number, minute: number) => {
+    const cloned = new Date(date);
+    cloned.setHours(hour, minute, 0, 0);
+    return cloned;
+  };
+
+  const handleTimeChange = (
+    type: "start" | "end",
+    event: any,
+    selectedDate?: Date,
+  ) => {
+    if (Platform.OS === "android" && event?.type === "dismissed") return;
+
+    const pickedDate = selectedDate || new Date();
+    const formatted = formatTimeValue(pickedDate);
+
+    if (type === "start") {
+      setShowStartPicker(Platform.OS === "ios");
+      setStartTime(formatted);
+    } else {
+      setShowEndPicker(Platform.OS === "ios");
+      setEndTime(formatted);
+    }
+
+    if (Platform.OS === "ios") {
+      closePickers();
+    }
+  };
+
+  const openTimePicker = (type: "start" | "end") => {
+    if (Platform.OS === "android") {
+      const baseDate =
+        type === "start" ? startDate || new Date() : endDate || new Date();
+
+      DateTimePickerAndroid.open({
+        value: baseDate,
+        mode: "time",
+        is24Hour: true,
+        onChange: (event, date) => handleTimeChange(type, event, date || baseDate),
+      });
+      return;
+    }
+
+    type === "start" ? setShowStartPicker(true) : setShowEndPicker(true);
+  };
+
+  const closePickers = () => {
+    setShowStartPicker(false);
+    setShowEndPicker(false);
+  };
+
+  const renderIOSPicker = () => {
+    if (!showStartPicker && !showEndPicker) return null;
+
+    const isStart = showStartPicker;
+    const value = isStart ? startDate || new Date() : endDate || new Date();
+    const type = isStart ? "start" : "end";
+
+    return (
+      <Modal
+        transparent
+        animationType="fade"
+        visible={showStartPicker || showEndPicker}
+        onRequestClose={closePickers}
+      >
+        <TouchableWithoutFeedback onPress={closePickers}>
+          <View style={requestModalStyles.pickerOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={requestModalStyles.pickerSheet}>
+                <View style={requestModalStyles.pickerHeader}>
+                  <Text style={requestModalStyles.pickerTitle}>Seleziona orario</Text>
+                  <TouchableOpacity onPress={closePickers}>
+                    <Text style={requestModalStyles.pickerClose}>Chiudi</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <DateTimePicker
+                  value={value}
+                  mode="time"
+                  is24Hour
+                  display="spinner"
+                  themeVariant="light"
+                  textColor={Colors.textPrimary}
+                  onChange={(event, date) => {
+                    if (event?.type === "dismissed") {
+                      closePickers();
+                      return;
+                    }
+                    handleTimeChange(type, event, date || value);
+                  }}
+                  style={requestModalStyles.pickerIOS}
+                />
+
+                <TouchableOpacity
+                  style={requestModalStyles.pickerConfirm}
+                  onPress={closePickers}
+                >
+                  <Text style={requestModalStyles.pickerConfirmText}>OK</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+    );
+  };
 
   useEffect(() => {
     if (visible) {
       setSubType(null); // reset motivazione quando si riapre
+      setStartTime(formatTimeValue(startDate));
+      setEndTime(formatTimeValue(endDate));
     }
-  }, [visible]);
+  }, [visible, startDate, endDate]);
 
   const currentOptions =
     mainType === "straordinari" ? OVERTIME_OPTIONS : ABSENCE_OPTIONS;
@@ -68,6 +211,29 @@ const RequestModal = ({
     if (!startDate || !endDate) {
       alert("Date non valide!");
       return; // blocca invio senza date
+    }
+
+    let finalStartDate = startDate;
+    let finalEndDate = endDate;
+
+    const shouldApplyTime = isSingleDaySelection && !isHolidayRequest;
+
+    if (shouldApplyTime) {
+      const parsedStart = parseTime(startTime);
+      const parsedEnd = parseTime(endTime);
+
+      if (!parsedStart || !parsedEnd) {
+        alert("Inserisci orari validi nel formato HH:MM");
+        return;
+      }
+
+      finalStartDate = applyTimeToDate(startDate, parsedStart.hour, parsedStart.minute);
+      finalEndDate = applyTimeToDate(endDate, parsedEnd.hour, parsedEnd.minute);
+
+      if (finalEndDate < finalStartDate) {
+        alert("L'orario di fine deve essere successivo a quello di inizio");
+        return;
+      }
     }
 
     // DATI COMUNI (mockati: id_utente/stato dovrebbero venire dal backend)
@@ -88,8 +254,8 @@ const RequestModal = ({
       const extraRequest: ExtraordinaryRequest = {
         id_richiesta: NEW_REQUEST_ID,
         id_utente: MOCK_USER_ID,
-        data_inizio: startDate,
-        data_fine: endDate,
+        data_inizio: finalStartDate,
+        data_fine: finalEndDate,
         stato_approvazione: DEFAULT_STATUS,
       };
       requestPayload = extraRequest;
@@ -104,8 +270,8 @@ const RequestModal = ({
         const holidayRequest: HolidayRequest = {
           id_richiesta: NEW_REQUEST_ID,
           id_utente: MOCK_USER_ID,
-          data_inizio: startDate,
-          data_fine: endDate,
+          data_inizio: finalStartDate,
+          data_fine: finalEndDate,
           stato_approvazione: DEFAULT_STATUS,
         };
         requestPayload = holidayRequest;
@@ -114,8 +280,8 @@ const RequestModal = ({
         const sickRequest: SickRequest = {
           id_richiesta: NEW_REQUEST_ID,
           id_utente: MOCK_USER_ID,
-          data_inizio: startDate,
-          data_fine: endDate,
+          data_inizio: finalStartDate,
+          data_fine: finalEndDate,
           stato_approvazione: DEFAULT_STATUS,
           certificato_medico: "", // Placeholder: manca upload file nella UI
         };
@@ -126,8 +292,8 @@ const RequestModal = ({
           id_richiesta: NEW_REQUEST_ID,
           id_utente: MOCK_USER_ID,
           tipo_permesso: subType, // Passiamo la stringa specifica (es. "ROL")
-          data_inizio: startDate,
-          data_fine: endDate,
+          data_inizio: finalStartDate,
+          data_fine: finalEndDate,
           stato_approvazione: DEFAULT_STATUS,
         };
         requestPayload = permitsRequest;
@@ -144,10 +310,6 @@ const RequestModal = ({
 
     // Invio al padre
     onSubmit(requestPayload);
-  };
-
-  const formatDate = (date: Date | null) => {
-    return date ? date.toLocaleDateString("it-IT") : "--/--/----";
   };
 
   return (
@@ -190,6 +352,34 @@ const RequestModal = ({
                     </Text>
                   </View>
                 </View>
+
+                {isSingleDaySelection && !isHolidayRequest && (
+                  <>
+                    <Text style={requestModalStyles.label}>
+                      Orario (solo se 1 giorno)
+                    </Text>
+                    <View style={requestModalStyles.timeRow}>
+                      <View style={requestModalStyles.timeBox}>
+                        <Text style={requestModalStyles.dateLabel}>Inizio</Text>
+                        <TouchableOpacity
+                          style={requestModalStyles.timeInput}
+                          onPress={() => openTimePicker("start")}
+                        >
+                          <Text style={requestModalStyles.timeText}>{startTime}</Text>
+                        </TouchableOpacity>
+                      </View>
+                      <View style={requestModalStyles.timeBox}>
+                        <Text style={requestModalStyles.dateLabel}>Fine</Text>
+                        <TouchableOpacity
+                          style={requestModalStyles.timeInput}
+                          onPress={() => openTimePicker("end")}
+                        >
+                          <Text style={requestModalStyles.timeText}>{endTime}</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </>
+                )}
 
                 <Text style={requestModalStyles.label}>Motivazione:</Text>
                 <Dropdown
@@ -240,6 +430,7 @@ const RequestModal = ({
           </TouchableWithoutFeedback>
         </View>
       </TouchableWithoutFeedback>
+      {Platform.OS === "ios" && renderIOSPicker()}
     </Modal>
   );
 };

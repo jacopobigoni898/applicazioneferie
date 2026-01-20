@@ -238,6 +238,25 @@ export const requestModalStyles = StyleSheet.create({
   dateBox: { alignItems: "center", width: "45%" },
   dateLabel: { fontSize: 12, color: "#888" },
   dateValue: { fontSize: 16, fontWeight: "bold", color: Colors.textPrimary },
+  timeRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  timeBox: { width: "48%" },
+  timeInput: {
+    height: 48,
+    borderColor: "#E0E0E0",
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    marginTop: 6,
+    fontSize: 16,
+    color: Colors.textPrimary,
+    backgroundColor: "#fff",
+    justifyContent: "center",
+  },
+  timeText: { fontSize: 16, color: Colors.textPrimary },
   label: { marginBottom: 8, fontWeight: "500", color: Colors.textPrimary },
   dropdown: {
     height: 50,
@@ -269,6 +288,48 @@ export const requestModalStyles = StyleSheet.create({
   },
   confirmButtonText: { color: "white", fontWeight: "bold" },
   disabledButton: { backgroundColor: "#CCC" },
+  pickerOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.35)",
+    justifyContent: "flex-end",
+  },
+  pickerSheet: {
+    backgroundColor: Colors.surface,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 20,
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
+  },
+  pickerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  pickerTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: Colors.textPrimary,
+  },
+  pickerClose: {
+    color: Colors.primary,
+    fontWeight: "600",
+  },
+  pickerConfirm: {
+    marginTop: 10,
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    alignItems: "center",
+    paddingVertical: 12,
+  },
+  pickerConfirmText: {
+    color: "#fff",
+    fontWeight: "700",
+  },
+  pickerIOS: {
+    backgroundColor: Colors.surface,
+  },
 });
 
 // Stili per la schermata Calendario (tab wrapper)
