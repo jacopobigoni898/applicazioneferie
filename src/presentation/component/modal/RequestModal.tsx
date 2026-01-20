@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import * as AuthSession from "expo-auth-session";
 import {
   Modal,
   View,
