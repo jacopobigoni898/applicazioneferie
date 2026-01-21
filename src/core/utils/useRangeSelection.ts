@@ -64,9 +64,9 @@ export function useRangeSelection() {
         setEndDate(selectedDate);
       }
     },
-    [startDate, endDate]
+    [startDate, endDate],
   );
-
+  //funzione per colorare giorni del calendario
   const markedDates = useMemo(() => {
     let marks: MarkedDatesType = { ...weekendMarks };
     // Nessuna selezione: mostra solo weekend

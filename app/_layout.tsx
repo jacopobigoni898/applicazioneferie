@@ -1,9 +1,19 @@
-import {Stack} from "expo-router";
+import { Stack } from "expo-router";
+import { AuthProvider } from "./_providers/AuthProvider";
 
-export default function RootLayout(){
-    return(
-        <Stack>
-        <Stack.Screen name = "(tabs)" options={{headerShown: false}} />
+function RootNavigator() {
+    return (
+        <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="login" />
         </Stack>
-    )
+    );
+}
+
+export default function RootLayout() {
+    return (
+        <AuthProvider>
+            <RootNavigator />
+        </AuthProvider>
+    );
 }
