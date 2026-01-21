@@ -146,3 +146,6 @@ export const useAuth = () => {
   }
   return ctx;
 };
+
+// Default export to silence Expo Router route warning
+export default AuthProvider;
