@@ -332,8 +332,8 @@ export const requestModalStyles = StyleSheet.create({
   },
 });
 
-// Stili per la schermata Calendario (tab wrapper)
-export const calendarScreenStyles = StyleSheet.create({
+// Stili per la schermata
+export const screenStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.top,
@@ -355,6 +355,64 @@ export const calendarScreenStyles = StyleSheet.create({
     backgroundColor: Colors.top,
   },
   top: {
+    flex: 1,
+  },
+});
+
+export const profileScreen = StyleSheet.create({
+  informationProfileStyle: {
+    fontSize: Typography.size.lg,
+    fontWeight: Typography.weight.medium,
+    textAlign: "left",
+    color: Colors.textPrimary,
+    paddingBottom: 2,
+    paddingLeft: 0,
+  },
+  cardProfile: {
+    backgroundColor: Colors.background,
+    paddingTop: 10,
+    paddingHorizontal: 10,
+  },
+  profilePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 999,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#e1e3e8",
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  profileAvatar: {
+    width: 52,
+    height: 52,
+    borderRadius: 999,
+    backgroundColor: Colors.secondary,
+    borderWidth: 1,
+    borderColor: "#d6d8dd",
+  },
+  profileNameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  profileRole: {
+    fontSize: 12,
+    color: Colors.primary,
+  },
+  profileEmail: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+  },
+  profiletop: {
+    paddingHorizontal: 10,
+    paddingTop: 54,
     flex: 1,
   },
 });

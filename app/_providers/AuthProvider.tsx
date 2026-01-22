@@ -1,5 +1,6 @@
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -9,19 +10,23 @@ import * as WebBrowser from "expo-web-browser";
 import * as AuthSession from "expo-auth-session";
 import * as SecureStore from "expo-secure-store";
 import { useRouter, useSegments } from "expo-router";
+import { fetchMicrosoftLogin } from "../../src/api/authApi";
+import type { User } from "../../src/domain/entities/User";
 
-WebBrowser.maybeCompleteAuthSession();
+WebBrowser.maybeCompleteAuthSession(); //chiude la finestra del browser se l app gira sul web
 
-const CLIENT_ID = "37bdcadd-4948-4dff-9c60-a3d119fa4ab5";
-const TENANT_ID = "b3c5783b-8e0b-4639-85b6-e17c2dabed5b";
+const CLIENT_ID = "37bdcadd-4948-4dff-9c60-a3d119fa4ab5"; //chin sei
+const TENANT_ID = "b3c5783b-8e0b-4639-85b6-e17c2dabed5b"; //quale organizzazione microsoft contattare
 const AUTH_SCOPES = [
   "api://37bdcadd-4948-4dff-9c60-a3d119fa4ab5/user_impersonation",
 ];
 
 type AuthContextType = {
-  user: unknown | null;
+  user: User | null;
   accessToken: string | null;
-  isLoading: boolean;
+  isLoading: boolean; // carica token da storage
+  isUserLoading: boolean; // carica profilo utente
+  refreshUser: () => Promise<void>;
   signIn: () => Promise<void>;
   signOut: () => Promise<void>;
 };
@@ -32,10 +37,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [user, setUser] = useState<unknown | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUserLoading, setIsUserLoading] = useState(false);
   const router = useRouter(); // oggeto di navigazione di expo per fare redirect
   const segments = useSegments(); // restituisce l array dei segmenti della route corrente
+
+  const refreshUser = useCallback(async () => {
+    if (!accessToken) return;
+    setIsUserLoading(true);
+    try {
+      const profile = await fetchMicrosoftLogin();
+      setUser(profile);
+    } catch (error) {
+      console.error("Errore nel recupero profilo", error);
+      setUser(null);
+    } finally {
+      setIsUserLoading(false);
+    }
+  }, [accessToken]);
 
   //provo a vedere se ce gia un access token salvato nello sceurestorage
   useEffect(() => {
@@ -52,6 +72,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     loadToken();
   }, []);
+
+  // Quando ho un token, provo a recuperare il profilo utente
+  useEffect(() => {
+    if (!accessToken) {
+      setUser(null);
+      return;
+    }
+    refreshUser();
+  }, [accessToken, refreshUser]);
   //quandoisn loadinf  finito controlla segment(la route) e controlla se hai il token altrimenti torni alla login
   useEffect(() => {
     if (isLoading) return;
@@ -108,12 +137,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             tokenResponse.accessToken,
           );
           setAccessToken(tokenResponse.accessToken);
-
-          // If needed, fetch the profile from Microsoft Graph and store it in state.
-          // const profile = await fetch("https://graph.microsoft.com/v1.0/me", {
-          //   headers: { Authorization: `Bearer ${tokenResponse.accessToken}` },
-          // }).then((r) => r.json());
-          // setUser(profile);
         }
       } else {
         console.log("Login fallito o cancellato", result);
@@ -130,8 +153,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const contextValue = useMemo(
-    () => ({ user, accessToken, isLoading, signIn, signOut }),
-    [user, accessToken, isLoading],
+    () => ({
+      user,
+      accessToken,
+      isLoading,
+      isUserLoading,
+      refreshUser,
+      signIn,
+      signOut,
+    }),
+    [user, accessToken, isLoading, isUserLoading, refreshUser],
   );
 
   return (
