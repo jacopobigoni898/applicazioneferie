@@ -11,7 +11,7 @@ export default function IndexScreen() {
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
-  const PC_IP = "192.168.10.87";
+  const PC_IP = "192.168.10.127";
 
   const api = useMemo(
     () =>
