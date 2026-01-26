@@ -257,6 +257,13 @@ export const requestModalStyles = StyleSheet.create({
     justifyContent: "center",
   },
   timeText: { fontSize: 16, color: Colors.textPrimary },
+  toggleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  toggleLabel: { fontSize: 16, color: Colors.textPrimary, fontWeight: "500" },
   label: { marginBottom: 8, fontWeight: "500", color: Colors.textPrimary },
   dropdown: {
     height: 50,

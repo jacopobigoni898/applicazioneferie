@@ -4,10 +4,10 @@ import { Calendar } from "react-native-calendars";
 import { Dropdown } from "react-native-element-dropdown";
 import { calendarTheme } from "../../../core/theme/calendarTheme";
 import { calendarStyles } from "../../../core/style/commonStyles";
-import { useRangeSelection } from "../../../core/utils/useRangeSelection";
-import { IOSPullDown } from "../ios/IOSPullDown";
+import { useRangeSelection } from "../hooks/useRangeSelection";
+import { IOSPullDown } from "../../../core/ui/IOSPullDown";
 import { configureCalendarLocale } from "../../../core/utils/calendarConfig";
-import RequestModal from "../modal/RequestModal";
+import RequestModal from "../../../features/requests/components/RequestModal";
 import {
   CALENDAR_VIEW_OPTIONS,
   CalendarMode,
@@ -17,33 +17,26 @@ import {
 configureCalendarLocale();
 
 export default function CalendarComp() {
-  // Hook condiviso: gestisce selezione intervallo, date marcate e reset
   const { startDate, endDate, markedDates, onDayPress, resetRange } =
     useRangeSelection();
-  //stato del tipo di calendario settato inzialmente a calendario assenze
   const [calendarType, setCalendarType] = useState<string>(
     CalendarMode.ABSENCE,
   );
-  //stato del fitro
   const [isFocus, setIsFocus] = useState(false);
-  //stato della modale quando farla diventare visibile
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Stato UI: piattaforma, opzione selezionata e testo placeholder
   const isIOS = Platform.OS === "ios";
   const selectedOption = CALENDAR_VIEW_OPTIONS.find(
     (option) => option.value === calendarType,
   );
   const placeholderText = "Scegli il tipo di calendario";
 
-  // Cambio filtro calendario (assenze/straordinari/admin) e chiusura focus
   const handleOptionSelect = useCallback((value: string) => {
     setCalendarType(value);
     setIsFocus(false);
   }, []);
 
   const handleConfirm = () => {
-    // Se intervallo valido: blocca admin non implementato, altrimenti apre modale richiesta
     if (startDate && endDate) {
       if (calendarType === CalendarMode.ADMIN) {
         Alert.alert("Admin", "Funzione admin non ancora implementata");
@@ -54,7 +47,6 @@ export default function CalendarComp() {
   };
 
   const handleSubmission = (data: any) => {
-    // Log di debug del payload che arriva dalla modale prima di chiudere
     console.log("[CalendarComp] payload inviato:", data);
     setModalVisible(false);
     Alert.alert("Successo", "Richiesta Inviata!");
@@ -70,7 +62,6 @@ export default function CalendarComp() {
       </View>
 
       {isIOS ? (
-        // iOS: pull-down custom per scelta del tipo calendario
         <IOSPullDown
           options={CALENDAR_VIEW_OPTIONS}
           selectedLabel={selectedOption?.label}
@@ -81,7 +72,6 @@ export default function CalendarComp() {
           placeholderStyle={calendarStyles.placeholderStyle}
         />
       ) : (
-        // Android / altre piattaforme: dropdown della libreria element-dropdown
         <Dropdown
           style={[
             calendarStyles.dropdown,
@@ -105,8 +95,8 @@ export default function CalendarComp() {
 
       <View style={calendarStyles.calendarWrapper}>
         <Calendar
-          firstDay={1} // settimana inizia di lunedì
-          markingType="period" // usa intervalli contigui per markedDates
+          firstDay={1}
+          markingType="period"
           markedDates={markedDates}
           onDayPress={onDayPress}
           theme={calendarTheme}

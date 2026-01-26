@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { DateData } from "react-native-calendars";
-import { Colors } from "../theme/theme";
+import { Colors } from "../../../core/theme/theme";
 
 export type PeriodSelected = {
   startingDay?: boolean;
@@ -46,11 +46,9 @@ export function useRangeSelection() {
   const onDayPress = useCallback(
     (day: DateData) => {
       const selectedDate = day.dateString;
-      // Primo tap: setta start/end alla stessa data
       if (!startDate || (startDate && endDate && startDate !== endDate)) {
         setStartDate(selectedDate);
         setEndDate(selectedDate);
-        // Secondo tap: se dopo la start, estende l'intervallo; se prima, resetta su quella data
       } else if (startDate && endDate && startDate === endDate) {
         if (selectedDate > startDate) {
           setEndDate(selectedDate);
@@ -58,7 +56,6 @@ export function useRangeSelection() {
           setStartDate(selectedDate);
           setEndDate(selectedDate);
         }
-        // Terzo tap (intervallo già settato): riparte da nuovo start/end singolo
       } else {
         setStartDate(selectedDate);
         setEndDate(selectedDate);
@@ -66,13 +63,11 @@ export function useRangeSelection() {
     },
     [startDate, endDate],
   );
-  //funzione per colorare giorni del calendario
+
   const markedDates = useMemo(() => {
     let marks: MarkedDatesType = { ...weekendMarks };
-    // Nessuna selezione: mostra solo weekend
     if (!startDate) return marks;
 
-    // Caso singolo giorno
     if (startDate && endDate && startDate === endDate) {
       marks[startDate] = {
         startingDay: true,
@@ -83,7 +78,6 @@ export function useRangeSelection() {
       return marks;
     }
 
-    // Inizio intervallo
     marks[startDate] = {
       startingDay: true,
       color: Colors.primary,
@@ -96,7 +90,6 @@ export function useRangeSelection() {
         textColor: "white",
       };
 
-      // Giorni intermedi dell'intervallo
       let currentDate = new Date(startDate);
       let stopDate = new Date(endDate);
       currentDate.setDate(currentDate.getDate() + 1);
@@ -109,7 +102,6 @@ export function useRangeSelection() {
     return marks;
   }, [startDate, endDate, weekendMarks]);
 
-  // Resetta la selezione (es. dopo invio richiesta)
   const resetRange = useCallback(() => {
     setStartDate(null);
     setEndDate(null);

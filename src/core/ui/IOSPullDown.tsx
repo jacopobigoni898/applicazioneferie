@@ -8,8 +8,8 @@ import {
   TextStyle,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Colors } from "../../../core/theme/theme";
-import { pullDownStyles } from "../../../core/style/commonStyles";
+import { Colors } from "../theme/theme";
+import { pullDownStyles } from "../style/commonStyles";
 
 export type PullDownOption = {
   label: string;
@@ -37,17 +37,15 @@ export function IOSPullDown({
   placeholderStyle,
   chevronColor,
 }: Props) {
-  // Stato di apertura/chiusura del menu
   const [open, setOpen] = useState(false);
 
   return (
     <View style={pullDownStyles.container}>
       <TouchableOpacity
         style={triggerStyle}
-        onPress={() => setOpen((prev) => !prev)} // toggle apertura menu
+        onPress={() => setOpen((prev) => !prev)}
         activeOpacity={0.85}
       >
-        {/* Mostra il label selezionato o il placeholder */}
         <Text style={selectedLabel ? selectedTextStyle : placeholderStyle}>
           {selectedLabel || placeholder}
         </Text>
@@ -62,7 +60,7 @@ export function IOSPullDown({
         <View style={pullDownStyles.overlay}>
           <Pressable
             style={pullDownStyles.overlay}
-            onPress={() => setOpen(false)} // chiusura tap fuori menu
+            onPress={() => setOpen(false)}
           />
           <View style={pullDownStyles.menu}>
             {options.map((option, index) => (
@@ -74,8 +72,8 @@ export function IOSPullDown({
                   index === options.length - 1 && pullDownStyles.menuItemLast,
                 ]}
                 onPress={() => {
-                  onSelect(option.value); // propaga selezione al parent
-                  setOpen(false); // chiude menu dopo scelta
+                  onSelect(option.value);
+                  setOpen(false);
                 }}
               >
                 <Text style={pullDownStyles.menuItemText}>{option.label}</Text>
