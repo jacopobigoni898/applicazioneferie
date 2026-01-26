@@ -1,3 +1,5 @@
+// Hook che gestisce la logica del modal richieste: stato UI, applicazione orari,
+// validazioni base e costruzione payload per l'invio.
 import { useEffect, useMemo, useState } from "react";
 import { Platform } from "react-native";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
@@ -7,10 +9,10 @@ import {
   RequestType,
 } from "../../../domain/entities/TypeRequest";
 import { RequestStatus } from "../../../domain/entities/RequestStatus";
-import { HolidayRequest } from "../../../domain/entities/HolidayRequest";
-import { SickRequest } from "../../../domain/entities/SickRequest";
-import { PermitsRequest } from "../../../domain/entities/PermitsRequest";
-import { ExtraordinaryRequest } from "../../../domain/entities/RequestExtraordinary";
+import {
+  buildRequestPayload,
+  RequestPayload,
+} from "../services/requestsService";
 
 export interface UseRequestModalLogicParams {
   visible: boolean;
@@ -18,7 +20,7 @@ export interface UseRequestModalLogicParams {
   endDate: Date | null;
   mainType: "assenza" | "straordinari";
   onSubmit: (
-    data: ExtraordinaryRequest | HolidayRequest | PermitsRequest | SickRequest,
+    data: RequestPayload,
   ) => void;
 }
 
@@ -29,6 +31,7 @@ export const useRequestModalLogic = ({
   mainType,
   onSubmit,
 }: UseRequestModalLogicParams) => {
+  // Stato UI selezioni
   const [subType, setSubType] = useState<string | null>(null);
   const [isFocus, setIsFocus] = useState(false);
   const [startTime, setStartTime] = useState("09:00");
@@ -46,10 +49,12 @@ export const useRequestModalLogic = ({
     );
   }, [subType]);
 
+    // Formatta la data per la UI (dd/mm/yyyy) o placeholder se mancante
   const formatDate = (date: Date | null) => {
     return date ? date.toLocaleDateString("it-IT") : "--/--/----";
   };
 
+    // Converte un oggetto Date in stringa HH:mm per la UI
   const formatTimeValue = (date: Date | null) => {
     if (!date) return "09:00";
     const hours = String(date.getHours()).padStart(2, "0");
@@ -57,6 +62,7 @@ export const useRequestModalLogic = ({
     return `${hours}:${minutes}`;
   };
 
+    // Valida e parse stringa oraria HH:mm in {hour, minute}
   const parseTime = (value: string) => {
     const match = /^(\d{1,2}):(\d{2})$/.exec(value.trim());
     if (!match) return null;
@@ -66,17 +72,44 @@ export const useRequestModalLogic = ({
     return { hour, minute };
   };
 
-  const applyTimeToDate = (date: Date, hour: number, minute: number) => {
-    const cloned = new Date(date);
-    cloned.setHours(hour, minute, 0, 0);
-    return cloned;
+  // Arrotonda l'orario alla mezz'ora più vicina (00 o 30 minuti)
+  const snapToHalfHour = (date: Date) => {
+    const snapped = new Date(date);
+    const minutes = snapped.getMinutes();
+    if (minutes < 15) {
+      snapped.setMinutes(0, 0, 0);
+    } else if (minutes < 45) {
+      snapped.setMinutes(30, 0, 0);
+    } else {
+      snapped.setHours(snapped.getHours() + 1, 0, 0, 0);
+    }
+    return snapped;
   };
 
+  // Applica ore/minuti a una data usando UTC costruita con componenti locali (anti-shift)
+  const applyTimeToDate = (date: Date, hour: number, minute: number) => {
+    const y = date.getFullYear();
+    const m = date.getMonth();
+    const d = date.getDate();
+    return new Date(Date.UTC(y, m, d, hour, minute, 0, 0));
+  };
+
+  // Chiude entrambi i time picker
   const closePickers = () => {
     setShowStartPicker(false);
     setShowEndPicker(false);
   };
 
+  // Gestisce toggle all-day e imposta orario di default 09:00–18:00
+  const handleAllDayToggle = (value: boolean) => {
+    setIsAllDay(value);
+    if (value) {
+      setStartTime("09:00");
+      setEndTime("18:00");
+    }
+  };
+
+  // Aggiorna lo stato dell'orario dopo la scelta sul picker
   const handleTimeChange = (
     type: "start" | "end",
     event: any,
@@ -85,7 +118,8 @@ export const useRequestModalLogic = ({
     if (Platform.OS === "android" && event?.type === "dismissed") return;
 
     const pickedDate = selectedDate || new Date();
-    const formatted = formatTimeValue(pickedDate);
+    const snapped = snapToHalfHour(pickedDate);
+    const formatted = formatTimeValue(snapped);
 
     if (type === "start") {
       setShowStartPicker(Platform.OS === "ios");
@@ -100,6 +134,7 @@ export const useRequestModalLogic = ({
     }
   };
 
+  // Apre il time picker nativo (Android immediato, iOS toggla modal interno)
   const openTimePicker = (type: "start" | "end") => {
     if (Platform.OS === "android") {
       const baseDate =
@@ -118,11 +153,12 @@ export const useRequestModalLogic = ({
     type === "start" ? setShowStartPicker(true) : setShowEndPicker(true);
   };
 
+  // Reset stato quando il modal diventa visibile o cambiano le date selezionate
   useEffect(() => {
     if (visible) {
       setSubType(null);
-      setStartTime(formatTimeValue(startDate));
-      setEndTime(formatTimeValue(endDate));
+      setStartTime("09:00");
+      setEndTime("18:00");
       setIsAllDay(false);
     }
   }, [visible, startDate, endDate]);
@@ -132,6 +168,7 @@ export const useRequestModalLogic = ({
     [mainType],
   );
 
+  // Valida input, applica orari e costruisce il payload prima dell'invio
   const handleSubmit = () => {
     if (!subType) {
       alert("Seleziona una motivazione!");
@@ -146,8 +183,7 @@ export const useRequestModalLogic = ({
     let finalStartDate = startDate;
     let finalEndDate = endDate;
 
-    const shouldApplyTime =
-      isSingleDaySelection && !isHolidayRequest && !isAllDay;
+    const shouldApplyTime = isSingleDaySelection && !isAllDay;
 
     if (shouldApplyTime) {
       const parsedStart = parseTime(startTime);
@@ -159,74 +195,35 @@ export const useRequestModalLogic = ({
       }
 
       finalStartDate = applyTimeToDate(
-        startDate,
+        new Date(startDate.getTime()),
         parsedStart.hour,
         parsedStart.minute,
       );
-      finalEndDate = applyTimeToDate(endDate, parsedEnd.hour, parsedEnd.minute);
+      finalEndDate = applyTimeToDate(
+        new Date(endDate.getTime()),
+        parsedEnd.hour,
+        parsedEnd.minute,
+      );
 
       if (finalEndDate < finalStartDate) {
         alert("L'orario di fine deve essere successivo a quello di inizio");
         return;
       }
-    } else if (isSingleDaySelection && isAllDay && !isHolidayRequest) {
-      finalStartDate = applyTimeToDate(startDate, 0, 0);
-      finalEndDate = applyTimeToDate(endDate, 23, 59);
+    } else if (isSingleDaySelection && isAllDay) {
+      // All-day singolo giorno: applica orario fisso 09-18
+      finalStartDate = applyTimeToDate(new Date(startDate.getTime()), 9, 0);
+      finalEndDate = applyTimeToDate(new Date(endDate.getTime()), 18, 0);
     }
 
     const MOCK_USER_ID = 1;
-    const NEW_REQUEST_ID = 0;
-    const DEFAULT_STATUS = RequestStatus.PENDING;
-
-    let requestPayload:
-      | ExtraordinaryRequest
-      | HolidayRequest
-      | PermitsRequest
-      | SickRequest;
-
-    if (mainType === "straordinari") {
-      const extraRequest: ExtraordinaryRequest = {
-        id_richiesta: NEW_REQUEST_ID,
-        id_utente: MOCK_USER_ID,
-        data_inizio: finalStartDate,
-        data_fine: finalEndDate,
-        stato_approvazione: DEFAULT_STATUS,
-      };
-      requestPayload = extraRequest;
-    } else {
-      const typeLower = subType.toLowerCase();
-
-      if (typeLower.includes("ferie")) {
-        const holidayRequest: HolidayRequest = {
-          id_richiesta: NEW_REQUEST_ID,
-          id_utente: MOCK_USER_ID,
-          data_inizio: finalStartDate,
-          data_fine: finalEndDate,
-          stato_approvazione: DEFAULT_STATUS,
-        };
-        requestPayload = holidayRequest;
-      } else if (typeLower.includes("malattia")) {
-        const sickRequest: SickRequest = {
-          id_richiesta: NEW_REQUEST_ID,
-          id_utente: MOCK_USER_ID,
-          data_inizio: finalStartDate,
-          data_fine: finalEndDate,
-          stato_approvazione: DEFAULT_STATUS,
-          certificato_medico: "",
-        };
-        requestPayload = sickRequest;
-      } else {
-        const permitsRequest: PermitsRequest = {
-          id_richiesta: NEW_REQUEST_ID,
-          id_utente: MOCK_USER_ID,
-          tipo_permesso: subType,
-          data_inizio: finalStartDate,
-          data_fine: finalEndDate,
-          stato_approvazione: DEFAULT_STATUS,
-        };
-        requestPayload = permitsRequest;
-      }
-    }
+    const requestPayload = buildRequestPayload({
+      mainType,
+      subType,
+      startDate: finalStartDate,
+      endDate: finalEndDate,
+      userId: MOCK_USER_ID,
+      status: RequestStatus.PENDING,
+    });
 
     console.log("--------------------------------------------------");
     console.log(
@@ -245,10 +242,12 @@ export const useRequestModalLogic = ({
     setIsFocus,
     startTime,
     endTime,
+    setStartTime,
+    setEndTime,
     showStartPicker,
     showEndPicker,
     isAllDay,
-    setIsAllDay,
+    setIsAllDay: handleAllDayToggle,
     isSingleDaySelection,
     isHolidayRequest,
     currentOptions,

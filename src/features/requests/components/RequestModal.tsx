@@ -15,10 +15,7 @@ import { Dropdown } from "react-native-element-dropdown";
 import { Colors } from "../../../core/theme/theme";
 import { requestModalStyles } from "../../../core/style/commonStyles";
 import { useRequestModalLogic } from "../hooks/useRequestModalLogic";
-import { HolidayRequest } from "../../../domain/entities/HolidayRequest";
-import { SickRequest } from "../../../domain/entities/SickRequest";
-import { PermitsRequest } from "../../../domain/entities/PermitsRequest";
-import { ExtraordinaryRequest } from "../../../domain/entities/RequestExtraordinary";
+import { RequestPayload } from "../services/requestsService";
 
 interface RequestModalProps {
   visible: boolean;
@@ -26,9 +23,7 @@ interface RequestModalProps {
   startDate: Date | null;
   endDate: Date | null;
   mainType: "assenza" | "straordinari";
-  onSubmit: (
-    data: ExtraordinaryRequest | HolidayRequest | PermitsRequest | SickRequest,
-  ) => void;
+  onSubmit: (data: RequestPayload) => void;
 }
 
 const RequestModal = ({
@@ -98,6 +93,7 @@ const RequestModal = ({
                   mode="time"
                   is24Hour
                   display="spinner"
+                  minuteInterval={30}
                   themeVariant="light"
                   textColor={Colors.textPrimary}
                   onChange={(event, date) => {
@@ -165,7 +161,7 @@ const RequestModal = ({
                   </View>
                 </View>
 
-                {isSingleDaySelection && !isHolidayRequest && (
+                {isSingleDaySelection && (
                   <>
                     <View style={requestModalStyles.toggleRow}>
                       <Text style={requestModalStyles.toggleLabel}>

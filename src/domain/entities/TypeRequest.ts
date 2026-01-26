@@ -13,7 +13,7 @@ export enum RequestType {
 
 // Liste pronte per essere usate nei dropdown
 export const ABSENCE_OPTIONS = [
-  { label: "Ferie Annuali", value: RequestType.FERIE },
+  { label: "Ferie ", value: RequestType.FERIE },
   { label: "Malattia", value: RequestType.MALATTIA },
   { label: "Permesso ROL", value: RequestType.ROL },
   { label: "Congedo Matrimoniale", value: RequestType.CONGEDO },

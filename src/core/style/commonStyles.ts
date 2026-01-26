@@ -199,6 +199,7 @@ export const requestModalStyles = StyleSheet.create({
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     padding: Spacing.md + 4,
+    paddingBottom: 24,
     maxHeight: "100%",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
@@ -271,7 +272,7 @@ export const requestModalStyles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
     paddingHorizontal: 12,
-    marginBottom: 250,
+    marginBottom: 140, // spazio per far aprire il menu senza coprire i bottoni
   },
   placeholderStyle: { fontSize: 16, color: "#999" },
   selectedTextStyle: { fontSize: 16, color: Colors.textPrimary },

@@ -6,5 +6,5 @@ export interface SickRequest {
     data_inizio: Date;
     data_fine: Date;
     stato_approvazione: RequestStatus;
-    certificato_medico: String;
+    certificato_medico: string;
 }
