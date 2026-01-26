@@ -12,6 +12,11 @@ import {
   CALENDAR_VIEW_OPTIONS,
   CalendarMode,
 } from "../../../domain/entities/TypeRequest";
+import {
+  RequestPayload,
+  submitHolidayByToken,
+  submitRequest,
+} from "../../../features/requests/services/requestsService";
 
 // Configura localizzazione calendario (nomi mesi/giorni in italiano)
 configureCalendarLocale();
@@ -46,11 +51,26 @@ export default function CalendarComp() {
     }
   };
 
-  const handleSubmission = (data: any) => {
-    console.log("[CalendarComp] payload inviato:", data);
-    setModalVisible(false);
-    Alert.alert("Successo", "Richiesta Inviata!");
-    resetRange();
+  const handleSubmission = async (data: RequestPayload) => {
+    try {
+      const isHoliday =
+        calendarType === CalendarMode.ABSENCE &&
+        !(data as any).tipo_permesso &&
+        !(data as any).certificato_medico;
+
+      if (isHoliday) {
+        await submitHolidayByToken(data.data_inizio, data.data_fine);
+      } else {
+        await submitRequest(data);
+      }
+
+      setModalVisible(false);
+      Alert.alert("Successo", "Richiesta inviata!");
+      resetRange();
+    } catch (error: any) {
+      const msg = error?.response?.data?.message || error?.message || "Errore durante l'invio";
+      Alert.alert("Errore", msg);
+    }
   };
 
   return (

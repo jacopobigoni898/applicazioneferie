@@ -9,6 +9,7 @@ import { PermitsRequest } from "../../../domain/entities/PermitsRequest";
 import { SickRequest } from "../../../domain/entities/SickRequest";
 
 const REQUESTS_ENDPOINT = "/requests"; // Allinea con l'endpoint reale del backend
+const HOLIDAY_ADD_ENDPOINT = "/RichiestaFerie/utente/addRichiestaFerie";
 
 // Union dei payload gestiti: straordinari, ferie, permessi e malattia.
 export type RequestPayload =
@@ -41,11 +42,30 @@ type RequestDto =
   | (BaseDto & { tipo_permesso?: string })
   | (BaseDto & { certificato_medico?: string });
 
-// Converte in ISO locale senza "Z" per evitare shift di timezone lato backend
+// DTO minimale per inserire ferie quando l'utente è dedotto dal token (campi PascalCase richiesti dal backend)
+type AddHolidayDto = {
+  DataInizio: string;
+  DataFine: string;
+};
+
+// Pad helper
+const pad2 = (n: number) => String(n).padStart(2, "0");
+
+// Converte usando componenti UTC (coerenti con Date.UTC usato nell'applicazione orari)
+// Output: yyyy-MM-ddTHH:mm:ss senza millisecondi e senza Z
 const toLocalIsoString = (date: Date) => {
-  const tzOffsetMs = date.getTimezoneOffset() * 60000;
-  const local = new Date(date.getTime() - tzOffsetMs);
-  return local.toISOString().slice(0, 19); // yyyy-MM-ddTHH:mm:ss
+  const y = date.getUTCFullYear();
+  const m = pad2(date.getUTCMonth() + 1);
+  const d = pad2(date.getUTCDate());
+  const h = pad2(date.getUTCHours());
+  const min = pad2(date.getUTCMinutes());
+  const s = pad2(date.getUTCSeconds());
+  return `${y}-${m}-${d}T${h}:${min}:${s}`;
+};
+
+// Versione con spazio al posto di "T" per backend che fa DateTime.Parse su stringhe con spazio
+const toLocalDateTimeStringWithSpace = (date: Date) => {
+  return toLocalIsoString(date).replace("T", " "); // yyyy-MM-dd HH:mm:ss
 };
 
 export const buildRequestPayload = ({
@@ -116,7 +136,10 @@ const mapPayloadToDto = (payload: RequestPayload): RequestDto => {
   };
 
   if ((payload as PermitsRequest).tipo_permesso !== undefined) {
-    return { ...base, tipo_permesso: (payload as PermitsRequest).tipo_permesso };
+    return {
+      ...base,
+      tipo_permesso: (payload as PermitsRequest).tipo_permesso,
+    };
   }
   if ((payload as SickRequest).certificato_medico !== undefined) {
     return {
@@ -131,5 +154,16 @@ export const submitRequest = async (payload: RequestPayload) => {
   // Serializza e invia al backend; ritorna la risposta tipizzata.
   const dto = mapPayloadToDto(payload);
   const { data } = await http.post<RequestDto>(REQUESTS_ENDPOINT, dto);
+  return data;
+};
+
+// Invia una richiesta ferie usando l'utente dedotto dal token (endpoint dedicato)
+export const submitHolidayByToken = async (startDate: Date, endDate: Date) => {
+  const dto: AddHolidayDto = {
+    DataInizio: toLocalDateTimeStringWithSpace(startDate),
+    DataFine: toLocalDateTimeStringWithSpace(endDate),
+  };
+
+  const { data } = await http.post<AddHolidayDto>(HOLIDAY_ADD_ENDPOINT, dto);
   return data;
 };
