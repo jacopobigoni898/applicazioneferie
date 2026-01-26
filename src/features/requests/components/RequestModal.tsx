@@ -61,7 +61,7 @@ const RequestModal = ({
     onSubmit,
   });
 
-  const renderIOSPicker = () => {
+  const renderTimePicker = () => {
     if (!showStartPicker && !showEndPicker) return null;
 
     const isStart = showStartPicker;
@@ -92,15 +92,11 @@ const RequestModal = ({
                   value={value}
                   mode="time"
                   is24Hour
-                  display="spinner"
-                  minuteInterval={30}
+                  display={Platform.OS === "ios" ? "spinner" : "clock"}
+                  minuteInterval={Platform.OS === "ios" ? 30 : undefined}
                   themeVariant="light"
                   textColor={Colors.textPrimary}
                   onChange={(event, date) => {
-                    if (event?.type === "dismissed") {
-                      closePickers();
-                      return;
-                    }
                     handleTimeChange(type, event, date || value);
                   }}
                   style={requestModalStyles.pickerIOS}
@@ -263,7 +259,7 @@ const RequestModal = ({
           </TouchableWithoutFeedback>
         </View>
       </TouchableWithoutFeedback>
-      {Platform.OS === "ios" && renderIOSPicker()}
+      {renderTimePicker()}
     </Modal>
   );
 };

@@ -2,7 +2,6 @@
 // validazioni base e costruzione payload per l'invio.
 import { useEffect, useMemo, useState } from "react";
 import { Platform } from "react-native";
-import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import {
   ABSENCE_OPTIONS,
   OVERTIME_OPTIONS,
@@ -115,41 +114,22 @@ export const useRequestModalLogic = ({
     event: any,
     selectedDate?: Date,
   ) => {
-    if (Platform.OS === "android" && event?.type === "dismissed") return;
+    // Su Android il picker inline non manda "dismissed"; su iOS lo gestiamo per uscire
+    if (Platform.OS === "ios" && event?.type === "dismissed") return;
 
     const pickedDate = selectedDate || new Date();
     const snapped = snapToHalfHour(pickedDate);
     const formatted = formatTimeValue(snapped);
 
     if (type === "start") {
-      setShowStartPicker(Platform.OS === "ios");
       setStartTime(formatted);
     } else {
-      setShowEndPicker(Platform.OS === "ios");
       setEndTime(formatted);
-    }
-
-    if (Platform.OS === "ios") {
-      closePickers();
     }
   };
 
-  // Apre il time picker nativo (Android immediato, iOS toggla modal interno)
+  // Apre il time picker inline mostrato nel modal custom
   const openTimePicker = (type: "start" | "end") => {
-    if (Platform.OS === "android") {
-      const baseDate =
-        type === "start" ? startDate || new Date() : endDate || new Date();
-
-      DateTimePickerAndroid.open({
-        value: baseDate,
-        mode: "time",
-        is24Hour: true,
-        onChange: (event, date) =>
-          handleTimeChange(type, event, date || baseDate),
-      });
-      return;
-    }
-
     type === "start" ? setShowStartPicker(true) : setShowEndPicker(true);
   };
 
@@ -160,6 +140,7 @@ export const useRequestModalLogic = ({
       setStartTime("09:00");
       setEndTime("18:00");
       setIsAllDay(false);
+      closePickers();
     }
   }, [visible, startDate, endDate]);
 
