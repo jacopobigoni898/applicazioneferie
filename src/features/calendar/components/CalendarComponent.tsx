@@ -68,7 +68,10 @@ export default function CalendarComp() {
       Alert.alert("Successo", "Richiesta inviata!");
       resetRange();
     } catch (error: any) {
-      const msg = error?.response?.data?.message || error?.message || "Errore durante l'invio";
+      const msg =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Errore durante l'invio";
       Alert.alert("Errore", msg);
     }
   };

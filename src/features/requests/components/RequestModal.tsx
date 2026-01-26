@@ -47,6 +47,7 @@ const RequestModal = ({
     setIsAllDay,
     isSingleDaySelection,
     isHolidayRequest,
+    isSickRequest,
     currentOptions,
     formatDate,
     openTimePicker,
@@ -157,7 +158,7 @@ const RequestModal = ({
                   </View>
                 </View>
 
-                {isSingleDaySelection && (
+                {isSickRequest ? null : isSingleDaySelection ? (
                   <>
                     <View style={requestModalStyles.toggleRow}>
                       <Text style={requestModalStyles.toggleLabel}>
@@ -207,6 +208,36 @@ const RequestModal = ({
                         </View>
                       </>
                     )}
+                  </>
+                ) : (
+                  <>
+                    <Text style={requestModalStyles.label}>
+                      Orario primo/ultimo giorno
+                    </Text>
+                    <View style={requestModalStyles.timeRow}>
+                      <View style={requestModalStyles.timeBox}>
+                        <Text style={requestModalStyles.dateLabel}>Inizio</Text>
+                        <TouchableOpacity
+                          style={requestModalStyles.timeInput}
+                          onPress={() => openTimePicker("start")}
+                        >
+                          <Text style={requestModalStyles.timeText}>
+                            {startTime}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                      <View style={requestModalStyles.timeBox}>
+                        <Text style={requestModalStyles.dateLabel}>Fine</Text>
+                        <TouchableOpacity
+                          style={requestModalStyles.timeInput}
+                          onPress={() => openTimePicker("end")}
+                        >
+                          <Text style={requestModalStyles.timeText}>
+                            {endTime}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
                   </>
                 )}
 

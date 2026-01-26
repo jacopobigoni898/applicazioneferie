@@ -18,9 +18,7 @@ export interface UseRequestModalLogicParams {
   startDate: Date | null;
   endDate: Date | null;
   mainType: "assenza" | "straordinari";
-  onSubmit: (
-    data: RequestPayload,
-  ) => void;
+  onSubmit: (data: RequestPayload) => void;
 }
 
 export const useRequestModalLogic = ({
@@ -48,12 +46,16 @@ export const useRequestModalLogic = ({
     );
   }, [subType]);
 
-    // Formatta la data per la UI (dd/mm/yyyy) o placeholder se mancante
+  const isSickRequest = useMemo(() => {
+    return subType === RequestType.MALATTIA;
+  }, [subType]);
+
+  // Formatta la data per la UI (dd/mm/yyyy) o placeholder se mancante
   const formatDate = (date: Date | null) => {
     return date ? date.toLocaleDateString("it-IT") : "--/--/----";
   };
 
-    // Converte un oggetto Date in stringa HH:mm per la UI
+  // Converte un oggetto Date in stringa HH:mm per la UI
   const formatTimeValue = (date: Date | null) => {
     if (!date) return "09:00";
     const hours = String(date.getHours()).padStart(2, "0");
@@ -61,7 +63,7 @@ export const useRequestModalLogic = ({
     return `${hours}:${minutes}`;
   };
 
-    // Valida e parse stringa oraria HH:mm in {hour, minute}
+  // Valida e parse stringa oraria HH:mm in {hour, minute}
   const parseTime = (value: string) => {
     const match = /^(\d{1,2}):(\d{2})$/.exec(value.trim());
     if (!match) return null;
@@ -101,6 +103,7 @@ export const useRequestModalLogic = ({
 
   // Gestisce toggle all-day e imposta orario di default 09:00–18:00
   const handleAllDayToggle = (value: boolean) => {
+    if (isSickRequest) return; // malattia sempre all-day
     setIsAllDay(value);
     if (value) {
       setStartTime("09:00");
@@ -164,9 +167,11 @@ export const useRequestModalLogic = ({
     let finalStartDate = startDate;
     let finalEndDate = endDate;
 
-    const shouldApplyTime = isSingleDaySelection && !isAllDay;
-
-    if (shouldApplyTime) {
+    // Malattia: sempre all-day, 09-18
+    if (isSickRequest) {
+      finalStartDate = applyTimeToDate(new Date(startDate.getTime()), 9, 0);
+      finalEndDate = applyTimeToDate(new Date(endDate.getTime()), 18, 0);
+    } else {
       const parsedStart = parseTime(startTime);
       const parsedEnd = parseTime(endTime);
 
@@ -175,25 +180,43 @@ export const useRequestModalLogic = ({
         return;
       }
 
-      finalStartDate = applyTimeToDate(
-        new Date(startDate.getTime()),
-        parsedStart.hour,
-        parsedStart.minute,
-      );
-      finalEndDate = applyTimeToDate(
-        new Date(endDate.getTime()),
-        parsedEnd.hour,
-        parsedEnd.minute,
-      );
+      if (isSingleDaySelection) {
+        const shouldApplyTime = !isAllDay;
 
-      if (finalEndDate < finalStartDate) {
-        alert("L'orario di fine deve essere successivo a quello di inizio");
-        return;
+        if (shouldApplyTime) {
+          finalStartDate = applyTimeToDate(
+            new Date(startDate.getTime()),
+            parsedStart.hour,
+            parsedStart.minute,
+          );
+          finalEndDate = applyTimeToDate(
+            new Date(endDate.getTime()),
+            parsedEnd.hour,
+            parsedEnd.minute,
+          );
+
+          if (finalEndDate < finalStartDate) {
+            alert("L'orario di fine deve essere successivo a quello di inizio");
+            return;
+          }
+        } else {
+          // All-day singolo giorno: applica orario fisso 09-18
+          finalStartDate = applyTimeToDate(new Date(startDate.getTime()), 9, 0);
+          finalEndDate = applyTimeToDate(new Date(endDate.getTime()), 18, 0);
+        }
+      } else {
+        // Multi-giorno: applica orario al primo giorno (inizio) e all'ultimo (fine)
+        finalStartDate = applyTimeToDate(
+          new Date(startDate.getTime()),
+          parsedStart.hour,
+          parsedStart.minute,
+        );
+        finalEndDate = applyTimeToDate(
+          new Date(endDate.getTime()),
+          parsedEnd.hour,
+          parsedEnd.minute,
+        );
       }
-    } else if (isSingleDaySelection && isAllDay) {
-      // All-day singolo giorno: applica orario fisso 09-18
-      finalStartDate = applyTimeToDate(new Date(startDate.getTime()), 9, 0);
-      finalEndDate = applyTimeToDate(new Date(endDate.getTime()), 18, 0);
     }
 
     const MOCK_USER_ID = 1;
@@ -231,6 +254,7 @@ export const useRequestModalLogic = ({
     setIsAllDay: handleAllDayToggle,
     isSingleDaySelection,
     isHolidayRequest,
+    isSickRequest,
     currentOptions,
     formatDate,
     openTimePicker,

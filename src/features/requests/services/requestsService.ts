@@ -10,6 +10,7 @@ import { SickRequest } from "../../../domain/entities/SickRequest";
 
 const REQUESTS_ENDPOINT = "/requests"; // Allinea con l'endpoint reale del backend
 const HOLIDAY_ADD_ENDPOINT = "/RichiestaFerie/utente/addRichiestaFerie";
+const HOLIDAY_LIST_ENDPOINT = "/RichiestaFerie/utente/getAllAssenzeById";
 
 // Union dei payload gestiti: straordinari, ferie, permessi e malattia.
 export type RequestPayload =
@@ -41,6 +42,32 @@ type BaseDto = {
 type RequestDto =
   | (BaseDto & { tipo_permesso?: string })
   | (BaseDto & { certificato_medico?: string });
+
+// Risposta lista assenze (ferie/permessi) dedotte dal token
+export type HolidayListDto = BaseDto & { tipo_permesso?: string };
+
+// Normalizza le chiavi (snake_case/PascalCase) dal backend in camel snake coerente col resto
+const mapHolidayItem = (raw: any): HolidayListDto => {
+  return {
+    id_richiesta: raw.id_richiesta ?? raw.IdRichiesta ?? raw.id ?? 0,
+    id_utente: raw.id_utente ?? raw.IdUtente ?? raw.userId ?? 0,
+    data_inizio:
+      raw.data_inizio ??
+      raw.DataInizio ??
+      raw.dataInizio ??
+      raw.startDate ??
+      "",
+    data_fine:
+      raw.data_fine ?? raw.DataFine ?? raw.dataFine ?? raw.endDate ?? "",
+    stato_approvazione:
+      raw.stato_approvazione ??
+      raw.StatoApprovazione ??
+      raw.status ??
+      raw.Stato ??
+      RequestStatus.PENDING,
+    tipo_permesso: raw.tipo_permesso ?? raw.TipoPermesso,
+  };
+};
 
 // DTO minimale per inserire ferie quando l'utente è dedotto dal token (campi PascalCase richiesti dal backend)
 type AddHolidayDto = {
@@ -166,4 +193,21 @@ export const submitHolidayByToken = async (startDate: Date, endDate: Date) => {
 
   const { data } = await http.post<AddHolidayDto>(HOLIDAY_ADD_ENDPOINT, dto);
   return data;
+};
+
+// Restituisce le assenze dell'utente (token) dal backend dedicato ferie/assenze
+// Recupera le assenze/ferie dell'utente dal token; il backend richiede un parametro "data" (string)
+export const fetchHolidaysByToken = async (dataFilter?: string) => {
+  const today = new Date();
+  const formatYmd = (d: Date) =>
+    `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, "0")}-${d
+      .getDate()
+      .toString()
+      .padStart(2, "0")}`;
+
+  const filter =
+    dataFilter && dataFilter.trim() !== "" ? dataFilter : formatYmd(today);
+  const query = `?data=${encodeURIComponent(filter)}`;
+  const { data } = await http.get<any[]>(`${HOLIDAY_LIST_ENDPOINT}${query}`);
+  return (data || []).map(mapHolidayItem);
 };
