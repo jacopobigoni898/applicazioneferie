@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -7,34 +7,12 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  fetchHolidaysByToken,
-  HolidayListDto,
-} from "../../src/features/requests/services/requestsService";
+import { HolidayListDto } from "../../src/features/requests/services/requestsService";
+import { useRequests } from "../../src/features/requests/hooks/useRequests";
+import RequestItem from "../../src/features/requests/components/RequestItem";
 
 export default function Richieste() {
-  const [items, setItems] = useState<HolidayListDto[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const loadData = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-        const data = await fetchHolidaysByToken();
-      setItems(data);
-    } catch (err: any) {
-      const msg =
-        err?.response?.data?.message || err?.message || "Errore di caricamento";
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadData();
-  }, []);
+  const { items, loading, error, reload } = useRequests();
 
   const renderItem = ({ item }: { item: HolidayListDto }) => {
     return (
@@ -67,7 +45,7 @@ export default function Richieste() {
       </Text>
 
       <TouchableOpacity
-        onPress={loadData}
+        onPress={reload}
         disabled={loading}
         style={{
           padding: 12,
@@ -94,7 +72,9 @@ export default function Richieste() {
         <FlatList
           data={items}
           keyExtractor={(item, index) => `${item.id_richiesta || index}`}
-          renderItem={renderItem}
+          renderItem={({ item }: { item: HolidayListDto }) => (
+            <RequestItem item={item} />
+          )}
           ListEmptyComponent={
             !loading ? (
               <Text style={{ color: "#555" }}>Nessuna richiesta trovata</Text>
