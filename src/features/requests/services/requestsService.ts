@@ -7,6 +7,7 @@ import { ExtraordinaryRequest } from "../../../domain/entities/RequestExtraordin
 import { HolidayRequest } from "../../../domain/entities/HolidayRequest";
 import { PermitsRequest } from "../../../domain/entities/PermitsRequest";
 import { SickRequest } from "../../../domain/entities/SickRequest";
+import { mapHolidayItem } from "../mappers/holidayMappers";
 
 const REQUESTS_ENDPOINT = "/requests"; // Allinea con l'endpoint reale del backend
 const HOLIDAY_ADD_ENDPOINT = "/RichiestaFerie/utente/addRichiestaFerie";
@@ -47,29 +48,6 @@ type RequestDto =
 // Risposta lista assenze (ferie/permessi) dedotte dal token
 export type HolidayListDto = BaseDto & { tipo_permesso?: string };
 
-//da spostare?
-// Normalizza le chiavi (snake_case/PascalCase) dal backend in camel snake coerente col resto
-const mapHolidayItem = (raw: any): HolidayListDto => {
-  return {
-    id_richiesta: raw.id_richiesta ?? raw.IdRichiesta ?? raw.id ?? 0,
-    id_utente: raw.id_utente ?? raw.IdUtente ?? raw.userId ?? 0,
-    data_inizio:
-      raw.data_inizio ??
-      raw.DataInizio ??
-      raw.dataInizio ??
-      raw.startDate ??
-      "",
-    data_fine:
-      raw.data_fine ?? raw.DataFine ?? raw.dataFine ?? raw.endDate ?? "",
-    stato_approvazione:
-      raw.stato_approvazione ??
-      raw.StatoApprovazione ??
-      raw.status ??
-      raw.Stato ??
-      RequestStatus.PENDING,
-    tipo_permesso: raw.tipo_permesso ?? raw.TipoPermesso,
-  };
-};
 
 // DTO minimale per inserire ferie quando l'utente è dedotto dal token (campi PascalCase richiesti dal backend)
 type AddHolidayDto = {
