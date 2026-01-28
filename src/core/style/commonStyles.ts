@@ -424,3 +424,91 @@ export const profileScreen = StyleSheet.create({
     flex: 1,
   },
 });
+
+export const itemStyles = StyleSheet.create({
+  card: {
+    marginLeft: 16,
+    marginRight: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderRadius: 42,
+    padding: 12,
+    marginBottom: 12,
+    paddingHorizontal: 34,
+    // shadow iOS
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    // elevation Android
+    elevation: 3,
+  },
+  leftAccent: {
+    width: 40,
+    height: 40,
+    borderRadius: 90,
+    backgroundColor: Colors.primary,
+    marginRight: 12,
+  },
+  content: { flex: 1 },
+  title: {
+    fontWeight: Typography.weight.bold,
+    fontSize: 15,
+    marginBottom: 6,
+  },
+  rowText: {
+    color: "#000000",
+    fontWeight: Typography.weight.regular,
+    fontSize: 13,
+    marginBottom: 2,
+  },
+  right: { marginLeft: 8, alignItems: "flex-end" },
+  badge: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+    minWidth: 90,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  badgeText: {
+    color: "#fff",
+    fontWeight: Typography.weight.regular,
+    fontSize: 12,
+  },
+});
+
+export const tabStyles = StyleSheet.create({
+  tabBar: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 12,
+  },
+  tabButton: {
+    flex: 1,
+    backgroundColor: "#ae513e",
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  tabButtonActive: {
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#395174",
+    fontWeight: Typography.weight.bold,
+  },
+  tabLabel: {
+    textAlign: "center",
+    fontWeight: Typography.weight.bold,
+    fontSize: 16,
+  },
+  tabLabelActive: {
+    color: "#cda0a0",
+  },
+});

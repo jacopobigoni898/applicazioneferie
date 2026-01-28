@@ -11,6 +11,7 @@ import { SickRequest } from "../../../domain/entities/SickRequest";
 const REQUESTS_ENDPOINT = "/requests"; // Allinea con l'endpoint reale del backend
 const HOLIDAY_ADD_ENDPOINT = "/RichiestaFerie/utente/addRichiestaFerie";
 const HOLIDAY_LIST_ENDPOINT = "/RichiestaFerie/utente/getAllAssenzeById";
+const HOLIDAY_DELETE_ENDPOINT = "/RichiestaFerie"; // TODO: allinea con l'endpoint di delete del backend
 
 // Union dei payload gestiti: straordinari, ferie, permessi e malattia.
 export type RequestPayload =
@@ -46,6 +47,7 @@ type RequestDto =
 // Risposta lista assenze (ferie/permessi) dedotte dal token
 export type HolidayListDto = BaseDto & { tipo_permesso?: string };
 
+//da spostare?
 // Normalizza le chiavi (snake_case/PascalCase) dal backend in camel snake coerente col resto
 const mapHolidayItem = (raw: any): HolidayListDto => {
   return {
@@ -210,4 +212,10 @@ export const fetchHolidaysByToken = async (dataFilter?: string) => {
   const query = `?data=${encodeURIComponent(filter)}`;
   const { data } = await http.get<any[]>(`${HOLIDAY_LIST_ENDPOINT}${query}`);
   return (data || []).map(mapHolidayItem);
+};
+
+// Elimina una richiesta per id; aggiorna HOLIDAY_DELETE_ENDPOINT se il backend espone un path diverso
+export const deleteHolidayById = async (id: number) => {
+  await http.delete(`${HOLIDAY_DELETE_ENDPOINT}/${id}`);
+  return true;
 };

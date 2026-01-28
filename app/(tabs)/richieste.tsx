@@ -1,87 +1,126 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  RefreshControl,
   Text,
-  TouchableOpacity,
   View,
+  StyleSheet,
+  useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { HolidayListDto } from "../../src/features/requests/services/requestsService";
 import { useRequests } from "../../src/features/requests/hooks/useRequests";
 import RequestItem from "../../src/features/requests/components/RequestItem";
+import { screenStyles, tabStyles } from "../../src/core/style/commonStyles";
+import { TabView, TabBar } from "react-native-tab-view";
+import { Colors } from "../../src/core/theme/theme";
+type TabKey = "sent" | "received";
+
+const tabs: { key: TabKey; label: string }[] = [
+  { key: "sent", label: "Richieste inviate" },
+  { key: "received", label: "Richieste ricevute" },
+];
 
 export default function Richieste() {
-  const { items, loading, error, reload } = useRequests();
+  const layout = useWindowDimensions();
+  const [index, setIndex] = useState(0); //resta sulle richieste inviate
+  const [routes] = useState([
+    { key: "sent", title: "Richieste inviate" },
+    { key: "received", title: "Richieste ricevute" },
+  ]);
 
-  const renderItem = ({ item }: { item: HolidayListDto }) => {
-    return (
-      <View
-        style={{
-          padding: 12,
-          borderRadius: 10,
-          backgroundColor: "#f5f7fb",
-          marginBottom: 10,
-          borderWidth: 1,
-          borderColor: "#e1e5ee",
-        }}
-      >
-        <Text style={{ fontWeight: "700", marginBottom: 4 }}>
-          {item.tipo_permesso || "Ferie"}
-        </Text>
-        <Text style={{ color: "#444" }}>Dal: {item.data_inizio}</Text>
-        <Text style={{ color: "#444" }}>Al: {item.data_fine}</Text>
-        <Text style={{ marginTop: 6, color: "#2563eb", fontWeight: "600" }}>
-          Stato: {item.stato_approvazione}
-        </Text>
-      </View>
-    );
-  };
+  const sent = useRequests("sent");
+  const received = useRequests("received");
+  // verifica che la lista non sia vuota
+  const listEmpty = (loading: boolean) =>
+    !loading ? (
+      <Text style={{ color: "#555" }}>Nessuna richiesta trovata</Text>
+    ) : null;
 
-  return (
-    <SafeAreaView style={{ flex: 1, padding: 16 }}>
-      <Text style={{ fontSize: 20, fontWeight: "700", marginBottom: 12 }}>
-        Richieste inviate
-      </Text>
-
-      <TouchableOpacity
-        onPress={reload}
-        disabled={loading}
-        style={{
-          padding: 12,
-          borderRadius: 10,
-          backgroundColor: loading ? "#9aa0a6" : "#2563eb",
-          alignItems: "center",
-          marginBottom: 12,
-        }}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={{ color: "#fff", fontWeight: "600" }}>Aggiorna</Text>
-        )}
-      </TouchableOpacity>
-
-      {error ? (
-        <Text style={{ color: "#d64545", marginBottom: 12 }}>{error}</Text>
+  const renderList = (
+    data: any[],
+    loadingFlag: boolean,
+    errorMsg: string | null,
+    reloadFn: () => void,
+    removeFn: (id: number) => void,
+  ) => (
+    <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: 12 }}>
+      {errorMsg ? (
+        <Text style={{ color: "#d64545", marginBottom: 12 }}>{errorMsg}</Text>
       ) : null}
 
-      {loading && items.length === 0 ? (
-        <ActivityIndicator />
-      ) : (
-        <FlatList
-          data={items}
-          keyExtractor={(item, index) => `${item.id_richiesta || index}`}
-          renderItem={({ item }: { item: HolidayListDto }) => (
-            <RequestItem item={item} />
-          )}
-          ListEmptyComponent={
-            !loading ? (
-              <Text style={{ color: "#555" }}>Nessuna richiesta trovata</Text>
-            ) : null
-          }
-        />
-      )}
+      <FlatList
+        data={data}
+        keyExtractor={(item, index) => `${item.id_richiesta || index}`}
+        renderItem={({ item }: any) => (
+          <RequestItem
+            item={item}
+            formattedStart={item.formatted_start}
+            formattedEnd={item.formatted_end}
+            onDelete={removeFn}
+          />
+        )}
+        refreshControl={
+          <RefreshControl refreshing={loadingFlag} onRefresh={reloadFn} />
+        }
+        ListEmptyComponent={listEmpty(loadingFlag)}
+        ListFooterComponent={
+          loadingFlag && data.length > 0 ? <ActivityIndicator /> : null
+        }
+        contentContainerStyle={{ paddingBottom: 24 }}
+      />
+    </View>
+  );
+
+  return (
+    <SafeAreaView style={screenStyles.container} edges={["top"]}>
+      <View style={screenStyles.header}>
+        <View style={screenStyles.titleBlock}>
+          <Text style={screenStyles.title}>Richieste</Text>
+        </View>
+      </View>
+
+      <TabView
+        navigationState={{ index, routes }}
+        renderScene={({ route }) => {
+          if (route.key === "sent")
+            return renderList(
+              sent.formattedItems,
+              sent.loading,
+              sent.error,
+              sent.reload,
+              sent.remove,
+            );
+          if (route.key === "received")
+            return renderList(
+              received.formattedItems,
+              received.loading,
+              received.error,
+              received.reload,
+              received.remove,
+            );
+          return null;
+        }}
+        onIndexChange={(i) => setIndex(i)}
+        initialLayout={{ width: layout.width }}
+        renderTabBar={(props) => (
+          <TabBar
+            {...(props as any)}
+            labelAllowFontScaling={false}
+            indicatorStyle={{ backgroundColor: Colors.primary }}
+            style={{
+              backgroundColor: "transparent",
+              marginTop: 24,
+              height: 64,
+              justifyContent: "center",
+              paddingTop: 6,
+            }}
+            labelStyle={tabStyles.tabLabel}
+            activeColor="#000000"
+            inactiveColor="#808080"
+          />
+        )}
+      />
     </SafeAreaView>
   );
 }
