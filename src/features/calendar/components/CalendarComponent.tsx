@@ -60,11 +60,10 @@ export default function CalendarComp() {
 
   const handleSubmission = async (data: RequestPayload) => {
     try {
+      const isSick = (data as any).certificato_medico !== undefined;
+      const isPermit = (data as any).tipo_permesso !== undefined;
       const isHoliday =
-        calendarType === CalendarMode.ABSENCE &&
-        !(data as any).tipo_permesso &&
-        !(data as any).certificato_medico;
-
+        calendarType === CalendarMode.ABSENCE && !isPermit && !isSick;
       if (isHoliday) {
         await submitHolidayByToken(data.data_inizio, data.data_fine);
       } else {
