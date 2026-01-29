@@ -19,6 +19,7 @@ export interface UseRequestModalLogicParams {
   startDate: Date | null;
   endDate: Date | null;
   mainType: "assenza" | "straordinari";
+  userId: number | null;
   onSubmit: (data: RequestPayload) => void;
 }
 
@@ -27,6 +28,7 @@ export const useRequestModalLogic = ({
   startDate,
   endDate,
   mainType,
+  userId,
   onSubmit,
 }: UseRequestModalLogicParams) => {
   // Stato UI selezioni
@@ -231,13 +233,17 @@ export const useRequestModalLogic = ({
         );
       }
     }
-    const MOCK_USER_ID = 1;
+    if (userId == null || Number.isNaN(userId)) {
+      alert("Impossibile inviare la richiesta: utente non disponibile");
+      return;
+    }
+
     const requestPayload = buildRequestPayload({
       mainType,
       subType,
       startDate: finalStartDate,
       endDate: finalEndDate,
-      userId: MOCK_USER_ID,
+      userId,
       status: RequestStatus.PENDING,
     });
 

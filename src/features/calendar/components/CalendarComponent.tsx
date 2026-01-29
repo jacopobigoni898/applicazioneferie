@@ -17,11 +17,18 @@ import {
   submitHolidayByToken,
   submitRequest,
 } from "../../../features/requests/services/requestsService";
+import { useAuth } from "../../../../app/_providers/AuthProvider";
 
 // Configura localizzazione calendario (nomi mesi/giorni in italiano)
 configureCalendarLocale();
 
 export default function CalendarComp() {
+  //prendo l id del utente
+  const { user } = useAuth();
+  const parsedUserId = user ? Number(user.id) : null;
+  const userId =
+    parsedUserId != null && !Number.isNaN(parsedUserId) ? parsedUserId : null;
+
   const { startDate, endDate, markedDates, onDayPress, resetRange } =
     useRangeSelection();
   const [calendarType, setCalendarType] = useState<string>(
@@ -145,6 +152,7 @@ export default function CalendarComp() {
         mainType={
           calendarType === CalendarMode.OVERTIME ? "straordinari" : "assenza"
         }
+        userId={userId}
         onSubmit={handleSubmission}
       />
     </View>

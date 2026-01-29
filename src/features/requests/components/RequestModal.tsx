@@ -23,6 +23,7 @@ interface RequestModalProps {
   startDate: Date | null;
   endDate: Date | null;
   mainType: "assenza" | "straordinari";
+  userId: number | null;
   onSubmit: (data: RequestPayload) => void;
 }
 
@@ -32,6 +33,7 @@ const RequestModal = ({
   startDate,
   endDate,
   mainType,
+  userId,
   onSubmit,
 }: RequestModalProps) => {
   const {
@@ -59,6 +61,7 @@ const RequestModal = ({
     startDate,
     endDate,
     mainType,
+    userId,
     onSubmit,
   });
 
