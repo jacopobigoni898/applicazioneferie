@@ -48,7 +48,6 @@ type RequestDto =
 // Risposta lista assenze (ferie/permessi) dedotte dal token
 export type HolidayListDto = BaseDto & { tipo_permesso?: string };
 
-
 // DTO minimale per inserire ferie quando l'utente è dedotto dal token (campi PascalCase richiesti dal backend)
 type AddHolidayDto = {
   DataInizio: string;
@@ -176,7 +175,7 @@ export const submitHolidayByToken = async (startDate: Date, endDate: Date) => {
 };
 
 // Restituisce le assenze dell'utente (token) dal backend dedicato ferie/assenze
-// Recupera le assenze/ferie dell'utente dal token; il backend richiede un parametro "data" (string)
+// Recupera le ferie dell'utente dal token; il backend richiede un parametro "data" (string)
 export const fetchHolidaysByToken = async (dataFilter?: string) => {
   const today = new Date();
   const formatYmd = (d: Date) =>

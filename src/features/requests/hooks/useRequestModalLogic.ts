@@ -2,6 +2,7 @@
 // validazioni base e costruzione payload per l'invio.
 import { useEffect, useMemo, useState } from "react";
 import { Platform } from "react-native";
+import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import {
   ABSENCE_OPTIONS,
   OVERTIME_OPTIONS,
@@ -133,6 +134,18 @@ export const useRequestModalLogic = ({
 
   // Apre il time picker inline mostrato nel modal custom
   const openTimePicker = (type: "start" | "end") => {
+    if (Platform.OS === "android") {
+      DateTimePickerAndroid.open({
+        value:
+          type === "start" ? startDate || new Date() : endDate || new Date(),
+        mode: "time",
+        is24Hour: true,
+        onChange: (event, date) =>
+          handleTimeChange(type, event, date || new Date()),
+      });
+      return;
+    }
+
     type === "start" ? setShowStartPicker(true) : setShowEndPicker(true);
   };
 
@@ -218,7 +231,6 @@ export const useRequestModalLogic = ({
         );
       }
     }
-
     const MOCK_USER_ID = 1;
     const requestPayload = buildRequestPayload({
       mainType,

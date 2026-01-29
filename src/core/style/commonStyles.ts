@@ -51,7 +51,7 @@ export const calendarStyles = StyleSheet.create({
     height: 50,
     borderColor: Colors.border,
     borderWidth: 1.25,
-    borderRadius: 18,
+    borderRadius: 12,
     paddingHorizontal: 16,
     backgroundColor: Colors.surface,
     shadowColor: "#000",
@@ -129,7 +129,7 @@ export const calendarStyles = StyleSheet.create({
     marginBottom: 24,
   },
   buttonDisabled: { backgroundColor: "#CCCCCC" },
-  buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+  buttonText: { color: "#fff", fontSize: 16, fontWeight: "regular" },
 });
 
 // Stili condivisi per il pull-down iOS

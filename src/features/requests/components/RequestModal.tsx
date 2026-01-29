@@ -63,6 +63,9 @@ const RequestModal = ({
   });
 
   const renderTimePicker = () => {
+    // Android usa il picker nativo (DateTimePickerAndroid.open), niente modal custom
+    if (Platform.OS !== "ios") return null;
+
     if (!showStartPicker && !showEndPicker) return null;
 
     const isStart = showStartPicker;

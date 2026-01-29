@@ -28,15 +28,17 @@ export default function Richieste() {
     { key: "sent", title: "Richieste inviate" },
     { key: "received", title: "Richieste ricevute" },
   ]);
-
+  //hooks
   const sent = useRequests("sent");
   const received = useRequests("received");
+
   // verifica che la lista non sia vuota
   const listEmpty = (loading: boolean) =>
     !loading ? (
       <Text style={{ color: "#555" }}>Nessuna richiesta trovata</Text>
     ) : null;
 
+  //componente render list
   const renderList = (
     data: any[],
     loadingFlag: boolean,
