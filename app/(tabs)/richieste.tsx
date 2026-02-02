@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -14,6 +14,11 @@ import RequestItem from "../../src/features/requests/components/RequestItem";
 import { screenStyles, tabStyles } from "../../src/core/style/commonStyles";
 import { TabView, TabBar } from "react-native-tab-view";
 import { Colors } from "../../src/core/theme/theme";
+import EditRequestModal from "../../src/features/requests/components/EditRequestModal";
+import {
+  HolidayListDto,
+  UpdateHolidayInput,
+} from "../../src/features/requests/services/requestsService";
 type TabKey = "sent" | "received";
 
 const tabs: { key: TabKey; label: string }[] = [
@@ -31,6 +36,11 @@ export default function Richieste() {
   //hooks
   const sent = useRequests("sent");
   const received = useRequests("received");
+  const [editContext, setEditContext] = useState<{
+    item: HolidayListDto;
+    updateFn: (payload: UpdateHolidayInput) => Promise<void>;
+  } | null>(null);
+  const [savingEdit, setSavingEdit] = useState(false);
 
   // verifica che la lista non sia vuota
   const listEmpty = (loading: boolean) =>
@@ -45,6 +55,7 @@ export default function Richieste() {
     errorMsg: string | null,
     reloadFn: () => void,
     removeFn: (id: number) => void,
+    editFn: (item: HolidayListDto) => void,
   ) => (
     <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: 12 }}>
       {errorMsg ? (
@@ -60,6 +71,7 @@ export default function Richieste() {
             formattedStart={item.formatted_start}
             formattedEnd={item.formatted_end}
             onDelete={removeFn}
+            onEdit={editFn}
           />
         )}
         refreshControl={
@@ -92,6 +104,7 @@ export default function Richieste() {
               sent.error,
               sent.reload,
               sent.remove,
+              (it) => setEditContext({ item: it, updateFn: sent.update }),
             );
           if (route.key === "received")
             return renderList(
@@ -100,6 +113,7 @@ export default function Richieste() {
               received.error,
               received.reload,
               received.remove,
+              (it) => setEditContext({ item: it, updateFn: received.update }),
             );
           return null;
         }}
@@ -122,6 +136,29 @@ export default function Richieste() {
             inactiveColor="#808080"
           />
         )}
+      />
+
+      <EditRequestModal
+        visible={!!editContext}
+        item={editContext?.item ?? null}
+        onClose={() => setEditContext(null)}
+        saving={savingEdit}
+        onConfirm={async (payload) => {
+          if (!editContext) return;
+          try {
+            setSavingEdit(true);
+            await editContext.updateFn(payload);
+            setEditContext(null);
+          } catch (err: any) {
+            const msg =
+              err?.response?.data?.message ||
+              err?.message ||
+              "Errore durante l'aggiornamento";
+            alert(msg);
+          } finally {
+            setSavingEdit(false);
+          }
+        }}
       />
     </SafeAreaView>
   );

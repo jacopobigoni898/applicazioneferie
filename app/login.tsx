@@ -10,7 +10,7 @@ import {
 import { useAuth } from "./_providers/AuthProvider";
 
 export default function LoginScreen() {
-  const { signIn, isLoading } = useAuth();
+  const { signIn, isLoading } = useAuth(); //uso il context di authprovider
   const [isSigningIn, setIsSigningIn] = useState(false);
 
   const handleSignIn = async () => {
@@ -22,7 +22,7 @@ export default function LoginScreen() {
     }
   };
 
-  const busy = isLoading || isSigningIn;
+  const busy = isLoading || isSigningIn; // se is loading o signi
 
   return (
     <SafeAreaView style={styles.container}>

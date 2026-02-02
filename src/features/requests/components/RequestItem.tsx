@@ -8,6 +8,7 @@ interface Props {
   formattedStart?: string;
   formattedEnd?: string;
   onDelete?: (id: number) => void;
+  onEdit?: (item: HolidayListDto) => void;
 }
 
 export default function RequestItem({
@@ -15,6 +16,7 @@ export default function RequestItem({
   formattedStart,
   formattedEnd,
   onDelete,
+  onEdit,
 }: Props) {
   const status = (item.stato_approvazione || "").toLowerCase();
   const badgeColor =
@@ -41,12 +43,21 @@ export default function RequestItem({
         <View style={[itemStyles.badge, { backgroundColor: badgeColor }]}>
           <Text style={itemStyles.badgeText}>{item.stato_approvazione}</Text>
         </View>
-        <TouchableOpacity
-          onPress={() => onDelete?.(item.id_richiesta)}
-          style={{ marginTop: 8 }}
-        >
-          <Text style={{ color: "#dc2626", fontWeight: "700" }}>Elimina</Text>
-        </TouchableOpacity>
+        <View style={{ marginTop: 8 }}>
+          <TouchableOpacity
+            onPress={() => onEdit?.(item)}
+            style={{ marginBottom: 6 }}
+          >
+            <Text style={{ color: "#2563eb", fontWeight: "700" }}>
+              Modifica
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => onDelete?.(item.id_richiesta)}>
+            <Text style={{ color: "#dc2626", fontWeight: "700" }}>
+              Elimina
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );

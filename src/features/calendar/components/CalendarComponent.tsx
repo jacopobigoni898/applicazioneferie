@@ -64,8 +64,18 @@ export default function CalendarComp() {
       const isPermit = (data as any).tipo_permesso !== undefined;
       const isHoliday =
         calendarType === CalendarMode.ABSENCE && !isPermit && !isSick;
+
       if (isHoliday) {
-        await submitHolidayByToken(data.data_inizio, data.data_fine);
+        const result = await submitHolidayByToken(
+          data.data_inizio,
+          data.data_fine,
+        );
+
+        const esitoOk = (result.Esito || "").toLowerCase().includes("riusc");
+        if (!esitoOk) {
+          Alert.alert("Errore", result.Motivazione || result.Esito || "Invio non riuscito");
+          return;
+        }
       } else {
         await submitRequest(data);
       }

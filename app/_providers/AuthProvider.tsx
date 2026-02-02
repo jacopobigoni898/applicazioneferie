@@ -13,16 +13,15 @@ import { useRouter, useSegments } from "expo-router";
 import { fetchMicrosoftLogin } from "../../src/api/authApi";
 import type { User } from "../../src/domain/entities/User";
 
-WebBrowser.maybeCompleteAuthSession(); //chiude la finestra del browser se l app gira sul web
-
-const CLIENT_ID = "37bdcadd-4948-4dff-9c60-a3d119fa4ab5"; //chin sei
+const CLIENT_ID = "37bdcadd-4948-4dff-9c60-a3d119fa4ab5"; //chi sei
 const TENANT_ID = "b3c5783b-8e0b-4639-85b6-e17c2dabed5b"; //quale organizzazione microsoft contattare
 const AUTH_SCOPES = [
-  "api://37bdcadd-4948-4dff-9c60-a3d119fa4ab5/user_impersonation",
+  "api://37bdcadd-4948-4dff-9c60-a3d119fa4ab5/user_impersonation", //indicano cosa puo fare gli utenti
 ];
 
+//definisce a forma del oggeto di autenticazione fornito da AuthProvider
 type AuthContextType = {
-  user: User | null;
+  user: User | null; //profilo del utente corrente o null in caso non sia connesso
   accessToken: string | null;
   isLoading: boolean; // carica token da storage
   isUserLoading: boolean; // carica profilo utente
@@ -31,6 +30,7 @@ type AuthContextType = {
   signOut: () => Promise<void>;
 };
 
+//creo il contesto cosi tutti possono recuperarlo
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({

@@ -13,6 +13,7 @@ const REQUESTS_ENDPOINT = "/requests"; // Allinea con l'endpoint reale del backe
 const HOLIDAY_ADD_ENDPOINT = "/RichiestaFerie/utente/addRichiestaFerie";
 const HOLIDAY_LIST_ENDPOINT = "/RichiestaFerie/utente/getAllAssenzeById";
 const HOLIDAY_DELETE_ENDPOINT = "/RichiestaFerie"; // TODO: allinea con l'endpoint di delete del backend
+const HOLIDAY_UPDATE_ENDPOINT = "/RichiestaFerie"; // verifica con backend
 
 // Union dei payload gestiti: straordinari, ferie, permessi e malattia.
 export type RequestPayload =
@@ -31,6 +32,13 @@ export type BuildRequestParams = {
   status?: RequestStatus;
 };
 
+export type PostResultDTO = {
+  Esito: string;
+  CreatedCount: number;
+  SkippedDates: string[]; // backend ritorna DateOnly come "YYYY-MM-DD"
+  Motivazione?: string | null;
+};
+
 // Forma base del DTO che inviamo: le date sono stringhe locali, non ISO con "Z".
 type BaseDto = {
   id_richiesta: number;
@@ -47,6 +55,14 @@ type RequestDto =
 
 // Risposta lista assenze (ferie/permessi) dedotte dal token
 export type HolidayListDto = BaseDto & { tipo_permesso?: string };
+
+// Payload richiesto dal backend per aggiornare una richiesta esistente
+export type UpdateHolidayInput = {
+  idRichiesta: number;
+  dataInizio: string; // formato atteso: yyyy-MM-dd
+  dataFine: string; // formato atteso: yyyy-MM-dd
+  statoApprovazione: string;
+};
 
 // DTO minimale per inserire ferie quando l'utente è dedotto dal token (campi PascalCase richiesti dal backend)
 type AddHolidayDto = {
@@ -164,14 +180,24 @@ export const submitRequest = async (payload: RequestPayload) => {
 };
 
 // Invia una richiesta ferie usando l'utente dedotto dal token (endpoint dedicato)
-export const submitHolidayByToken = async (startDate: Date, endDate: Date) => {
+export const submitHolidayByToken = async (
+  startDate: Date,
+  endDate: Date,
+): Promise<PostResultDTO> => {
   const dto: AddHolidayDto = {
     DataInizio: toLocalDateTimeStringWithSpace(startDate),
     DataFine: toLocalDateTimeStringWithSpace(endDate),
   };
 
-  const { data } = await http.post<AddHolidayDto>(HOLIDAY_ADD_ENDPOINT, dto);
-  return data;
+  const { data } = await http.post<any>(HOLIDAY_ADD_ENDPOINT, dto);
+  console.log("[requestsService] submitHolidayByToken response:", data);
+  // mappa la response camelCase del server al nostro PostResultDTO
+  return {
+    Esito: String(data?.esito ?? ""),
+    CreatedCount: Number(data?.createdCount ?? 0),
+    SkippedDates: Array.isArray(data?.skippedDates) ? data.skippedDates : [],
+    Motivazione: data?.motivazione ?? null,
+  };
 };
 
 // Restituisce le assenze dell'utente (token) dal backend dedicato ferie/assenze
@@ -195,4 +221,10 @@ export const fetchHolidaysByToken = async (dataFilter?: string) => {
 export const deleteHolidayById = async (id: number) => {
   await http.delete(`${HOLIDAY_DELETE_ENDPOINT}/${id}`);
   return true;
+};
+
+// Aggiorna una richiesta esistente (ferie/assenza). Il body atteso è fornito dal backend.
+export const updateHoliday = async (payload: UpdateHolidayInput) => {
+  const { data } = await http.put(HOLIDAY_UPDATE_ENDPOINT, payload);
+  return data;
 };

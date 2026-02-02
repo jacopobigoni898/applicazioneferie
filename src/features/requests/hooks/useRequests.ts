@@ -3,6 +3,8 @@ import {
   deleteHolidayById,
   fetchHolidaysByToken,
   HolidayListDto,
+  updateHoliday,
+  UpdateHolidayInput,
 } from "../services/requestsService";
 
 //funzione che si occupa della conversione delle stringhe in modo piu leggibile
@@ -89,6 +91,35 @@ export function useRequests(mode: "sent" | "received" = "sent") {
     }
   }, []);
 
+  const update = useCallback(async (payload: UpdateHolidayInput) => {
+    setError(null);
+
+    let previous: HolidayListDto[] = [];
+    setItems((curr) => {
+      previous = curr;
+      return curr.map((it) =>
+        it.id_richiesta === payload.idRichiesta
+          ? {
+              ...it,
+              data_inizio: payload.dataInizio,
+              data_fine: payload.dataFine,
+              stato_approvazione: payload.statoApprovazione as any,
+            }
+          : it,
+      );
+    });
+
+    try {
+      await updateHoliday(payload);
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.message || err?.message || "Errore aggiornamento";
+      setError(msg);
+      setItems(previous); // rollback
+      throw err;
+    }
+  }, []);
+
   return {
     items,
     formattedItems,
@@ -96,5 +127,6 @@ export function useRequests(mode: "sent" | "received" = "sent") {
     error,
     reload: loadData,
     remove,
+    update,
   } as const;
 }
