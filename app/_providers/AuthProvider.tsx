@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { fetchMicrosoftLogin } from "../../src/api/authApi";
 import { authStorage } from "../../src/core/auth/authStorage";
+import { setUnauthorizedHandler } from "../../src/api/httpClient";
 import { signInWithMicrosoft } from "../../src/core/auth/authService";
 import { useAuthGuard } from "../../src/core/auth/useAuthGuard";
 import type { User } from "../../src/domain/entities/User";
@@ -53,6 +54,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       try {
         const token = await authStorage.getToken();
         if (token) {
+          if (__DEV__) {
+            console.log("[AuthProvider] token caricato da storage:", token);
+          }
           setAccessToken(token);
         }
       } finally {
@@ -79,6 +83,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const token = await signInWithMicrosoft();
       if (!token) return; // login cancellato o fallito
 
+      if (__DEV__) {
+        console.log("[AuthProvider] token ricevuto da login:", token);
+      }
       await authStorage.setToken(token);
       setAccessToken(token);
     } catch (error) {
@@ -91,6 +98,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setAccessToken(null);
     setUser(null);
   };
+
+  // Registra handler globale: se un 401 arriva dagli interceptor, puliamo lo stato
+  useEffect(() => {
+    setUnauthorizedHandler(() => {
+      setAccessToken(null);
+      setUser(null);
+    });
+  }, []);
 
   const contextValue = useMemo(
     () => ({

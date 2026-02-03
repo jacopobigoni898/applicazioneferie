@@ -5,8 +5,8 @@ import { Dropdown } from "react-native-element-dropdown";
 import { calendarTheme } from "../../../core/theme/calendarTheme";
 import { calendarStyles } from "../../../core/style/commonStyles";
 import { useRangeSelection } from "../hooks/useRangeSelection";
-import { IOSPullDown } from "../../../core/ui/IOSPullDown";
-import { configureCalendarLocale } from "../../../core/utils/calendarConfig";
+import { IOSPullDown } from "./IOSPullDown";
+import { configureCalendarLocale } from "../utils/calendarConfig";
 import RequestModal from "../../../features/requests/components/RequestModal";
 import {
   CALENDAR_VIEW_OPTIONS,

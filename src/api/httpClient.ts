@@ -1,6 +1,6 @@
 import axios from "axios";
-import * as SecureStore from "expo-secure-store";
 import { API_BASE_URL } from "../config/env";
+import { authStorage } from "../core/auth/authStorage";
 
 // Istanza Axios condivisa per tutte le chiamate API
 export const http = axios.create({
@@ -8,9 +8,15 @@ export const http = axios.create({
   timeout: 15000,
 });
 
-// Interceptor: allega automaticamente il bearer token salvato in SecureStore
+// Handler esterno per notificare l'app in caso di 401 (es. logout forzato)
+let onUnauthorized: (() => void) | null = null;
+export const setUnauthorizedHandler = (handler: () => void) => {
+  onUnauthorized = handler;
+};
+
+// Interceptor richiesta: inserisce il bearer letto da SecureStore (via authStorage)
 http.interceptors.request.use(async (config) => {
-  const token = await SecureStore.getItemAsync("msal_access_token");
+  const token = await authStorage.getToken();
 
   if (token) {
     config.headers = {
@@ -21,3 +27,18 @@ http.interceptors.request.use(async (config) => {
 
   return config;
 });
+
+// Interceptor risposta: se arriva 401 il token è presumibilmente invalido → lo rimuoviamo
+http.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const status = error?.response?.status;
+    if (status === 401) {
+      await authStorage.deleteToken();
+      if (onUnauthorized) {
+        onUnauthorized();
+      }
+    }
+    return Promise.reject(error);
+  },
+);

@@ -2,19 +2,34 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   deleteHolidayById,
   fetchHolidaysByToken,
-  HolidayListDto,
   updateHoliday,
   UpdateHolidayInput,
 } from "../services/requestsService";
+import { HolidayRequest } from "../../../domain/entities/HolidayRequest";
 
 //funzione che si occupa della conversione delle stringhe in modo piu leggibile
-function formatDateString(raw?: string | null) {
+function formatDateString(raw?: string | Date | null) {
   if (!raw) return "";
-  const date = new Date(raw);
-  if (isNaN(date.getTime())) return raw; // fallback: return original
+  if (raw instanceof Date) {
+    const dateOpts: Intl.DateTimeFormatOptions = {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    };
+    const timeOpts: Intl.DateTimeFormatOptions = {
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    const datePart = new Intl.DateTimeFormat("it-IT", dateOpts).format(raw);
+    return `${datePart}`;
+  }
 
-  // detect if time component is present in the input
-  const hasTime = /T|:\d{2}/.test(raw);
+  const str = String(raw);
+  const date = new Date(str);
+  if (isNaN(date.getTime())) return str; // fallback: return original
+
+  // detect if time component is present in the input string
+  const hasTime = /T|:\d{2}/.test(str);
 
   const dateOpts: Intl.DateTimeFormatOptions = {
     day: "2-digit",
@@ -35,13 +50,13 @@ function formatDateString(raw?: string | null) {
   return datePart;
 }
 
-type FormattedHoliday = HolidayListDto & {
+type FormattedHoliday = HolidayRequest & {
   formatted_start: string;
   formatted_end: string;
 };
 
 export function useRequests(mode: "sent" | "received" = "sent") {
-  const [items, setItems] = useState<HolidayListDto[]>([]);
+  const [items, setItems] = useState<HolidayRequest[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -76,7 +91,7 @@ export function useRequests(mode: "sent" | "received" = "sent") {
   const remove = useCallback(async (id: number) => {
     setError(null);
     // optimistic update
-    let previous: HolidayListDto[] = [];
+    let previous: HolidayRequest[] = [];
     setItems((curr) => {
       previous = curr;
       return curr.filter((it) => it.id_richiesta !== id);
@@ -94,16 +109,16 @@ export function useRequests(mode: "sent" | "received" = "sent") {
   const update = useCallback(async (payload: UpdateHolidayInput) => {
     setError(null);
 
-    let previous: HolidayListDto[] = [];
+    let previous: HolidayRequest[] = [];
     setItems((curr) => {
       previous = curr;
       return curr.map((it) =>
-        it.id_richiesta === payload.idRichiesta
+        it.id_richiesta === payload.IdRichiesta
           ? {
               ...it,
-              data_inizio: payload.dataInizio,
-              data_fine: payload.dataFine,
-              stato_approvazione: payload.statoApprovazione as any,
+              data_inizio: new Date(payload.DataInizio),
+              data_fine: new Date(payload.DataFine),
+              stato_approvazione: payload.StatoApprovazione as any,
             }
           : it,
       );

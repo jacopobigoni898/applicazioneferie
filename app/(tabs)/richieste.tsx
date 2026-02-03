@@ -15,10 +15,8 @@ import { screenStyles, tabStyles } from "../../src/core/style/commonStyles";
 import { TabView, TabBar } from "react-native-tab-view";
 import { Colors } from "../../src/core/theme/theme";
 import EditRequestModal from "../../src/features/requests/components/EditRequestModal";
-import {
-  HolidayListDto,
-  UpdateHolidayInput,
-} from "../../src/features/requests/services/requestsService";
+import { UpdateHolidayInput } from "../../src/features/requests/services/requestsService";
+import { HolidayRequest } from "../../src/domain/entities/HolidayRequest";
 type TabKey = "sent" | "received";
 
 const tabs: { key: TabKey; label: string }[] = [
@@ -37,7 +35,7 @@ export default function Richieste() {
   const sent = useRequests("sent");
   const received = useRequests("received");
   const [editContext, setEditContext] = useState<{
-    item: HolidayListDto;
+    item: HolidayRequest;
     updateFn: (payload: UpdateHolidayInput) => Promise<void>;
   } | null>(null);
   const [savingEdit, setSavingEdit] = useState(false);
@@ -55,7 +53,7 @@ export default function Richieste() {
     errorMsg: string | null,
     reloadFn: () => void,
     removeFn: (id: number) => void,
-    editFn: (item: HolidayListDto) => void,
+    editFn: (item: HolidayRequest) => void,
   ) => (
     <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: 12 }}>
       {errorMsg ? (

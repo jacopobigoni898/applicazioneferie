@@ -14,10 +14,8 @@ import DateTimePicker, {
 import { Dropdown } from "react-native-element-dropdown";
 import { requestModalStyles } from "../../../core/style/commonStyles";
 import { Colors } from "../../../core/theme/theme";
-import {
-  HolidayListDto,
-  UpdateHolidayInput,
-} from "../services/requestsService";
+import { UpdateHolidayInput } from "../services/requestsService";
+import { HolidayRequest } from "../../../domain/entities/HolidayRequest";
 
 import { RequestStatus } from "../../../domain/entities/RequestStatus";
 
@@ -48,7 +46,7 @@ const formatDisplayDate = (date: Date) => date.toLocaleDateString("it-IT");
 
 export interface EditRequestModalProps {
   visible: boolean;
-  item: HolidayListDto | null;
+  item: HolidayRequest | null;
   onClose: () => void;
   onConfirm: (payload: UpdateHolidayInput) => void;
   saving?: boolean;
@@ -72,7 +70,9 @@ const EditRequestModal = ({
     if (visible && item) {
       setStartDate(parseDate(item.data_inizio as any));
       setEndDate(parseDate(item.data_fine as any));
-      setStatus((item.stato_approvazione as RequestStatus) ?? RequestStatus.PENDING);
+      setStatus(
+        (item.stato_approvazione as RequestStatus) ?? RequestStatus.PENDING,
+      );
       setShowStartPicker(false);
       setShowEndPicker(false);
     }
@@ -80,7 +80,8 @@ const EditRequestModal = ({
 
   const isSameDay = useMemo(() => {
     return (
-      startDate.toISOString().slice(0, 10) === endDate.toISOString().slice(0, 10)
+      startDate.toISOString().slice(0, 10) ===
+      endDate.toISOString().slice(0, 10)
     );
   }, [startDate, endDate]);
 
@@ -105,18 +106,21 @@ const EditRequestModal = ({
       return;
     }
     if (endDate < startDate) {
-      alert("La data di fine deve essere successiva o uguale a quella di inizio");
+      alert(
+        "La data di fine deve essere successiva o uguale a quella di inizio",
+      );
       return;
     }
 
     const payload: UpdateHolidayInput = {
-      idRichiesta: item.id_richiesta,
-      dataInizio: formatPayloadDate(startDate),
-      dataFine: formatPayloadDate(endDate),
-      statoApprovazione: status,
+      IdRichiesta: item.id_richiesta,
+      DataInizio: formatPayloadDate(startDate),
+      DataFine: formatPayloadDate(endDate),
+      StatoApprovazione: status,
     };
 
     onConfirm(payload);
+    console.log(payload);
   };
 
   const renderPicker = (type: "start" | "end") => {
@@ -208,7 +212,9 @@ const EditRequestModal = ({
                 />
 
                 <Text style={requestModalStyles.subHeader}>
-                  {isSameDay ? "Richiesta singolo giorno" : "Richiesta multi giorno"}
+                  {isSameDay
+                    ? "Richiesta singolo giorno"
+                    : "Richiesta multi giorno"}
                 </Text>
 
                 <View style={requestModalStyles.buttonRow}>

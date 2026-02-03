@@ -8,8 +8,8 @@ import {
   TextStyle,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Colors } from "../theme/theme";
-import { pullDownStyles } from "../style/commonStyles";
+import { Colors } from "../../../core/theme/theme";
+import { pullDownStyles } from "../../../core/style/commonStyles";
 
 export type PullDownOption = {
   label: string;
