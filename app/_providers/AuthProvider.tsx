@@ -6,17 +6,11 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import * as AuthSession from "expo-auth-session";
-import * as SecureStore from "expo-secure-store";
-import { useRouter, useSegments } from "expo-router";
 import { fetchMicrosoftLogin } from "../../src/api/authApi";
+import { authStorage } from "../../src/core/auth/authStorage";
+import { signInWithMicrosoft } from "../../src/core/auth/authService";
+import { useAuthGuard } from "../../src/core/auth/useAuthGuard";
 import type { User } from "../../src/domain/entities/User";
-
-const CLIENT_ID = "37bdcadd-4948-4dff-9c60-a3d119fa4ab5"; //chi sei
-const TENANT_ID = "b3c5783b-8e0b-4639-85b6-e17c2dabed5b"; //quale organizzazione microsoft contattare
-const AUTH_SCOPES = [
-  "api://37bdcadd-4948-4dff-9c60-a3d119fa4ab5/user_impersonation", //indicano cosa puo fare gli utenti
-];
 
 //definisce a forma del oggeto di autenticazione fornito da AuthProvider
 type AuthContextType = {
@@ -39,9 +33,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUserLoading, setIsUserLoading] = useState(false);
-  const router = useRouter(); // oggeto di navigazione di expo per fare redirect
-  const segments = useSegments(); // restituisce l array dei segmenti della route corrente
-
   const refreshUser = useCallback(async () => {
     if (!accessToken) return;
     setIsUserLoading(true);
@@ -60,7 +51,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const loadToken = async () => {
       try {
-        const token = await SecureStore.getItemAsync("msal_access_token");
+        const token = await authStorage.getToken();
         if (token) {
           setAccessToken(token);
         }
@@ -80,73 +71,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
     refreshUser();
   }, [accessToken, refreshUser]);
-  //quandoisn loadinf  finito controlla segment(la route) e controlla se hai il token altrimenti torni alla login
-  useEffect(() => {
-    if (isLoading) return;
 
-    const inTabs = segments[0] === "(tabs)";
-    const atLogin = segments[0] === "login";
-
-    if (!accessToken && inTabs) {
-      router.replace("/login");
-    }
-
-    if (accessToken && atLogin) {
-      router.replace("/(tabs)");
-    }
-  }, [accessToken, isLoading, router, segments]);
+  useAuthGuard(accessToken, isLoading, isUserLoading);
 
   const signIn = async () => {
     try {
-      const discovery = await AuthSession.fetchDiscoveryAsync(
-        `https://login.microsoftonline.com/${TENANT_ID}/v2.0`,
-      );
+      const token = await signInWithMicrosoft();
+      if (!token) return; // login cancellato o fallito
 
-      // Use Expo proxy so it works from Expo Go QR (no dev client needed)
-      const redirectUri = AuthSession.makeRedirectUri();
-      console.log(redirectUri);
-
-      const request = new AuthSession.AuthRequest({
-        clientId: CLIENT_ID,
-        scopes: AUTH_SCOPES,
-        redirectUri,
-        usePKCE: true,
-      });
-
-      // Proxy is enabled by default in Expo Go
-      const result = await request.promptAsync(discovery);
-
-      if (result.type === "success" && result.params.code) {
-        const tokenResponse = await AuthSession.exchangeCodeAsync(
-          {
-            clientId: CLIENT_ID,
-            code: result.params.code,
-            redirectUri,
-            extraParams: {
-              code_verifier: request.codeVerifier || "",
-            },
-          },
-          discovery,
-        );
-
-        if (tokenResponse.accessToken) {
-          console.log("Received access token", tokenResponse.accessToken);
-          await SecureStore.setItemAsync(
-            "msal_access_token",
-            tokenResponse.accessToken,
-          );
-          setAccessToken(tokenResponse.accessToken);
-        }
-      } else {
-        console.log("Login fallito o cancellato", result);
-      }
+      await authStorage.setToken(token);
+      setAccessToken(token);
     } catch (error) {
       console.error("Errore durante il login", error);
     }
   };
 
   const signOut = async () => {
-    await SecureStore.deleteItemAsync("msal_access_token");
+    await authStorage.deleteToken();
     setAccessToken(null);
     setUser(null);
   };

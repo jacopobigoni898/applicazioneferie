@@ -1,6 +1,6 @@
 import { http } from "./httpClient";
 import { AuthResponse } from "./types";
-import { mapAuthResponseToUser } from "../domain/mappers/userMapper";
+import { mapAuthResponseToUser } from "../domain/mappers/authMapper";
 import type { User } from "../domain/entities/User";
 
 // Chiamata di login Microsoft: ritorna l'entità User mappata dal DTO API
