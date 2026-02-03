@@ -1,7 +1,7 @@
 import { View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React from "react";
-import CalendarComp from "../../src/features/calendar/components/CalendarComponent";
+import CalendarComp from "../../src/features/calendar/components/CalendarComponent"; //import componente calendario
 import { screenStyles } from "../../src/core/style/commonStyles";
 
 export default function CalendarScreen() {

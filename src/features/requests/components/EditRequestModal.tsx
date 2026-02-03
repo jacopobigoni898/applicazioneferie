@@ -19,10 +19,12 @@ import {
   UpdateHolidayInput,
 } from "../services/requestsService";
 
+import { RequestStatus } from "../../../domain/entities/RequestStatus";
+
 const STATUS_OPTIONS = [
-  { label: "Approvato", value: "approvato" },
-  { label: "Non validato", value: "non validato" },
-  { label: "Annullato", value: "annullato" },
+  { label: "Approvato", value: RequestStatus.APPROVED },
+  { label: "Non validato", value: RequestStatus.PENDING },
+  { label: "Annullato", value: RequestStatus.REJECTED },
 ];
 
 const parseDate = (value?: string | null) => {
@@ -61,7 +63,7 @@ const EditRequestModal = ({
 }: EditRequestModalProps) => {
   const [startDate, setStartDate] = useState<Date>(new Date());
   const [endDate, setEndDate] = useState<Date>(new Date());
-  const [status, setStatus] = useState<string>("non validato");
+  const [status, setStatus] = useState<RequestStatus>(RequestStatus.PENDING);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [isFocus, setIsFocus] = useState(false);
@@ -70,7 +72,7 @@ const EditRequestModal = ({
     if (visible && item) {
       setStartDate(parseDate(item.data_inizio as any));
       setEndDate(parseDate(item.data_fine as any));
-      setStatus(String(item.stato_approvazione || "non validato"));
+      setStatus((item.stato_approvazione as RequestStatus) ?? RequestStatus.PENDING);
       setShowStartPicker(false);
       setShowEndPicker(false);
     }
@@ -200,7 +202,7 @@ const EditRequestModal = ({
                   onFocus={() => setIsFocus(true)}
                   onBlur={() => setIsFocus(false)}
                   onChange={(item) => {
-                    setStatus(item.value);
+                    setStatus(item.value as RequestStatus);
                     setIsFocus(false);
                   }}
                 />

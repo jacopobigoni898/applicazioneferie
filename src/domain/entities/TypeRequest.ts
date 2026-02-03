@@ -37,7 +37,7 @@ export enum CalendarMode {
 
 // Opzioni per il dropdown principale del Calendario
 export const CALENDAR_VIEW_OPTIONS = [
-  { label: "Richiesta Assenza", value: CalendarMode.ABSENCE },
+  { label: "Richiesta Permessi", value: CalendarMode.ABSENCE },
   { label: "Richiesta Straordinari", value: CalendarMode.OVERTIME },
   { label: "Panoramica Generale (Admin)", value: CalendarMode.ADMIN },
 ];

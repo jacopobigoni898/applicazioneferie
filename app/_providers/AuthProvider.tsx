@@ -6,7 +6,6 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import * as WebBrowser from "expo-web-browser";
 import * as AuthSession from "expo-auth-session";
 import * as SecureStore from "expo-secure-store";
 import { useRouter, useSegments } from "expo-router";
@@ -21,7 +20,7 @@ const AUTH_SCOPES = [
 
 //definisce a forma del oggeto di autenticazione fornito da AuthProvider
 type AuthContextType = {
-  user: User | null; //profilo del utente corrente o null in caso non sia connesso
+  user: User | null; // id profilo del utente corrente o null in caso non sia connesso
   accessToken: string | null;
   isLoading: boolean; // carica token da storage
   isUserLoading: boolean; // carica profilo utente

@@ -25,12 +25,12 @@ configureCalendarLocale();
 export default function CalendarComp() {
   //prendo l id del utente
   const { user } = useAuth();
-  const parsedUserId = user ? Number(user.id) : null;
+  const parsedUserId = user ? Number(user.id) : null; // verifico che non sia null
   const userId =
     parsedUserId != null && !Number.isNaN(parsedUserId) ? parsedUserId : null;
 
   const { startDate, endDate, markedDates, onDayPress, resetRange } =
-    useRangeSelection();
+    useRangeSelection(); // hooks per capire come e quali giorni colorare
   const [calendarType, setCalendarType] = useState<string>(
     CalendarMode.ABSENCE,
   );
@@ -73,7 +73,10 @@ export default function CalendarComp() {
 
         const esitoOk = (result.Esito || "").toLowerCase().includes("riusc");
         if (!esitoOk) {
-          Alert.alert("Errore", result.Motivazione || result.Esito || "Invio non riuscito");
+          Alert.alert(
+            "Errore",
+            result.Motivazione || result.Esito || "Invio non riuscito",
+          );
           return;
         }
       } else {
@@ -134,7 +137,7 @@ export default function CalendarComp() {
 
       <View style={calendarStyles.calendarWrapper}>
         <Calendar
-          firstDay={1}
+          firstDay={1} // fa iniziare la settimana da lunedi
           markingType="period"
           markedDates={markedDates}
           onDayPress={onDayPress}
@@ -154,7 +157,7 @@ export default function CalendarComp() {
       </TouchableOpacity>
 
       <RequestModal
-        visible={modalVisible}
+        visible={modalVisible} // booleano per fare aprire la modale
         onClose={() => setModalVisible(false)}
         startDate={startDate ? new Date(startDate) : null}
         endDate={endDate ? new Date(endDate) : null}
