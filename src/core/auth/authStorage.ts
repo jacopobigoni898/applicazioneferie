@@ -1,13 +1,16 @@
 import * as SecureStore from "expo-secure-store";
 
+// Modello della sessione MSAL che persistiamo su SecureStore
 export type AuthSessionData = {
   accessToken: string;
   refreshToken?: string | null;
   expiresAt?: number; // epoch ms
 };
 
+// Chiave isolata per evitare collisioni con versioni precedenti
 const ACCESS_TOKEN_KEY = "msal_access_token_v2";
 
+// Parsing difensivo per gestire record corrotti in SecureStore
 const safeParse = (raw: string | null): AuthSessionData | null => {
   if (!raw) return null;
   try {

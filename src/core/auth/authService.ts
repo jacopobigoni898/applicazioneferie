@@ -4,12 +4,14 @@ import type { AuthSessionData } from "./authStorage";
 
 type TokenResponse = AuthSession.TokenResponse;
 
+// Converte expiresIn (sec) in epoch ms con piccolo buffer per evitare richieste a token quasi scaduto
 const calcExpiresAt = (expiresIn?: number): number => {
   const safeSeconds = typeof expiresIn === "number" ? expiresIn : 3600;
   // buffer 60s per evitare richieste con token quasi scaduto
   return Date.now() + Math.max(safeSeconds - 60, 30) * 1000;
 };
 
+// Normalizza la TokenResponse di MSAL nel nostro AuthSessionData
 const mapTokenResponse = (tr: TokenResponse): AuthSessionData | null => {
   if (!tr.accessToken) return null;
   return {

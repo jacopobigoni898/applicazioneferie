@@ -8,10 +8,7 @@ import React, {
 } from "react";
 import { Alert } from "react-native";
 import { fetchMicrosoftLogin } from "../../src/api/authApi";
-import {
-  authStorage,
-  AuthSessionData,
-} from "../../src/core/auth/authStorage";
+import { authStorage, AuthSessionData } from "../../src/core/auth/authStorage";
 import { setUnauthorizedHandler } from "../../src/api/httpClient";
 import {
   refreshMicrosoftToken,
@@ -43,14 +40,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isUserLoading, setIsUserLoading] = useState(false);
   const accessToken = session?.accessToken ?? null;
 
+  // Verifica locale con margine se il token e' prossimo alla scadenza
   const isSessionExpired = useCallback((s: AuthSessionData | null) => {
     if (!s?.expiresAt) return false;
-    // margine 30s per evitare richieste con token quasi scaduto
     return Date.now() >= s.expiresAt - 30_000;
   }, []);
 
+  // Se scaduto prova refresh silenzioso, altrimenti invalida la sessione
   const ensureFreshSession = useCallback(
-    async (current: AuthSessionData | null): Promise<AuthSessionData | null> => {
+    async (
+      current: AuthSessionData | null,
+    ): Promise<AuthSessionData | null> => {
       if (!current) return null;
       if (!isSessionExpired(current)) return current;
 
@@ -112,6 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     refreshUser();
   }, [accessToken, refreshUser]);
 
+  //serve a verificare che l utente possa navigare nel applicazione,se ha fatto il login/accestoken presente
   useAuthGuard(accessToken, isLoading, isUserLoading);
 
   const signIn = async () => {
@@ -144,6 +145,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     const refreshIn = session.expiresAt - now - 30_000; // 30s di margine
     const delay = Math.max(refreshIn, 0);
 
+    // Timer per tentare il refresh poco prima della scadenza
     const timer = setTimeout(async () => {
       const fresh = await ensureFreshSession(session);
       if (fresh) {

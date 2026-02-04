@@ -65,6 +65,9 @@ const EditRequestModal = ({
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [isFocus, setIsFocus] = useState(false);
+  //stati temporanei in modo tale che finche l utente non conferma non vengono confermate le date
+  const [tempStartDate, setTempStartDate] = useState<Date | null>(null);
+  const [tempEndDate, setTempEndDate] = useState<Date | null>(null);
 
   useEffect(() => {
     if (visible && item) {
@@ -75,6 +78,8 @@ const EditRequestModal = ({
       );
       setShowStartPicker(false);
       setShowEndPicker(false);
+      setTempStartDate(null);
+      setTempEndDate(null);
     }
   }, [visible, item]);
 
@@ -91,11 +96,19 @@ const EditRequestModal = ({
     date?: Date,
   ) => {
     if (type === "start") {
-      if (date) setStartDate(date);
-      if (Platform.OS !== "ios") setShowStartPicker(false);
+      if (Platform.OS === "ios") {
+        if (date) setTempStartDate(date);
+      } else {
+        if (date) setStartDate(date);
+        setShowStartPicker(false);
+      }
     } else {
-      if (date) setEndDate(date);
-      if (Platform.OS !== "ios") setShowEndPicker(false);
+      if (Platform.OS === "ios") {
+        if (date) setTempEndDate(date);
+      } else {
+        if (date) setEndDate(date);
+        setShowEndPicker(false);
+      }
     }
   };
 
@@ -126,14 +139,83 @@ const EditRequestModal = ({
   const renderPicker = (type: "start" | "end") => {
     const visibleFlag = type === "start" ? showStartPicker : showEndPicker;
     const value = type === "start" ? startDate : endDate;
-
     if (!visibleFlag) return null;
+
+    if (Platform.OS === "ios") {
+      const tempValue =
+        type === "start" ? (tempStartDate ?? value) : (tempEndDate ?? value);
+      return (
+        <Modal transparent animationType="fade" visible={visibleFlag}>
+          <TouchableWithoutFeedback
+            onPress={() => {
+              // tapping outside cancels picker without applying changes
+              if (type === "start") {
+                setShowStartPicker(false);
+                setTempStartDate(null);
+              } else {
+                setShowEndPicker(false);
+                setTempEndDate(null);
+              }
+            }}
+          >
+            <View style={requestModalStyles.pickerOverlay} />
+          </TouchableWithoutFeedback>
+
+          <View style={requestModalStyles.pickerSheet}>
+            <View style={requestModalStyles.pickerHeader}>
+              <Text style={requestModalStyles.pickerTitle}>Seleziona data</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  if (type === "start") {
+                    setShowStartPicker(false);
+                    setTempStartDate(null);
+                  } else {
+                    setShowEndPicker(false);
+                    setTempEndDate(null);
+                  }
+                }}
+              >
+                <Text style={requestModalStyles.pickerClose}>Chiudi</Text>
+              </TouchableOpacity>
+            </View>
+
+            <DateTimePicker
+              value={tempValue}
+              mode="date"
+              display="spinner"
+              onChange={(event, date) =>
+                handleDateChange(type, event, date || tempValue)
+              }
+              style={requestModalStyles.pickerIOS}
+              textColor={Colors.textPrimary}
+            />
+
+            <TouchableOpacity
+              style={requestModalStyles.pickerConfirm}
+              onPress={() => {
+                if (type === "start") {
+                  if (tempStartDate) setStartDate(tempStartDate);
+                  setShowStartPicker(false);
+                  setTempStartDate(null);
+                } else {
+                  if (tempEndDate) setEndDate(tempEndDate);
+                  setShowEndPicker(false);
+                  setTempEndDate(null);
+                }
+              }}
+            >
+              <Text style={requestModalStyles.pickerConfirmText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
+      );
+    }
 
     return (
       <DateTimePicker
         value={value}
         mode="date"
-        display={Platform.OS === "ios" ? "spinner" : "default"}
+        display="default"
         onChange={(event, date) => handleDateChange(type, event, date || value)}
       />
     );
@@ -170,7 +252,10 @@ const EditRequestModal = ({
                     <Text style={requestModalStyles.dateLabel}>Dal:</Text>
                     <TouchableOpacity
                       style={requestModalStyles.timeInput}
-                      onPress={() => setShowStartPicker(true)}
+                      onPress={() => {
+                        setTempStartDate(startDate);
+                        setShowStartPicker(true);
+                      }}
                     >
                       <Text style={requestModalStyles.dateValue}>
                         {formatDisplayDate(startDate)}
@@ -181,7 +266,10 @@ const EditRequestModal = ({
                     <Text style={requestModalStyles.dateLabel}>Al:</Text>
                     <TouchableOpacity
                       style={requestModalStyles.timeInput}
-                      onPress={() => setShowEndPicker(true)}
+                      onPress={() => {
+                        setTempEndDate(endDate);
+                        setShowEndPicker(true);
+                      }}
                     >
                       <Text style={requestModalStyles.dateValue}>
                         {formatDisplayDate(endDate)}

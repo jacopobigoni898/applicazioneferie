@@ -28,13 +28,13 @@ http.interceptors.request.use(async (config) => {
   return config;
 });
 
-// Interceptor risposta: se arriva 401 il token è presumibilmente invalido → lo rimuoviamo
+// Interceptor risposta: se arriva 401 il token è presumibilmente invalido → puliamo storage e notifichiamo
 http.interceptors.response.use(
   (response) => response,
   async (error) => {
     const status = error?.response?.status;
     if (status === 401) {
-      await authStorage.deleteToken();
+      await authStorage.deleteSession();
       if (onUnauthorized) {
         onUnauthorized();
       }
