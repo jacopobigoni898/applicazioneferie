@@ -16,7 +16,7 @@ export const setUnauthorizedHandler = (handler: () => void) => {
 
 // Interceptor richiesta: inserisce il bearer letto da SecureStore (via authStorage)
 http.interceptors.request.use(async (config) => {
-  const token = await authStorage.getToken();
+  const token = await authStorage.getAccessToken();
 
   if (token) {
     config.headers = {

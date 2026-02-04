@@ -6,10 +6,17 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { Alert } from "react-native";
 import { fetchMicrosoftLogin } from "../../src/api/authApi";
-import { authStorage } from "../../src/core/auth/authStorage";
+import {
+  authStorage,
+  AuthSessionData,
+} from "../../src/core/auth/authStorage";
 import { setUnauthorizedHandler } from "../../src/api/httpClient";
-import { signInWithMicrosoft } from "../../src/core/auth/authService";
+import {
+  refreshMicrosoftToken,
+  signInWithMicrosoft,
+} from "../../src/core/auth/authService";
 import { useAuthGuard } from "../../src/core/auth/useAuthGuard";
 import type { User } from "../../src/domain/entities/User";
 
@@ -30,10 +37,33 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [session, setSession] = useState<AuthSessionData | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUserLoading, setIsUserLoading] = useState(false);
+  const accessToken = session?.accessToken ?? null;
+
+  const isSessionExpired = useCallback((s: AuthSessionData | null) => {
+    if (!s?.expiresAt) return false;
+    // margine 30s per evitare richieste con token quasi scaduto
+    return Date.now() >= s.expiresAt - 30_000;
+  }, []);
+
+  const ensureFreshSession = useCallback(
+    async (current: AuthSessionData | null): Promise<AuthSessionData | null> => {
+      if (!current) return null;
+      if (!isSessionExpired(current)) return current;
+
+      if (!current.refreshToken) return null;
+
+      const refreshed = await refreshMicrosoftToken(current.refreshToken);
+      if (!refreshed) return null;
+
+      await authStorage.setSession(refreshed);
+      return refreshed;
+    },
+    [isSessionExpired],
+  );
   const refreshUser = useCallback(async () => {
     if (!accessToken) return;
     setIsUserLoading(true);
@@ -52,12 +82,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const loadToken = async () => {
       try {
-        const token = await authStorage.getToken();
-        if (token) {
-          if (__DEV__) {
-            console.log("[AuthProvider] token caricato da storage:", token);
+        const stored = await authStorage.getSession();
+        if (stored) {
+          const fresh = await ensureFreshSession(stored);
+
+          if (fresh) {
+            if (__DEV__) {
+              console.log("[AuthProvider] sessione caricata da storage", fresh);
+            }
+            setSession(fresh);
+          } else {
+            await authStorage.deleteSession();
           }
-          setAccessToken(token);
         }
       } finally {
         setIsLoading(false);
@@ -65,7 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     loadToken();
-  }, []);
+  }, [ensureFreshSession]);
 
   // Quando ho un token, provo a recuperare il profilo utente
   useEffect(() => {
@@ -80,30 +116,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const signIn = async () => {
     try {
-      const token = await signInWithMicrosoft();
-      if (!token) return; // login cancellato o fallito
+      const newSession = await signInWithMicrosoft();
+      if (!newSession) return; // login cancellato o fallito
 
       if (__DEV__) {
-        console.log("[AuthProvider] token ricevuto da login:", token);
+        console.log("[AuthProvider] token ricevuto da login:", newSession);
       }
-      await authStorage.setToken(token);
-      setAccessToken(token);
+      await authStorage.setSession(newSession);
+      setSession(newSession);
     } catch (error) {
       console.error("Errore durante il login", error);
     }
   };
 
-  const signOut = async () => {
-    await authStorage.deleteToken();
-    setAccessToken(null);
+  const signOut = useCallback(async () => {
+    await authStorage.deleteSession();
+    setSession(null);
     setUser(null);
-  };
+  }, []);
+
+  // refresh silenzioso prima della scadenza del token, altrimenti logout
+  useEffect(() => {
+    if (!session) return;
+    if (!session.expiresAt) return;
+
+    const now = Date.now();
+    const refreshIn = session.expiresAt - now - 30_000; // 30s di margine
+    const delay = Math.max(refreshIn, 0);
+
+    const timer = setTimeout(async () => {
+      const fresh = await ensureFreshSession(session);
+      if (fresh) {
+        setSession(fresh);
+        await authStorage.setSession(fresh);
+      } else {
+        await signOut();
+        Alert.alert("Sessione scaduta", "Accedi nuovamente per continuare.");
+      }
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, [session, ensureFreshSession, signOut]);
 
   // Registra handler globale: se un 401 arriva dagli interceptor, puliamo lo stato
   useEffect(() => {
     setUnauthorizedHandler(() => {
-      setAccessToken(null);
+      Alert.alert(
+        "Sessione scaduta",
+        "Per favore accedi di nuovo per continuare.",
+      );
+      setSession(null);
       setUser(null);
+      authStorage.deleteSession();
     });
   }, []);
 
