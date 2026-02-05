@@ -20,7 +20,9 @@ export const mapHolidayResponse = (raw: any): HolidayRequest => {
     stato_approvazione:
       raw?.StatoApprovazione ??
       raw?.stato_approvazione ??
+      raw?.statoApprovazione ??
       RequestStatus.PENDING,
-    tipo_permesso: raw?.tipo_permesso ?? raw?.TipoPermesso,
+    tipo_permesso:
+      raw?.tipo ?? raw?.Tipo ?? raw?.tipo_permesso ?? raw?.TipoPermesso,
   };
 };

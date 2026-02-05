@@ -4,8 +4,11 @@
 export enum RequestType {
   FERIE = "ferie",
   MALATTIA = "malattia",
-  ROL = "rol",
-  CONGEDO = "congedo",
+  STUDIO = "Studio",
+  MATRIMONIALE = "matrimoniale",
+  L104 = "l104",
+  VISITA_MEDICA = "visita medica",
+  GENITORIALE = "genitoriale",
   STRAORDINARIO_DIURNO = "diurno",
   STRAORDINARIO_NOTTURNO = "notturno",
   STRAORDINARIO_FESTIVO = "festivo",
@@ -15,8 +18,11 @@ export enum RequestType {
 export const ABSENCE_OPTIONS = [
   { label: "Ferie ", value: RequestType.FERIE },
   { label: "Malattia", value: RequestType.MALATTIA },
-  { label: "Permesso ROL", value: RequestType.ROL },
-  { label: "Congedo Matrimoniale", value: RequestType.CONGEDO },
+  { label: "Studio", value: RequestType.STUDIO },
+  { label: " Matrimoniale", value: RequestType.MATRIMONIALE },
+  { label: " Visita medica", value: RequestType.VISITA_MEDICA },
+  { label: " Genitoriale", value: RequestType.GENITORIALE },
+  { label: " L104", value: RequestType.L104 },
 ];
 
 export const OVERTIME_OPTIONS = [

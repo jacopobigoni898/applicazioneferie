@@ -100,7 +100,7 @@ export const useRequestForm = (params: UseRequestFormParams) => {
   // Stato comune (riusato da create/edit)
   const [status, setStatus] = useState<RequestStatus>(
     params.mode === "edit"
-      ? params.initialStatus ?? RequestStatus.PENDING
+      ? (params.initialStatus ?? RequestStatus.PENDING)
       : RequestStatus.PENDING,
   );
   const [subType, setSubType] = useState<string | null>(null);
@@ -182,7 +182,7 @@ export const useRequestForm = (params: UseRequestFormParams) => {
     if (visible) {
       setStatus(
         params.mode === "edit"
-          ? params.initialStatus ?? RequestStatus.PENDING
+          ? (params.initialStatus ?? RequestStatus.PENDING)
           : RequestStatus.PENDING,
       );
       setSubType(null);
@@ -290,7 +290,9 @@ export const useRequestForm = (params: UseRequestFormParams) => {
       return;
     }
     if (endDate < startDate) {
-      alert("La data di fine deve essere successiva o uguale a quella di inizio");
+      alert(
+        "La data di fine deve essere successiva o uguale a quella di inizio",
+      );
       return;
     }
 

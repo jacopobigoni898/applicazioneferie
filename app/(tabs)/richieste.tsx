@@ -32,8 +32,9 @@ export default function Richieste() {
     { key: "received", title: "Richieste ricevute" },
   ]);
   //hooks
-  const sent = useRequests("sent");
-  const received = useRequests("received");
+  const sent = useRequests("sent"); // hook che si occupa di caricare la render list
+  const received = useRequests("received"); // hook che si occupa di caricare la render list
+  //stato per fare l update
   const [editContext, setEditContext] = useState<{
     item: HolidayRequest;
     updateFn: (payload: UpdateHolidayInput) => Promise<void>;

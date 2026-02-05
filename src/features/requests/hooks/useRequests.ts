@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   deleteHolidayById,
   fetchHolidaysByToken,
-  updateHoliday,
+  updateRequest,
   UpdateHolidayInput,
 } from "../services/requestsService";
 import { HolidayRequest } from "../../../domain/entities/HolidayRequest";
@@ -12,8 +12,8 @@ function formatDateString(raw?: string | Date | null) {
   if (!raw) return "";
   if (raw instanceof Date) {
     const dateOpts: Intl.DateTimeFormatOptions = {
-      day: "2-digit",
-      month: "2-digit",
+      day: "2-digit", //05
+      month: "2-digit", //03
       year: "numeric",
     };
     const timeOpts: Intl.DateTimeFormatOptions = {
@@ -60,6 +60,7 @@ export function useRequests(mode: "sent" | "received" = "sent") {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  //prima funzione che si avvia
   const loadData = useCallback(async () => {
     setLoading(true); // per fare capire che stiamo fetchandoi dati
     setError(null); // nessun errore
@@ -90,14 +91,19 @@ export function useRequests(mode: "sent" | "received" = "sent") {
 
   const remove = useCallback(async (id: number) => {
     setError(null);
-    // optimistic update
+    // optimistic update con tipo per la delete
     let previous: HolidayRequest[] = [];
+    let tipoForDelete: string | undefined;
+
     setItems((curr) => {
       previous = curr;
+      const found = curr.find((it) => it.id_richiesta === id);
+      tipoForDelete = found?.tipo_permesso;
       return curr.filter((it) => it.id_richiesta !== id);
     });
+
     try {
-      await deleteHolidayById(id);
+      await deleteHolidayById(id, tipoForDelete);
     } catch (err: any) {
       const msg =
         err?.response?.data?.message || err?.message || "Errore eliminazione";
@@ -110,22 +116,26 @@ export function useRequests(mode: "sent" | "received" = "sent") {
     setError(null);
 
     let previous: HolidayRequest[] = [];
+    let tipoForUpdate: string | undefined;
+
     setItems((curr) => {
       previous = curr;
-      return curr.map((it) =>
-        it.id_richiesta === payload.IdRichiesta
-          ? {
-              ...it,
-              data_inizio: new Date(payload.DataInizio),
-              data_fine: new Date(payload.DataFine),
-              stato_approvazione: payload.StatoApprovazione as any,
-            }
-          : it,
-      );
+      return curr.map((it) => {
+        if (it.id_richiesta === payload.IdRichiesta) {
+          tipoForUpdate = it.tipo_permesso;
+          return {
+            ...it,
+            data_inizio: new Date(payload.DataInizio),
+            data_fine: new Date(payload.DataFine),
+            stato_approvazione: payload.StatoApprovazione as any,
+          };
+        }
+        return it;
+      });
     });
 
     try {
-      await updateHoliday(payload);
+      await updateRequest(payload, tipoForUpdate);
     } catch (err: any) {
       const msg =
         err?.response?.data?.message || err?.message || "Errore aggiornamento";

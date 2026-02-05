@@ -16,6 +16,7 @@ import {
   RequestPayload,
   submitHolidayByToken,
   submitRequest,
+  addRichiestaPermessi,
 } from "../../../features/requests/services/requestsService";
 import { useAuth } from "../../../../app/_providers/AuthProvider";
 
@@ -62,16 +63,29 @@ export default function CalendarComp() {
     try {
       const isSick = (data as any).certificato_medico !== undefined;
       const isPermit = (data as any).tipo_permesso !== undefined;
-      console.log(data); //test per vedere se malattia
+      //console.log(data)
       const isHoliday =
         calendarType === CalendarMode.ABSENCE && !isPermit && !isSick;
 
-      if (isHoliday) {
+      if (isPermit) {
+        const result = await addRichiestaPermessi(
+          data.data_inizio,
+          data.data_fine,
+          (data as any).tipo_permesso,
+        );
+        const esitoOk = (result.Esito || "").toLowerCase().includes("riusc");
+        if (!esitoOk) {
+          Alert.alert(
+            "Errore",
+            result.Motivazione || result.Esito || "Invio non riuscito",
+          );
+          return;
+        }
+      } else if (isHoliday) {
         const result = await submitHolidayByToken(
           data.data_inizio,
           data.data_fine,
         );
-        //controllo se la richiesta è andata a buon fine
         const esitoOk = (result.Esito || "").toLowerCase().includes("riusc");
         if (!esitoOk) {
           Alert.alert(
@@ -81,6 +95,7 @@ export default function CalendarComp() {
           return;
         }
       } else {
+        // malattia, straordinari o altri tipi gestiti dal generic endpoint
         await submitRequest(data);
       }
 
