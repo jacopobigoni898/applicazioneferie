@@ -190,7 +190,18 @@ const mapPayloadToDto = (payload: RequestPayload): RequestDto => {
 };
 
 export const submitRequest = async (payload: RequestPayload) => {
-  // Serializza e invia al backend; ritorna la risposta tipizzata.
+  // Se si tratta di un permesso, inviamo un body con la shape richiesta
+  if (isPermitsRequest(payload)) {
+    const dto = {
+      tipoPermesso: payload.tipo_permesso,
+      dataInizio: toLocalIsoString(payload.data_inizio).slice(0, 10),
+      dataFine: toLocalIsoString(payload.data_fine).slice(0, 10),
+    };
+    const { data } = await http.post<any>(REQUESTS_ENDPOINT, dto);
+    return data;
+  }
+
+  // Serializza e invia al backend per gli altri tipi; ritorna la risposta tipizzata.
   const dto = mapPayloadToDto(payload);
   const { data } = await http.post<RequestDto>(REQUESTS_ENDPOINT, dto);
   return data;

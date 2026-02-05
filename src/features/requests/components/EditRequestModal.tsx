@@ -14,35 +14,17 @@ import DateTimePicker, {
 import { Dropdown } from "react-native-element-dropdown";
 import { requestModalStyles } from "../../../core/style/commonStyles";
 import { Colors } from "../../../core/theme/theme";
-import { UpdateHolidayInput } from "../services/requestsService";
 import { HolidayRequest } from "../../../domain/entities/HolidayRequest";
+import { UpdateHolidayInput } from "../services/requestsService";
 
 import { RequestStatus } from "../../../domain/entities/RequestStatus";
+import { useRequestForm } from "../hooks/useRequestForm";
 
 const STATUS_OPTIONS = [
   { label: "Approvato", value: RequestStatus.APPROVED },
   { label: "Non validato", value: RequestStatus.PENDING },
   { label: "Annullato", value: RequestStatus.REJECTED },
 ];
-
-const parseDate = (value?: string | null) => {
-  if (!value) return new Date();
-  const parsed = new Date(value);
-  if (!Number.isNaN(parsed.getTime())) return parsed;
-
-  const parts = value.split("-");
-  if (parts.length === 3) {
-    const y = Number(parts[0]);
-    const m = Number(parts[1]) - 1;
-    const d = Number(parts[2]);
-    const safeDate = new Date(Date.UTC(y, m, d, 9, 0, 0, 0));
-    if (!Number.isNaN(safeDate.getTime())) return safeDate;
-  }
-  return new Date();
-};
-
-const formatPayloadDate = (date: Date) => date.toISOString().slice(0, 10);
-const formatDisplayDate = (date: Date) => date.toLocaleDateString("it-IT");
 
 export interface EditRequestModalProps {
   visible: boolean;
@@ -52,6 +34,7 @@ export interface EditRequestModalProps {
   saving?: boolean;
 }
 
+// Modale di modifica richiesta: riusa useRequestForm (mode edit) e gestisce picker data iOS con conferma
 const EditRequestModal = ({
   visible,
   item,
@@ -59,23 +42,34 @@ const EditRequestModal = ({
   onConfirm,
   saving = false,
 }: EditRequestModalProps) => {
-  const [startDate, setStartDate] = useState<Date>(new Date());
-  const [endDate, setEndDate] = useState<Date>(new Date());
-  const [status, setStatus] = useState<RequestStatus>(RequestStatus.PENDING);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [isFocus, setIsFocus] = useState(false);
+
+  const {
+    startDate,
+    endDate,
+    setStartDate,
+    setEndDate,
+    status,
+    setStatus,
+    formatDate,
+    handleSubmitEdit,
+  } = useRequestForm({
+    mode: "edit",
+    visible,
+    startDate: item?.data_inizio ?? null,
+    endDate: item?.data_fine ?? null,
+    requestId: item?.id_richiesta ?? 0,
+    initialStatus: item?.stato_approvazione as RequestStatus,
+    onSubmit: onConfirm,
+  });
   //stati temporanei in modo tale che finche l utente non conferma non vengono confermate le date
   const [tempStartDate, setTempStartDate] = useState<Date | null>(null);
   const [tempEndDate, setTempEndDate] = useState<Date | null>(null);
 
   useEffect(() => {
-    if (visible && item) {
-      setStartDate(parseDate(item.data_inizio as any));
-      setEndDate(parseDate(item.data_fine as any));
-      setStatus(
-        (item.stato_approvazione as RequestStatus) ?? RequestStatus.PENDING,
-      );
+    if (visible) {
       setShowStartPicker(false);
       setShowEndPicker(false);
       setTempStartDate(null);
@@ -84,6 +78,7 @@ const EditRequestModal = ({
   }, [visible, item]);
 
   const isSameDay = useMemo(() => {
+    if (!startDate || !endDate) return true;
     return (
       startDate.toISOString().slice(0, 10) ===
       endDate.toISOString().slice(0, 10)
@@ -112,33 +107,10 @@ const EditRequestModal = ({
     }
   };
 
-  const handleSave = () => {
-    if (!item) return;
-    if (!status) {
-      alert("Seleziona uno stato");
-      return;
-    }
-    if (endDate < startDate) {
-      alert(
-        "La data di fine deve essere successiva o uguale a quella di inizio",
-      );
-      return;
-    }
-
-    const payload: UpdateHolidayInput = {
-      IdRichiesta: item.id_richiesta,
-      DataInizio: formatPayloadDate(startDate),
-      DataFine: formatPayloadDate(endDate),
-      StatoApprovazione: status,
-    };
-
-    onConfirm(payload);
-    console.log(payload);
-  };
-
   const renderPicker = (type: "start" | "end") => {
     const visibleFlag = type === "start" ? showStartPicker : showEndPicker;
-    const value = type === "start" ? startDate : endDate;
+    const value =
+      type === "start" ? (startDate ?? new Date()) : (endDate ?? new Date());
     if (!visibleFlag) return null;
 
     if (Platform.OS === "ios") {
@@ -253,12 +225,12 @@ const EditRequestModal = ({
                     <TouchableOpacity
                       style={requestModalStyles.timeInput}
                       onPress={() => {
-                        setTempStartDate(startDate);
+                        setTempStartDate(startDate ?? new Date());
                         setShowStartPicker(true);
                       }}
                     >
                       <Text style={requestModalStyles.dateValue}>
-                        {formatDisplayDate(startDate)}
+                        {formatDate(startDate)}
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -267,12 +239,12 @@ const EditRequestModal = ({
                     <TouchableOpacity
                       style={requestModalStyles.timeInput}
                       onPress={() => {
-                        setTempEndDate(endDate);
+                        setTempEndDate(endDate ?? new Date());
                         setShowEndPicker(true);
                       }}
                     >
                       <Text style={requestModalStyles.dateValue}>
-                        {formatDisplayDate(endDate)}
+                        {formatDate(endDate)}
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -320,7 +292,7 @@ const EditRequestModal = ({
                       requestModalStyles.confirmButton,
                       saving && requestModalStyles.disabledButton,
                     ]}
-                    onPress={handleSave}
+                    onPress={handleSubmitEdit}
                     disabled={saving}
                   >
                     <Text style={requestModalStyles.confirmButtonText}>

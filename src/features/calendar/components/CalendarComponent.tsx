@@ -35,7 +35,7 @@ export default function CalendarComp() {
     CalendarMode.ABSENCE,
   );
   const [isFocus, setIsFocus] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false); //use state per la modale
 
   const isIOS = Platform.OS === "ios";
   const selectedOption = CALENDAR_VIEW_OPTIONS.find(
@@ -47,21 +47,22 @@ export default function CalendarComp() {
     setCalendarType(value);
     setIsFocus(false);
   }, []);
-
+  //button 'procedi con la richiesta' e attivo quindi la modale
   const handleConfirm = () => {
     if (startDate && endDate) {
       if (calendarType === CalendarMode.ADMIN) {
         Alert.alert("Admin", "Funzione admin non ancora implementata");
         return;
       }
-      setModalVisible(true);
+      setModalVisible(true); //modale visibile
     }
   };
-
+  //button  finale della modale che si occupa di fare la richiesta
   const handleSubmission = async (data: RequestPayload) => {
     try {
       const isSick = (data as any).certificato_medico !== undefined;
       const isPermit = (data as any).tipo_permesso !== undefined;
+      console.log(data); //test per vedere se malattia
       const isHoliday =
         calendarType === CalendarMode.ABSENCE && !isPermit && !isSick;
 
@@ -70,7 +71,7 @@ export default function CalendarComp() {
           data.data_inizio,
           data.data_fine,
         );
-
+        //controllo se la richiesta è andata a buon fine
         const esitoOk = (result.Esito || "").toLowerCase().includes("riusc");
         if (!esitoOk) {
           Alert.alert(

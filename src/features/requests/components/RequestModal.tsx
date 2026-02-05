@@ -14,7 +14,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Dropdown } from "react-native-element-dropdown";
 import { Colors } from "../../../core/theme/theme";
 import { requestModalStyles } from "../../../core/style/commonStyles";
-import { useRequestModalLogic } from "../hooks/useRequestModalLogic";
+import { useRequestForm } from "../hooks/useRequestForm";
 import { RequestPayload } from "../services/requestsService";
 
 interface RequestModalProps {
@@ -27,6 +27,7 @@ interface RequestModalProps {
   onSubmit: (data: RequestPayload) => void;
 }
 
+// Modale di creazione richiesta (assenze/straordinari) che delega la logica a useRequestForm
 const RequestModal = ({
   visible,
   onClose,
@@ -41,6 +42,8 @@ const RequestModal = ({
     setSubType,
     isFocus,
     setIsFocus,
+    startDate: formStartDate,
+    endDate: formEndDate,
     startTime,
     endTime,
     showStartPicker,
@@ -48,15 +51,15 @@ const RequestModal = ({
     isAllDay,
     setIsAllDay,
     isSingleDaySelection,
-    isHolidayRequest,
     isSickRequest,
     currentOptions,
     formatDate,
     openTimePicker,
     handleTimeChange,
     closePickers,
-    handleSubmit,
-  } = useRequestModalLogic({
+    handleSubmitCreate,
+  } = useRequestForm({
+    mode: "create",
     visible,
     startDate,
     endDate,
@@ -64,7 +67,7 @@ const RequestModal = ({
     userId,
     onSubmit,
   });
-
+  //componente rendertimepicker per la gestione data inzio e data fine
   const renderTimePicker = () => {
     // Android usa il picker nativo (DateTimePickerAndroid.open), niente modal custom
     if (Platform.OS !== "ios") return null;
@@ -72,7 +75,9 @@ const RequestModal = ({
     if (!showStartPicker && !showEndPicker) return null;
 
     const isStart = showStartPicker;
-    const value = isStart ? startDate || new Date() : endDate || new Date();
+    const value = isStart
+      ? formStartDate || new Date()
+      : formEndDate || new Date();
     const type = isStart ? "start" : "end";
 
     return (
@@ -123,6 +128,7 @@ const RequestModal = ({
     );
   };
 
+  //inizio componente modale
   return (
     <Modal
       animationType="slide"
@@ -153,13 +159,13 @@ const RequestModal = ({
                   <View style={requestModalStyles.dateBox}>
                     <Text style={requestModalStyles.dateLabel}>Dal:</Text>
                     <Text style={requestModalStyles.dateValue}>
-                      {formatDate(startDate)}
+                      {formatDate(formStartDate)}
                     </Text>
                   </View>
                   <View style={requestModalStyles.dateBox}>
                     <Text style={requestModalStyles.dateLabel}>Al:</Text>
                     <Text style={requestModalStyles.dateValue}>
-                      {formatDate(endDate)}
+                      {formatDate(formEndDate)}
                     </Text>
                   </View>
                 </View>
@@ -281,7 +287,7 @@ const RequestModal = ({
                       requestModalStyles.confirmButton,
                       !subType && requestModalStyles.disabledButton,
                     ]}
-                    onPress={handleSubmit}
+                    onPress={handleSubmitCreate}
                     disabled={!subType}
                   >
                     <Text style={requestModalStyles.confirmButtonText}>
