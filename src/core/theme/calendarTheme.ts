@@ -1,10 +1,11 @@
-import { Colors, Typography } from "./theme";
+import { Colori, Tipografia } from "./theme";
 
-export const calendarTheme = {
-  arrowColor: Colors.textPrimary,
-  todayTextColor: Colors.primary,
-  monthTextColor: Colors.textPrimary,
-  textDayFontWeight: Typography.weight.regular,
-  textMonthFontWeight: Typography.weight.medium,
-  textDayHeaderFontWeight: Typography.weight.medium,
+// Tema personalizzato per il componente calendario
+export const temaCalendario = {
+  coloreFrecciaNavigazione: Colori.testoPrimario,
+  coloreTestoOggi: Colori.primario,
+  coloreTestoMese: Colori.testoPrimario,
+  pesoTestoGiorno: Tipografia.peso.regolare,
+  pesoTestoMese: Tipografia.peso.medio,
+  pesoTestoIntestazioneGiorno: Tipografia.peso.medio,
 };

@@ -1,44 +1,8 @@
-import axios from "axios";
-import { API_BASE_URL } from "../config/env";
-import { authStorage } from "../core/auth/authStorage";
+// Client HTTP condiviso per le chiamate API (segnaposto)
+// Qui andrà la configurazione di Axios con interceptor per autenticazione
 
-// Istanza Axios condivisa per tutte le chiamate API
-export const http = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 15000,
-});
+// Segnaposto: istanza HTTP
+export const http = {};
 
-// Handler esterno per notificare l'app in caso di 401 (es. logout forzato)
-let onUnauthorized: (() => void) | null = null;
-export const setUnauthorizedHandler = (handler: () => void) => {
-  onUnauthorized = handler;
-};
-
-// Interceptor richiesta: inserisce il bearer letto da SecureStore (via authStorage)
-http.interceptors.request.use(async (config) => {
-  const token = await authStorage.getAccessToken();
-
-  if (token) {
-    config.headers = {
-      ...(config.headers || {}),
-      Authorization: `Bearer ${token}`,
-    } as any;
-  }
-
-  return config;
-});
-
-// Interceptor risposta: se arriva 401 il token è presumibilmente invalido → puliamo storage e notifichiamo
-http.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const status = error?.response?.status;
-    if (status === 401) {
-      await authStorage.deleteSession();
-      if (onUnauthorized) {
-        onUnauthorized();
-      }
-    }
-    return Promise.reject(error);
-  },
-);
+// Segnaposto: handler per risposta non autorizzata (401)
+export const impostaHandlerNonAutorizzato = (_handler: () => void) => {};

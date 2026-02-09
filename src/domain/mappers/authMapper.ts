@@ -1,16 +1,8 @@
-import { User, UserRole } from "../entities/User";
-import type { AuthResponse } from "../../api/types";
+// Mapper per l'autenticazione (segnaposto)
+// Qui andrà la logica per mappare la risposta API all'entità Utente
 
-// Mappa il DTO di login in un'entità di dominio User
-export const mapAuthResponseToUser = (dto: AuthResponse): User => {
-  const normalizedRole = dto.ruolo?.toLowerCase() ?? "";
-  const role: UserRole = normalizedRole === "admin" ? UserRole.ADMIN : UserRole.USER;
-
-  return {
-    id: String(dto.idUtente),
-    name: dto.nome,
-    surname: dto.cognome,
-    email: dto.email,
-    role,
-  };
+// Segnaposto: mappa la risposta di autenticazione all'entità Utente
+export const mappaRispostaAuthAUtente = (_dati: any) => {
+  // Da implementare
+  return null;
 };

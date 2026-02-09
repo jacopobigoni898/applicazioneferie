@@ -1,9 +1,9 @@
-import { RequestStatus } from "./RequestStatus";
-
-export interface ExtraordinaryRequest {
-    id_richiesta: number;
-    id_utente: number;
-    data_inizio: Date;
-    data_fine: Date;
-    stato_approvazione: RequestStatus;
+// Entità Richiesta Straordinario
+export interface RichiestaStraordinario {
+  idRichiesta: number;
+  idUtente: number;
+  dataInizio: string;
+  dataFine: string;
+  stato: string;
+  oreStraordinario: number;
 }

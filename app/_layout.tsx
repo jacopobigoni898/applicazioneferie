@@ -1,7 +1,7 @@
 import { Stack } from "expo-router";
-import { AuthProvider } from "./_providers/AuthProvider";
 
-function RootNavigator() {
+// Navigatore principale dell'applicazione
+function NavigatorePrincipale() {
     return (
         <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)" />
@@ -10,10 +10,7 @@ function RootNavigator() {
     );
 }
 
-export default function RootLayout() {
-    return (
-        <AuthProvider>
-            <RootNavigator />
-        </AuthProvider>
-    );
+// Layout radice dell'applicazione
+export default function LayoutRadice() {
+    return <NavigatorePrincipale />;
 }

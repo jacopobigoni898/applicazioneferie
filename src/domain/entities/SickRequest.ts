@@ -1,10 +1,9 @@
-import {RequestStatus} from './RequestStatus';
-
-export interface SickRequest {
-    id_richiesta: number;
-    id_utente: number;
-    data_inizio: Date;
-    data_fine: Date;
-    stato_approvazione: RequestStatus;
-    certificato_medico: string;
+// Entità Richiesta Malattia
+export interface RichiestaMalattia {
+  idRichiesta: number;
+  idUtente: number;
+  dataInizio: string;
+  dataFine: string;
+  stato: string;
+  certificatoMedico?: string;
 }

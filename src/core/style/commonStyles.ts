@@ -1,514 +1,63 @@
 import { StyleSheet } from "react-native";
-import { Colors, Spacing, Typography } from "../theme/theme";
+import { Colori, Spaziatura, Tipografia } from "../theme/theme";
 
-// Stili riutilizzabili di base
-export const commonStyles = StyleSheet.create({
-  screenPadding: {
-    paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.md,
+// Stili comuni riutilizzabili
+export const stiliComuni = StyleSheet.create({
+  paddingSchermata: {
+    paddingHorizontal: Spaziatura.md,
+    paddingTop: Spaziatura.md,
   },
-  rowCenter: {
+  rigaCentrata: {
     flexDirection: "row",
     alignItems: "center",
   },
-  card: {
-    backgroundColor: Colors.surface,
+  scheda: {
+    backgroundColor: Colori.superficie,
     borderRadius: 12,
-    padding: Spacing.md,
+    padding: Spaziatura.md,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 6,
   },
-  shadowLight: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
 });
 
-// Stili del calendario centralizzati
-export const calendarStyles = StyleSheet.create({
-  container: {
+// Stili per le schermate
+export const stiliSchermata = StyleSheet.create({
+  contenitore: {
     flex: 1,
-    backgroundColor: Colors.background,
-    paddingTop: 54,
-    paddingHorizontal: 10,
+    backgroundColor: Colori.intestazione,
   },
-  subtitle: {
-    fontSize: Typography.size.md,
-    fontWeight: Typography.weight.light,
-    textAlign: "left",
-    color: Colors.textSecondary,
-    paddingBottom: 10,
-    paddingLeft: 5,
-  },
-  dropdown: {
-    marginBottom: Spacing.xl,
-    height: 50,
-    borderColor: Colors.border,
-    borderWidth: 1.25,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    backgroundColor: Colors.surface,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 6,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  iosPicker: {
-    paddingHorizontal: 16,
-  },
-  dropdownFocus: {
-    borderColor: Colors.primary,
-    shadowOpacity: 0.18,
-    shadowRadius: 10,
-    elevation: 8,
-  },
-  placeholderStyle: { fontSize: 16, color: "#999" },
-  selectedTextStyle: {
-    fontSize: 16,
-    color: Colors.textPrimary || "#000",
-    fontWeight: Typography.weight.medium,
-  },
-  iconStyle: { width: 20, height: 20 },
-  inputSearchStyle: { height: 40, fontSize: 16 },
-  pullDownContainer: {
-    position: "relative",
-    zIndex: 20,
-  },
-  menuOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  pullDownMenu: {
-    position: "absolute",
-    top: 52,
-    left: 0,
-    right: 0,
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
-    borderColor: Colors.border,
-    borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.14,
-    shadowRadius: 10,
-    elevation: 10,
-    overflow: "hidden",
-  },
-  menuItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: Colors.surface,
-    borderBottomColor: Colors.border,
-    borderBottomWidth: 1,
-  },
-  menuItemPressed: { backgroundColor: Colors.primary },
-  menuItemText: {
-    fontSize: 16,
-    color: Colors.textPrimary,
-  },
-  calendarWrapper: { flex: 1 },
-  button: {
-    backgroundColor: Colors.primary,
-    paddingVertical: 15,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 24,
-  },
-  buttonDisabled: { backgroundColor: "#CCCCCC" },
-  buttonText: { color: "#fff", fontSize: 16, fontWeight: "regular" },
-});
-
-// Stili condivisi per il pull-down iOS
-export const pullDownStyles = StyleSheet.create({
-  container: {
-    position: "relative",
-    zIndex: 20,
-  },
-  overlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  menu: {
-    position: "absolute",
-    top: 52,
-    left: 0,
-    right: 0,
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
-    borderColor: Colors.border,
-    borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.14,
-    shadowRadius: 10,
-    elevation: 10,
-    overflow: "hidden",
-  },
-  menuItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: Colors.surface,
-    borderBottomColor: Colors.border,
-    borderBottomWidth: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  menuItemLast: {
-    borderBottomWidth: 0,
-  },
-  menuItemPressed: { backgroundColor: Colors.primary },
-  menuItemText: {
-    fontSize: 16,
-    color: Colors.textPrimary,
-  },
-});
-
-// Stili condivisi per la modale di richiesta
-export const requestModalStyles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
-    alignItems: "center",
-  },
-  modalContainer: {
-    width: "100%",
-    maxHeight: "85%",
-    justifyContent: "flex-end",
-  },
-  content: {
-    backgroundColor: Colors.surface,
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    padding: Spacing.md + 4,
-    paddingBottom: 24,
-    maxHeight: "100%",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  handleIndicator: {
-    width: 40,
-    height: 5,
-    backgroundColor: "#E0E0E0",
-    borderRadius: 3,
-    alignSelf: "center",
-    marginBottom: 15,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: Colors.textPrimary,
-  },
-  subHeader: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    textAlign: "center",
-    marginBottom: 20,
-    textTransform: "uppercase",
-  },
-  dateRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
-    backgroundColor: "#F5F5F5",
-    padding: 15,
-    borderRadius: 12,
-  },
-  dateBox: { alignItems: "center", width: "45%" },
-  dateLabel: { fontSize: 12, color: "#888" },
-  dateValue: { fontSize: 16, fontWeight: "bold", color: Colors.textPrimary },
-  timeRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  timeBox: { width: "48%" },
-  timeInput: {
-    height: 48,
-    borderColor: "#E0E0E0",
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    marginTop: 6,
-    fontSize: 16,
-    color: Colors.textPrimary,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-  },
-  timeText: { fontSize: 16, color: Colors.textPrimary },
-  toggleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-  toggleLabel: { fontSize: 16, color: Colors.textPrimary, fontWeight: "500" },
-  label: { marginBottom: 8, fontWeight: "500", color: Colors.textPrimary },
-  dropdown: {
-    height: 50,
-    borderColor: "#E0E0E0",
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    marginBottom: 140, // spazio per far aprire il menu senza coprire i bottoni
-  },
-  placeholderStyle: { fontSize: 16, color: "#999" },
-  selectedTextStyle: { fontSize: 16, color: Colors.textPrimary },
-  buttonRow: { flexDirection: "row", marginTop: 10 },
-  cancelButton: {
-    flex: 1,
-    padding: 15,
-    marginRight: 10,
-    borderRadius: 10,
-    backgroundColor: "#F0F0F0",
-    alignItems: "center",
-  },
-  cancelButtonText: { color: "#666", fontWeight: "bold" },
-  confirmButton: {
-    flex: 1,
-    padding: 15,
-    marginLeft: 10,
-    borderRadius: 10,
-    backgroundColor: Colors.primary,
-    alignItems: "center",
-  },
-  confirmButtonText: { color: "white", fontWeight: "bold" },
-  disabledButton: { backgroundColor: "#CCC" },
-  pickerOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.35)",
-    justifyContent: "flex-end",
-  },
-  pickerSheet: {
-    backgroundColor: Colors.surface,
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 20,
-    borderTopLeftRadius: 18,
-    borderTopRightRadius: 18,
-  },
-  pickerHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-  pickerTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: Colors.textPrimary,
-  },
-  pickerClose: {
-    color: Colors.primary,
-    fontWeight: "600",
-  },
-  pickerConfirm: {
-    marginTop: 10,
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
-    alignItems: "center",
-    paddingVertical: 12,
-  },
-  pickerConfirmText: {
-    color: "#fff",
-    fontWeight: "700",
-  },
-  pickerIOS: {
-    backgroundColor: Colors.surface,
-  },
-});
-
-// Stili per la schermata
-export const screenStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.top,
-  },
-  title: {
-    fontSize: Typography.size.xl,
-    fontWeight: Typography.weight.medium,
+  titolo: {
+    fontSize: Tipografia.dimensione.xl,
+    fontWeight: Tipografia.peso.medio,
     borderBottomWidth: 4,
-    borderBottomColor: Colors.primary,
-    paddingBottom: Spacing.xs,
+    borderBottomColor: Colori.primario,
+    paddingBottom: Spaziatura.xs,
   },
-  titleBlock: {
+  bloccoTitolo: {
     alignSelf: "flex-start",
     alignItems: "flex-start",
-    marginLeft: Spacing.titleleft,
-    paddingTop: Spacing.title,
+    marginLeft: Spaziatura.titoloSinistra,
+    paddingTop: Spaziatura.titolo,
   },
-  header: {
-    backgroundColor: Colors.top,
+  intestazione: {
+    backgroundColor: Colori.intestazione,
   },
-  top: {
+  superiore: {
     flex: 1,
   },
 });
 
-export const profileScreen = StyleSheet.create({
-  informationProfileStyle: {
-    fontSize: Typography.size.lg,
-    fontWeight: Typography.weight.medium,
-    textAlign: "left",
-    color: Colors.textPrimary,
-    paddingBottom: 2,
-    paddingLeft: 0,
-  },
-  cardProfile: {
-    backgroundColor: Colors.background,
-    paddingTop: 10,
-    paddingHorizontal: 10,
-  },
-  profilePill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 999,
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#e1e3e8",
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-  },
-  profileAvatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 999,
-    backgroundColor: Colors.secondary,
-    borderWidth: 1,
-    borderColor: "#d6d8dd",
-  },
-  profileNameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  profileRole: {
-    fontSize: 12,
-    color: Colors.primary,
-  },
-  profileEmail: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-  },
-  profiletop: {
-    paddingHorizontal: 10,
-    paddingTop: 54,
-    flex: 1,
-  },
-});
+// Segnaposto: qui andranno gli stili per il calendario
+export const stiliCalendario = StyleSheet.create({});
 
-export const itemStyles = StyleSheet.create({
-  card: {
-    marginLeft: 16,
-    marginRight: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#ffffff",
-    borderRadius: 42,
-    padding: 12,
-    marginBottom: 12,
-    paddingHorizontal: 34,
-    // shadow iOS
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    // elevation Android
-    elevation: 3,
-  },
-  leftAccent: {
-    width: 40,
-    height: 40,
-    borderRadius: 90,
-    backgroundColor: Colors.primary,
-    marginRight: 12,
-  },
-  content: { flex: 1 },
-  title: {
-    fontWeight: Typography.weight.bold,
-    fontSize: 15,
-    marginBottom: 6,
-  },
-  rowText: {
-    color: "#000000",
-    fontWeight: Typography.weight.regular,
-    fontSize: 13,
-    marginBottom: 2,
-  },
-  right: { marginLeft: 8, alignItems: "flex-end" },
-  badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 16,
-    minWidth: 90,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  badgeText: {
-    color: "#fff",
-    fontWeight: Typography.weight.regular,
-    fontSize: 12,
-  },
-});
+// Segnaposto: qui andranno gli stili per il profilo
+export const stiliProfilo = StyleSheet.create({});
 
-export const tabStyles = StyleSheet.create({
-  tabBar: {
-    flexDirection: "row",
-    gap: 8,
-    marginTop: 12,
-  },
-  tabButton: {
-    flex: 1,
-    backgroundColor: "#ae513e",
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.12,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  tabButtonActive: {
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#395174",
-    fontWeight: Typography.weight.bold,
-  },
-  tabLabel: {
-    textAlign: "center",
-    fontWeight: Typography.weight.bold,
-    fontSize: 16,
-  },
-  tabLabelActive: {
-    color: "#cda0a0",
-  },
-});
+// Segnaposto: qui andranno gli stili per le richieste
+export const stiliRichieste = StyleSheet.create({});
+
+// Segnaposto: qui andranno gli stili per le tab
+export const stiliTab = StyleSheet.create({});

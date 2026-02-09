@@ -1,10 +1,12 @@
-import { RequestStatus } from "./RequestStatus";
-
-export interface HolidayRequest {
-  id_richiesta: number;
-  id_utente: number;
-  data_inizio: Date;
-  data_fine: Date;
-  stato_approvazione: RequestStatus;
-  tipo_permesso?: string; //solo per riconoscerlo nel app
+// Entità Richiesta Ferie
+export interface RichiestaFerie {
+  idRichiesta: number;
+  idUtente: number;
+  dataInizio: string;
+  dataFine: string;
+  stato: string;
+  tipoPermesso?: string;
 }
+
+// Mantenuto per compatibilità
+export type HolidayRequest = RichiestaFerie;

@@ -1,26 +1,10 @@
-import { useEffect } from "react";
-import { useRouter, useSegments } from "expo-router";
+// Hook per la protezione delle rotte autenticate (segnaposto)
+// Qui andrà la logica che reindirizza gli utenti non autenticati alla schermata di login
 
-export const useAuthGuard = (
-  accessToken: string | null,
-  isLoading: boolean,
-  isUserLoading: boolean,
+export const useGuardiaAuth = (
+  _tokenAccesso: string | null,
+  _inCaricamento: boolean,
+  _inCaricamentoUtente: boolean,
 ) => {
-  const router = useRouter();
-  const segments = useSegments();
-
-  useEffect(() => {
-    if (isLoading || isUserLoading) return;
-
-    const inTabs = segments[0] === "(tabs)";
-    const atLogin = segments[0] === "login";
-
-    if (!accessToken && inTabs) {
-      router.replace("/login");
-    }
-
-    if (accessToken && atLogin) {
-      router.replace("/(tabs)");
-    }
-  }, [accessToken, isLoading, isUserLoading, router, segments]);
+  // Da implementare
 };

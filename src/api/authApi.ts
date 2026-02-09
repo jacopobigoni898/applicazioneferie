@@ -1,10 +1,7 @@
-import { http } from "./httpClient";
-import { AuthResponse } from "./types";
-import { mapAuthResponseToUser } from "../domain/mappers/authMapper";
-import type { User } from "../domain/entities/User";
+// Servizio API per l'autenticazione (segnaposto)
+// Qui andrà la chiamata al backend per il login Microsoft
 
-// Chiamata di login Microsoft: ritorna l'entità User mappata dal DTO API
-export const fetchMicrosoftLogin = async (): Promise<User> => {
-  const { data } = await http.get<AuthResponse>("/Auth/microsoft-login");
-  return mapAuthResponseToUser(data);
+// Segnaposto: recupera il profilo utente tramite login Microsoft
+export const recuperaLoginMicrosoft = async () => {
+  // Da implementare
 };
