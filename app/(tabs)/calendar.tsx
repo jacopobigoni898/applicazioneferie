@@ -1,9 +1,10 @@
-import React from "react";
-import { Text, View } from "react-native";
+import { View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import React from "react";
+import ComponenteCalendario from "../../src/features/calendar/components/CalendarComponent";
 import { stiliSchermata } from "../../src/core/style/commonStyles";
 
-// Schermata del calendario (segnaposto)
+// Schermata del calendario
 export default function SchermataCalendario() {
   return (
     <SafeAreaView style={stiliSchermata.contenitore} edges={["top"]}>
@@ -13,9 +14,7 @@ export default function SchermataCalendario() {
         </View>
       </View>
       <View style={stiliSchermata.superiore}>
-        <Text style={{ padding: 16, color: "#808080" }}>
-          Contenuto del calendario (segnaposto)
-        </Text>
+        <ComponenteCalendario />
       </View>
     </SafeAreaView>
   );

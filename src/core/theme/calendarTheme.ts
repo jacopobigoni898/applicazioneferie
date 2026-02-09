@@ -1,11 +1,12 @@
 import { Colori, Tipografia } from "./theme";
 
-// Tema personalizzato per il componente calendario
+// Tema personalizzato per il componente react-native-calendars
+// Le chiavi devono corrispondere a quelle attese dalla libreria
 export const temaCalendario = {
-  coloreFrecciaNavigazione: Colori.testoPrimario,
-  coloreTestoOggi: Colori.primario,
-  coloreTestoMese: Colori.testoPrimario,
-  pesoTestoGiorno: Tipografia.peso.regolare,
-  pesoTestoMese: Tipografia.peso.medio,
-  pesoTestoIntestazioneGiorno: Tipografia.peso.medio,
+  arrowColor: Colori.testoPrimario,
+  todayTextColor: Colori.primario,
+  monthTextColor: Colori.testoPrimario,
+  textDayFontWeight: Tipografia.peso.regolare,
+  textMonthFontWeight: Tipografia.peso.medio,
+  textDayHeaderFontWeight: Tipografia.peso.medio,
 };
