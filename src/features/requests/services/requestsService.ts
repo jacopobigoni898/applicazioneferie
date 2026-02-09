@@ -90,6 +90,7 @@ export const aggiornaRichiesta = async (
 
   if (categoria === "permesso") {
     const dtoPermesso = costruisciDtoAggiornamentoPermesso(payload, tipo);
+    console.log(dtoPermesso);
     return aggiornaPermessi(dtoPermesso);
   }
 
