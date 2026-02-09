@@ -97,16 +97,17 @@ type DtoAggiornamentoPermesso = {
 
 // --- Helper di serializzazione ---
 
-const pad2 = (n: number) => String(n).padStart(2, "0");
+// Formatta un numero con zero iniziale a due cifre
+const formattaDueCifre = (n: number) => String(n).padStart(2, "0");
 
 // Converte usando componenti UTC. Output: yyyy-MM-ddTHH:mm:ss senza Z
 const aStringaIsoLocale = (data: Date) => {
   const a = data.getUTCFullYear();
-  const m = pad2(data.getUTCMonth() + 1);
-  const g = pad2(data.getUTCDate());
-  const o = pad2(data.getUTCHours());
-  const min = pad2(data.getUTCMinutes());
-  const s = pad2(data.getUTCSeconds());
+  const m = formattaDueCifre(data.getUTCMonth() + 1);
+  const g = formattaDueCifre(data.getUTCDate());
+  const o = formattaDueCifre(data.getUTCHours());
+  const min = formattaDueCifre(data.getUTCMinutes());
+  const s = formattaDueCifre(data.getUTCSeconds());
   return `${a}-${m}-${g}T${o}:${min}:${s}`;
 };
 
@@ -126,6 +127,25 @@ const eRichiestaMalattia = (
   payload: PayloadRichiesta,
 ): payload is RichiestaMalattia =>
   (payload as RichiestaMalattia).certificato_medico !== undefined;
+
+// --- Helper per determinare il tipo di richiesta da stringa ---
+
+type CategoriaRichiesta = "ferie" | "permesso" | "sconosciuto";
+
+const determinaCategoriaRichiesta = (tipo?: string): CategoriaRichiesta => {
+  const tipoMinuscolo = (tipo || "").toLowerCase();
+  if (tipoMinuscolo.includes("ferie") || tipoMinuscolo === "") return "ferie";
+  if (
+    tipoMinuscolo.includes("permess") ||
+    tipoMinuscolo.includes("visita") ||
+    tipoMinuscolo.includes("l104") ||
+    tipoMinuscolo.includes("genitoriale") ||
+    tipoMinuscolo.includes("matrimoniale") ||
+    tipoMinuscolo.includes("studio")
+  )
+    return "permesso";
+  return "sconosciuto";
+};
 
 // --- Costruzione payload ---
 
@@ -284,18 +304,9 @@ export const eliminaFeriePerId = async (
   id: number,
   tipo?: string,
 ): Promise<RisultatoDeleteDTO> => {
-  const tipoMinuscolo = (tipo || "").toLowerCase();
+  const categoria = determinaCategoriaRichiesta(tipo);
 
-  const eFerie = tipoMinuscolo.includes("ferie") || tipoMinuscolo === "";
-  const ePermesso =
-    tipoMinuscolo.includes("permess") ||
-    tipoMinuscolo.includes("visita") ||
-    tipoMinuscolo.includes("l104") ||
-    tipoMinuscolo.includes("genitoriale") ||
-    tipoMinuscolo.includes("matrimoniale") ||
-    tipoMinuscolo.includes("studio");
-
-  if (eFerie) {
+  if (categoria === "ferie") {
     const { data } = await http.delete<any>(
       `${ENDPOINT_ELIMINA_FERIE}?id=${id}`,
     );
@@ -305,12 +316,12 @@ export const eliminaFeriePerId = async (
     };
   }
 
-  if (ePermesso) {
+  if (categoria === "permesso") {
     return eliminaPermessiPerId(id);
   }
 
   throw new Error(
-    `Delete non implementata per il tipo '${tipoMinuscolo || "sconosciuto"}'`,
+    `Delete non implementata per il tipo '${tipo || "sconosciuto"}'`,
   );
 };
 
@@ -331,25 +342,17 @@ export const aggiornaRichiesta = async (
   payload: InputAggiornamentoFerie,
   tipo?: string,
 ) => {
-  const tipoMinuscolo = (tipo || "").toLowerCase();
-  const eFerie = tipoMinuscolo.includes("ferie") || tipoMinuscolo === "";
-  const ePermesso =
-    tipoMinuscolo.includes("permess") ||
-    tipoMinuscolo.includes("visita") ||
-    tipoMinuscolo.includes("l104") ||
-    tipoMinuscolo.includes("genitoriale") ||
-    tipoMinuscolo.includes("matrimoniale") ||
-    tipoMinuscolo.includes("studio");
+  const categoria = determinaCategoriaRichiesta(tipo);
 
-  if (eFerie) return aggiornaFerie(payload);
+  if (categoria === "ferie") return aggiornaFerie(payload);
 
-  if (ePermesso) {
+  if (categoria === "permesso") {
     const dtoPermesso = costruisciDtoAggiornamentoPermesso(payload, tipo);
     return aggiornaPermessi(dtoPermesso);
   }
 
   throw new Error(
-    `Update non implementata per il tipo '${tipoMinuscolo || "sconosciuto"}'`,
+    `Update non implementata per il tipo '${tipo || "sconosciuto"}'`,
   );
 };
 

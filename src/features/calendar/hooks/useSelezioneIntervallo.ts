@@ -54,19 +54,16 @@ export function useSelezioneIntervallo() {
       const dataSelezionata = giorno.dateString;
 
       // Primo tap o reset: imposta inizio e fine sullo stesso giorno
-      if (!dataInizio || (dataInizio && dataFine && dataInizio !== dataFine)) {
+      if (!dataInizio || dataInizio !== dataFine) {
         impostaDataInizio(dataSelezionata);
         impostaDataFine(dataSelezionata);
       }
       // Secondo tap: se la data è successiva, estendi l'intervallo
-      else if (dataInizio && dataFine && dataInizio === dataFine) {
-        if (dataSelezionata > dataInizio) {
-          impostaDataFine(dataSelezionata);
-        } else {
-          impostaDataInizio(dataSelezionata);
-          impostaDataFine(dataSelezionata);
-        }
-      } else {
+      else if (dataSelezionata > dataInizio) {
+        impostaDataFine(dataSelezionata);
+      }
+      // Altrimenti reset al nuovo giorno
+      else {
         impostaDataInizio(dataSelezionata);
         impostaDataFine(dataSelezionata);
       }
