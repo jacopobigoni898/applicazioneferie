@@ -21,7 +21,10 @@ export function useModificaRichiesta() {
 
   // Apre la modale di modifica per un elemento specifico
   const apriModifica = useCallback(
-    (elemento: RichiestaFerie, funzioneAggiornamento: FunzioneAggiornamento) => {
+    (
+      elemento: RichiestaFerie,
+      funzioneAggiornamento: FunzioneAggiornamento,
+    ) => {
       impostaContesto({ elemento, funzioneAggiornamento });
     },
     [],
@@ -39,6 +42,7 @@ export function useModificaRichiesta() {
       try {
         impostaInSalvataggio(true);
         await contesto.funzioneAggiornamento(payload);
+        //console.log(payload);
         impostaContesto(null);
       } catch (err: unknown) {
         const messaggio =
