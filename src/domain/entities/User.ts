@@ -1,6 +1,6 @@
 // Ruoli dell'utente nell'applicazione
 export enum RuoloUtente {
-  ADMIN = "admin",
+  ADMIN = "Admin",
   UTENTE = "Utente",
 }
 

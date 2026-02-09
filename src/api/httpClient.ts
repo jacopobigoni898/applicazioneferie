@@ -19,10 +19,7 @@ http.interceptors.request.use(async (config) => {
   const token = await storageAuth.recuperaTokenAccesso();
 
   if (token) {
-    config.headers = {
-      ...(config.headers || {}),
-      Authorization: `Bearer ${token}`,
-    } as any;
+    config.headers.Authorization = `Bearer ${token}`;
   }
 
   return config;

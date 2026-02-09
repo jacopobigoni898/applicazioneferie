@@ -5,7 +5,9 @@ import type { RispostaAuth } from "../../api/types";
 export const mappaRispostaAuthAUtente = (dto: RispostaAuth): Utente => {
   const ruoloNormalizzato = dto.ruolo?.toLowerCase() ?? "";
   const ruolo: RuoloUtente =
-    ruoloNormalizzato === "admin" ? RuoloUtente.ADMIN : RuoloUtente.UTENTE;
+    ruoloNormalizzato === "admin"
+      ? RuoloUtente.ADMIN
+      : RuoloUtente.UTENTE;
 
   return {
     id: String(dto.idUtente),

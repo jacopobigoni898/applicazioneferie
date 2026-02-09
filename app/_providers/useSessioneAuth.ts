@@ -9,6 +9,9 @@ import {
   aggiornaTokenMicrosoft,
 } from "../../src/core/auth/authService";
 
+// Margine in ms prima della scadenza per tentare il refresh
+const MARGINE_SCADENZA_MS = 30_000;
+
 // Hook che gestisce la sessione di autenticazione:
 // - Caricamento iniziale della sessione da SecureStore
 // - Verifica scadenza e refresh silenzioso del token
@@ -22,7 +25,7 @@ export const useSessioneAuth = () => {
   // Verifica locale con margine se il token è prossimo alla scadenza
   const sessioneScaduta = useCallback((s: DatiSessioneAuth | null) => {
     if (!s?.scadenzaA) return false;
-    return Date.now() >= s.scadenzaA - 30_000;
+    return Date.now() >= s.scadenzaA - MARGINE_SCADENZA_MS;
   }, []);
 
   // Se scaduto prova refresh silenzioso, altrimenti invalida la sessione
@@ -102,7 +105,7 @@ export const useSessioneAuth = () => {
     if (!sessione?.scadenzaA) return;
 
     const ora = Date.now();
-    const refreshTra = sessione.scadenzaA - ora - 30_000; // 30s di margine
+    const refreshTra = sessione.scadenzaA - ora - MARGINE_SCADENZA_MS;
     const ritardo = Math.max(refreshTra, 0);
 
     const timer = setTimeout(async () => {
