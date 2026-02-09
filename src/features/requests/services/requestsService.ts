@@ -52,7 +52,10 @@ export {
 
 // --- Funzioni di orchestrazione (dipendono da più moduli) ---
 
-import { determinaCategoriaRichiesta, InputAggiornamentoFerie } from "./tipiRichieste";
+import {
+  determinaCategoriaRichiesta,
+  InputAggiornamentoFerie,
+} from "./tipiRichieste";
 import { eliminaFeriePerIdDiretto, aggiornaFerie } from "./apiFerie";
 import { eliminaPermessiPerId, aggiornaPermessi } from "./apiPermessi";
 import { costruisciDtoAggiornamentoPermesso } from "./costruttorePayload";
@@ -89,6 +92,7 @@ export const aggiornaRichiesta = async (
 
   if (categoria === "permesso") {
     const dtoPermesso = costruisciDtoAggiornamentoPermesso(payload, tipo);
+
     return aggiornaPermessi(dtoPermesso);
   }
 

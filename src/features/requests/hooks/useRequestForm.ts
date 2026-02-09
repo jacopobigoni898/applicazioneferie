@@ -13,6 +13,7 @@ import {
   PayloadRichiesta,
   InputAggiornamentoFerie,
 } from "../services/requestsService";
+import { formatoAnnoMeseGiorno } from "../services/serializzazioneDate";
 
 export type ModalitaForm = "crea" | "modifica";
 
@@ -159,9 +160,7 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
     if (Platform.OS === "android") {
       DateTimePickerAndroid.open({
         value:
-          tipo === "inizio"
-            ? dataInizio || new Date()
-            : dataFine || new Date(),
+          tipo === "inizio" ? dataInizio || new Date() : dataFine || new Date(),
         mode: "time",
         is24Hour: true,
         onChange: (evento, data) =>
@@ -189,8 +188,12 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
       impostaTuttoIlGiorno(false);
       chiudiSelettori();
 
-      impostaDataInizio(parametri.dataInizio ? parsaData(parametri.dataInizio) : null);
-      impostaDataFine(parametri.dataFine ? parsaData(parametri.dataFine) : null);
+      impostaDataInizio(
+        parametri.dataInizio ? parsaData(parametri.dataInizio) : null,
+      );
+      impostaDataFine(
+        parametri.dataFine ? parsaData(parametri.dataFine) : null,
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -223,7 +226,11 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
     let dataFineFinale = dataFine;
 
     if (eRichiestaMalattia) {
-      dataInizioFinale = applicaOrarioAData(new Date(dataInizio.getTime()), 9, 0);
+      dataInizioFinale = applicaOrarioAData(
+        new Date(dataInizio.getTime()),
+        9,
+        0,
+      );
       dataFineFinale = applicaOrarioAData(new Date(dataFine.getTime()), 18, 0);
     } else {
       const inizioParsato = parsaOrario(orarioInizio);
@@ -250,8 +257,16 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
             return;
           }
         } else {
-          dataInizioFinale = applicaOrarioAData(new Date(dataInizio.getTime()), 9, 0);
-          dataFineFinale = applicaOrarioAData(new Date(dataFine.getTime()), 18, 0);
+          dataInizioFinale = applicaOrarioAData(
+            new Date(dataInizio.getTime()),
+            9,
+            0,
+          );
+          dataFineFinale = applicaOrarioAData(
+            new Date(dataFine.getTime()),
+            18,
+            0,
+          );
         }
       } else {
         dataInizioFinale = applicaOrarioAData(
@@ -287,14 +302,16 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
       return;
     }
     if (dataFine < dataInizio) {
-      alert("La data di fine deve essere successiva o uguale a quella di inizio");
+      alert(
+        "La data di fine deve essere successiva o uguale a quella di inizio",
+      );
       return;
     }
 
     const payload: InputAggiornamentoFerie = {
       IdRichiesta: parametri.idRichiesta,
-      DataInizio: dataInizio.toISOString().slice(0, 10),
-      DataFine: dataFine.toISOString().slice(0, 10),
+      DataInizio: formatoAnnoMeseGiorno(dataInizio),
+      DataFine: formatoAnnoMeseGiorno(dataFine),
       StatoApprovazione: stato,
     };
 

@@ -1,6 +1,9 @@
 // Servizio API per le operazioni CRUD sui permessi.
 import { http } from "../../../api/httpClient";
-import { aStringaIsoLocale, aStringaDataOraConSpazio } from "./serializzazioneDate";
+import {
+  formatoAnnoMeseGiorno,
+  aStringaIsoLocale,
+} from "./serializzazioneDate";
 import {
   PayloadRichiesta,
   DtoRichiesta,
@@ -21,8 +24,8 @@ export const inviaRichiesta = async (payload: PayloadRichiesta) => {
   if (eRichiestaPermesso(payload)) {
     const dto = {
       tipoPermesso: payload.tipo_permesso,
-      dataInizio: aStringaIsoLocale(payload.data_inizio).slice(0, 10),
-      dataFine: aStringaIsoLocale(payload.data_fine).slice(0, 10),
+      dataInizio: aStringaIsoLocale(new Date(payload.data_inizio)),
+      dataFine: aStringaIsoLocale(new Date(payload.data_fine)),
     };
     const { data } = await http.post<any>(ENDPOINT_AGGIUNGI_PERMESSI, dto);
     return data;
@@ -60,8 +63,8 @@ export const aggiungiRichiestaPermessi = async (
 ): Promise<RisultatoPostDTO> => {
   const dto: DtoAggiuntaPermesso = {
     tipoPermesso,
-    dataInizio: aStringaDataOraConSpazio(dataInizio).slice(0, 10),
-    dataFine: aStringaDataOraConSpazio(dataFine).slice(0, 10),
+    dataInizio: aStringaIsoLocale(new Date(dataInizio)),
+    dataFine: aStringaIsoLocale(new Date(dataFine)),
   };
 
   const { data } = await http.post<any>(ENDPOINT_AGGIUNGI_PERMESSI, dto);

@@ -10,8 +10,7 @@ import { RichiestaMalattia } from "../../../domain/entities/SickRequest";
 export const ENDPOINT_RICHIESTE = "/requests";
 export const ENDPOINT_AGGIUNGI_FERIE =
   "/RichiestaFerie/utente/addRichiestaFerie";
-export const ENDPOINT_LISTA_FERIE =
-  "/RichiestaFerie/utente/getAllAssenzeById";
+export const ENDPOINT_LISTA_FERIE = "/RichiestaFerie/utente/getAllAssenzeById";
 export const ENDPOINT_ELIMINA_FERIE =
   "/RichiestaFerie/utente/deleteRichiestaFerie";
 export const ENDPOINT_AGGIORNA_FERIE =
