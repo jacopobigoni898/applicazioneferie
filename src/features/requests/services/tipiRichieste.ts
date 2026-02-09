@@ -111,6 +111,7 @@ export type CategoriaRichiesta = "ferie" | "permesso" | "sconosciuto";
 export const determinaCategoriaRichiesta = (
   tipo?: string,
 ): CategoriaRichiesta => {
+  //console.log(tipo);
   const tipoMinuscolo = (tipo || "").toLowerCase();
   if (tipoMinuscolo.includes("ferie") || tipoMinuscolo === "") return "ferie";
   if (

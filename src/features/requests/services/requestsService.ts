@@ -67,7 +67,6 @@ export const eliminaFeriePerId = async (
   tipo?: string,
 ): Promise<RisultatoDeleteDTO> => {
   const categoria = determinaCategoriaRichiesta(tipo);
-
   if (categoria === "ferie") {
     return eliminaFeriePerIdDiretto(id);
   }
@@ -87,12 +86,10 @@ export const aggiornaRichiesta = async (
   tipo?: string,
 ) => {
   const categoria = determinaCategoriaRichiesta(tipo);
-
   if (categoria === "ferie") return aggiornaFerie(payload);
 
   if (categoria === "permesso") {
     const dtoPermesso = costruisciDtoAggiornamentoPermesso(payload, tipo);
-
     return aggiornaPermessi(dtoPermesso);
   }
 
