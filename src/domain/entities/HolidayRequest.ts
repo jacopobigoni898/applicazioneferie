@@ -7,6 +7,3 @@ export interface RichiestaFerie {
   stato: string;
   tipoPermesso?: string;
 }
-
-// Mantenuto per compatibilità
-export type HolidayRequest = RichiestaFerie;
