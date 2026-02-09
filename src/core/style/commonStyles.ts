@@ -332,3 +332,69 @@ export const stiliModaleRichiesta = StyleSheet.create({
     backgroundColor: Colori.superficie,
   },
 });
+
+// Stili per il singolo elemento richiesta nella lista
+export const stiliElementoRichiesta = StyleSheet.create({
+  scheda: {
+    marginLeft: 16,
+    marginRight: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderRadius: 42,
+    padding: 12,
+    marginBottom: 12,
+    paddingHorizontal: 34,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  accentoSinistra: {
+    width: 40,
+    height: 40,
+    borderRadius: 90,
+    backgroundColor: Colori.primario,
+    marginRight: 12,
+  },
+  contenuto: { flex: 1 },
+  titolo: {
+    fontWeight: Tipografia.peso.grassetto,
+    fontSize: 15,
+    marginBottom: 6,
+  },
+  testoRiga: {
+    color: "#000000",
+    fontWeight: Tipografia.peso.regolare,
+    fontSize: 13,
+    marginBottom: 2,
+  },
+  destra: { marginLeft: 8, alignItems: "flex-end" },
+  badge: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+    minWidth: 90,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  testoBadge: {
+    color: "#fff",
+    fontWeight: Tipografia.peso.regolare,
+    fontSize: 12,
+  },
+  azioniContenitore: { marginTop: 8 },
+  azioneModifica: { marginBottom: 6 },
+  testoModifica: { color: "#2563eb", fontWeight: "700" },
+  testoElimina: { color: "#dc2626", fontWeight: "700" },
+});
+
+// Stili per le tab nella schermata richieste
+export const stiliTab = StyleSheet.create({
+  etichetta: {
+    textAlign: "center",
+    fontWeight: Tipografia.peso.grassetto,
+    fontSize: 16,
+  },
+});
