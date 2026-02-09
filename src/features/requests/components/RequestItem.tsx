@@ -26,8 +26,10 @@ export default function RequestItem({
         ? "#dc2626"
         : "#f59e0b";
 
-  const fallbackStart = formattedStart ?? item.data_inizio.toLocaleDateString("it-IT");
-  const fallbackEnd = formattedEnd ?? item.data_fine.toLocaleDateString("it-IT");
+  const fallbackStart =
+    formattedStart ?? item.data_inizio.toLocaleDateString("it-IT");
+  const fallbackEnd =
+    formattedEnd ?? item.data_fine.toLocaleDateString("it-IT");
 
   return (
     <View style={itemStyles.card}>
@@ -52,9 +54,7 @@ export default function RequestItem({
             </Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => onDelete?.(item.id_richiesta)}>
-            <Text style={{ color: "#dc2626", fontWeight: "700" }}>
-              Elimina
-            </Text>
+            <Text style={{ color: "#dc2626", fontWeight: "700" }}>Elimina</Text>
           </TouchableOpacity>
         </View>
       </View>
