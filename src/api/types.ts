@@ -1,5 +1,5 @@
-// DTO restituito da /Auth/microsoft-login (segnaposto)
-export type RispostaAutenticazione = {
+// DTO restituito da /Auth/microsoft-login
+export type RispostaAuth = {
   idUtente: number;
   email: string;
   nome: string;

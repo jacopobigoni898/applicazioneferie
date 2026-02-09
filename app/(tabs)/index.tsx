@@ -1,10 +1,13 @@
 import React from "react";
-import { Text, View } from "react-native";
+import { Button, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../_providers/AuthProvider";
 import { stiliSchermata } from "../../src/core/style/commonStyles";
 
-// Schermata del profilo utente (segnaposto)
+// Schermata del profilo utente
 export default function SchermataProfilo() {
+  const { esci, utente, inCaricamentoUtente } = useAuth();
+
   return (
     <SafeAreaView style={stiliSchermata.contenitore} edges={["top"]}>
       <View style={stiliSchermata.intestazione}>
@@ -13,9 +16,27 @@ export default function SchermataProfilo() {
         </View>
       </View>
       <View style={stiliSchermata.superiore}>
-        <Text style={{ padding: 16, color: "#808080" }}>
-          Contenuto del profilo (segnaposto)
-        </Text>
+        {inCaricamentoUtente ? (
+          <Text style={{ padding: 16, color: "#808080" }}>
+            Carico il profilo...
+          </Text>
+        ) : utente ? (
+          <View style={{ padding: 16, gap: 4 }}>
+            <Text style={{ fontSize: 18, fontWeight: "700" }}>
+              {utente.nome} {utente.cognome}
+            </Text>
+            <Text style={{ fontSize: 14, color: "#808080" }}>
+              {utente.email}
+            </Text>
+          </View>
+        ) : (
+          <Text style={{ padding: 16, color: "#808080" }}>
+            Nessun profilo disponibile
+          </Text>
+        )}
+        <View style={{ paddingHorizontal: 16 }}>
+          <Button title="Esci" onPress={esci} />
+        </View>
       </View>
     </SafeAreaView>
   );

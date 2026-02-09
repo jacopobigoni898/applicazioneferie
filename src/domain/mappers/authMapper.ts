@@ -1,8 +1,17 @@
-// Mapper per l'autenticazione (segnaposto)
-// Qui andrà la logica per mappare la risposta API all'entità Utente
+import { Utente, RuoloUtente } from "../entities/User";
+import type { RispostaAuth } from "../../api/types";
 
-// Segnaposto: mappa la risposta di autenticazione all'entità Utente
-export const mappaRispostaAuthAUtente = (_dati: any) => {
-  // Da implementare
-  return null;
+// Mappa il DTO di login nell'entità di dominio Utente
+export const mappaRispostaAuthAUtente = (dto: RispostaAuth): Utente => {
+  const ruoloNormalizzato = dto.ruolo?.toLowerCase() ?? "";
+  const ruolo: RuoloUtente =
+    ruoloNormalizzato === "admin" ? RuoloUtente.ADMIN : RuoloUtente.UTENTE;
+
+  return {
+    id: String(dto.idUtente),
+    nome: dto.nome,
+    cognome: dto.cognome,
+    email: dto.email,
+    ruolo,
+  };
 };

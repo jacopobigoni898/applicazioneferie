@@ -1,14 +1,14 @@
 // Ruoli dell'utente nell'applicazione
 export enum RuoloUtente {
-  ADMIN = "ADMIN",
-  UTENTE = "UTENTE",
+  ADMIN = "admin",
+  UTENTE = "Utente",
 }
 
 // Entità Utente
 export interface Utente {
-  id: number;
-  email: string;
+  id: string;
   nome: string;
   cognome: string;
+  email: string;
   ruolo: RuoloUtente;
 }
