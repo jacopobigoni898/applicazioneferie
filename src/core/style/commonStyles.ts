@@ -340,7 +340,7 @@ export const stiliElementoRichiesta = StyleSheet.create({
     marginRight: 16,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#ffffff",
+    backgroundColor: Colori.superficie,
     borderRadius: 42,
     padding: 12,
     marginBottom: 12,
@@ -365,7 +365,7 @@ export const stiliElementoRichiesta = StyleSheet.create({
     marginBottom: 6,
   },
   testoRiga: {
-    color: "#000000",
+    color: Colori.testoPrimario,
     fontWeight: Tipografia.peso.regolare,
     fontSize: 13,
     marginBottom: 2,

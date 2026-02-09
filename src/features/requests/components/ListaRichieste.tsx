@@ -5,12 +5,14 @@ import {
   ActivityIndicator,
   FlatList,
   RefreshControl,
+  StyleSheet,
   Text,
   View,
 } from "react-native";
 import ElementoRichiesta from "./ElementoRichiesta";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
 import { RichiestaFormattata } from "../hooks/useRichieste";
+import { Colori } from "../../../core/theme/theme";
 
 interface PropsListaRichieste {
   dati: RichiestaFormattata[];
@@ -24,11 +26,7 @@ interface PropsListaRichieste {
 // Componente visualizzato quando la lista è vuota
 function ListaVuota({ inCaricamento }: { inCaricamento: boolean }) {
   if (inCaricamento) return null;
-  return (
-    <Text style={{ color: "#555", textAlign: "center", marginTop: 20 }}>
-      Nessuna richiesta trovata
-    </Text>
-  );
+  return <Text style={stili.testoVuoto}>Nessuna richiesta trovata</Text>;
 }
 
 export default function ListaRichieste({
@@ -40,10 +38,8 @@ export default function ListaRichieste({
   suModifica,
 }: PropsListaRichieste) {
   return (
-    <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: 12 }}>
-      {errore ? (
-        <Text style={{ color: "#d64545", marginBottom: 12 }}>{errore}</Text>
-      ) : null}
+    <View style={stili.contenitore}>
+      {errore ? <Text style={stili.testoErrore}>{errore}</Text> : null}
 
       <FlatList
         data={dati}
@@ -66,8 +62,28 @@ export default function ListaRichieste({
         ListFooterComponent={
           inCaricamento && dati.length > 0 ? <ActivityIndicator /> : null
         }
-        contentContainerStyle={{ paddingBottom: 24 }}
+        contentContainerStyle={stili.contenutoLista}
       />
     </View>
   );
 }
+
+const stili = StyleSheet.create({
+  contenitore: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+  },
+  testoErrore: {
+    color: "#d64545",
+    marginBottom: 12,
+  },
+  testoVuoto: {
+    color: Colori.testoSecondario,
+    textAlign: "center",
+    marginTop: 20,
+  },
+  contenutoLista: {
+    paddingBottom: 24,
+  },
+});

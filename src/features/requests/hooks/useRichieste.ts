@@ -38,8 +38,8 @@ export function useRichieste(tipo: TipoScheda = "inviate") {
     impostaInCaricamento(true);
     impostaErrore(null);
     try {
-      // Nota: per ora usiamo lo stesso endpoint per inviate/ricevute;
-      // quando l'admin avrà un endpoint dedicato, si sostituirà qui
+      // Per ora usiamo lo stesso endpoint per inviate/ricevute;
+      // quando l'admin avrà un endpoint dedicato, `tipo` guiderà la scelta
       const dati = await recuperaFerieConToken();
       impostaElementi(dati);
     } catch (err: unknown) {
@@ -47,6 +47,7 @@ export function useRichieste(tipo: TipoScheda = "inviate") {
     } finally {
       impostaInCaricamento(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tipo]);
 
   // Carica al montaggio e al cambio di tipo
