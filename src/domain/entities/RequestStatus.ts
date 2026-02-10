@@ -3,4 +3,5 @@ export enum StatoRichiesta {
   IN_ATTESA = "non validato",
   APPROVATO = "validato",
   RIFIUTATO = "annullato",
+  AUTORIZZATO = "autorizzato",
 }
