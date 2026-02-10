@@ -2,7 +2,7 @@
 export enum TipoRichiesta {
   FERIE = "ferie",
   MALATTIA = "malattia",
-  STUDIO = "Studio",
+  STUDIO = "studio",
   MATRIMONIALE = "matrimoniale",
   L104 = "l104",
   VISITA_MEDICA = "visita medica",
