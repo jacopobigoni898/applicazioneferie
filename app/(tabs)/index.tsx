@@ -3,10 +3,13 @@ import { Button, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../_providers/AuthProvider";
 import { stiliSchermata } from "../../src/core/style/commonStyles";
+import { useRichieste } from "../../src/features/requests/hooks/useRichieste";
+import GraficoAssenze from "../../src/features/requests/components/GraficoAssenze";
 
 // Schermata del profilo utente
 export default function SchermataProfilo() {
   const { esci, utente, inCaricamentoUtente } = useAuth();
+  const inviate = useRichieste("inviate");
 
   return (
     <SafeAreaView style={stiliSchermata.contenitore} edges={["top"]}>
@@ -38,6 +41,11 @@ export default function SchermataProfilo() {
           <Button title="Esci" onPress={esci} />
         </View>
       </View>
+
+      <GraficoAssenze
+        richieste={inviate.elementi}
+        inCaricamento={inviate.inCaricamento}
+      />
     </SafeAreaView>
   );
 }
