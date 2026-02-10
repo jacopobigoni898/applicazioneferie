@@ -143,9 +143,7 @@ const ModaleModificaRichiesta = ({
     const visibileFlag =
       tipo === "inizio" ? mostraSelettoreInizio : mostraSelettoreFine;
     const valore =
-      tipo === "inizio"
-        ? (dataInizio ?? new Date())
-        : (dataFine ?? new Date());
+      tipo === "inizio" ? (dataInizio ?? new Date()) : (dataFine ?? new Date());
     if (!visibileFlag) return null;
 
     if (Platform.OS === "ios") {
@@ -304,7 +302,8 @@ const ModaleModificaRichiesta = ({
                   <TouchableOpacity
                     style={[
                       stiliModaleRichiesta.pulsanteConferma,
-                      inSalvataggio && stiliModaleRichiesta.pulsanteDisabilitato,
+                      inSalvataggio &&
+                        stiliModaleRichiesta.pulsanteDisabilitato,
                     ]}
                     onPress={gestisciInvioModifica}
                     disabled={inSalvataggio}

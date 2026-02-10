@@ -6,7 +6,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { TabView, TabBar } from "react-native-tab-view";
 import { stiliSchermata, stiliTab } from "../../src/core/style/commonStyles";
 import { Colori } from "../../src/core/theme/theme";
-import { useRichieste, TipoScheda } from "../../src/features/requests/hooks/useRichieste";
+import {
+  useRichieste,
+  TipoScheda,
+} from "../../src/features/requests/hooks/useRichieste";
 import { useModificaRichiesta } from "../../src/features/requests/hooks/useModificaRichiesta";
 import ListaRichieste from "../../src/features/requests/components/ListaRichieste";
 import ModaleModificaRichiesta from "../../src/features/requests/components/ModaleModificaRichiesta";
