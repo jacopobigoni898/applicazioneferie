@@ -23,8 +23,8 @@ export const costruisciDtoAggiornamentoPermesso = (
   tipo?: string,
 ): DtoAggiornamentoPermesso => ({
   tipo: tipo || "permesso",
-  dataInizio: payload.DataInizio,
-  dataFine: payload.DataFine,
+  dataInizio: aStringaIsoLocale(new Date(payload.DataInizio)),
+  dataFine: aStringaIsoLocale(new Date(payload.DataFine)),
   statoApprovazione: payload.StatoApprovazione,
   idRichiesta: payload.IdRichiesta,
 });
