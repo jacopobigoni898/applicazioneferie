@@ -1,7 +1,7 @@
 // Hook per il recupero e la gestione delle richieste (inviate / ricevute).
 // Carica i dati dal backend, supporta eliminazione con rollback ottimistico
 // e aggiornamento con rollback in caso di errore.
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   eliminaFeriePerId,
   aggiornaRichiesta,
@@ -30,6 +30,8 @@ const estraiMessaggio = (err: unknown, fallback: string): string => {
 
 export function useRichieste(tipo: TipoScheda = "inviate") {
   const [elementi, impostaElementi] = useState<RichiestaFerie[]>([]);
+  const elementiRef = useRef<RichiestaFerie[]>(elementi);
+  elementiRef.current = elementi;
   const [inCaricamento, impostaInCaricamento] = useState(false);
   const [errore, impostaErrore] = useState<string | null>(null);
 
@@ -68,12 +70,13 @@ export function useRichieste(tipo: TipoScheda = "inviate") {
   const rimuovi = useCallback(async (id: number) => {
     impostaErrore(null);
     let precedenti: RichiestaFerie[] = [];
-    let tipoPerEliminazione: string | undefined;
+
+    const tipoPerEliminazione = elementiRef.current.find(
+      (el) => el.id_richiesta === id,
+    )?.tipo_permesso;
 
     impostaElementi((correnti) => {
       precedenti = correnti;
-      const trovato = correnti.find((el) => el.id_richiesta === id);
-      tipoPerEliminazione = trovato?.tipo_permesso;
       return correnti.filter((el) => el.id_richiesta !== id);
     });
 
@@ -89,13 +92,13 @@ export function useRichieste(tipo: TipoScheda = "inviate") {
   const aggiorna = useCallback(async (payload: InputAggiornamentoFerie) => {
     impostaErrore(null);
     let precedenti: RichiestaFerie[] = [];
-    let tipoPerAggiornamento: string | undefined;
+
+    const tipoPerAggiornamento = elementiRef.current.find(
+      (el) => el.id_richiesta === payload.IdRichiesta,
+    )?.tipo_permesso;
 
     impostaElementi((correnti) => {
       precedenti = correnti;
-      tipoPerAggiornamento = correnti.find(
-        (el) => el.id_richiesta === payload.IdRichiesta,
-      )?.tipo_permesso;
       return correnti.map((el) => {
         if (el.id_richiesta === payload.IdRichiesta) {
           return {
