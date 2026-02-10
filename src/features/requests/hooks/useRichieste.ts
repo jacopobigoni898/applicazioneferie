@@ -89,13 +89,13 @@ export function useRichieste(tipo: TipoScheda = "inviate") {
   const aggiorna = useCallback(async (payload: InputAggiornamentoFerie) => {
     impostaErrore(null);
     let precedenti: RichiestaFerie[] = [];
-    // prendo il tipo prima della setState, per non perderlo
-    const tipoPerAggiornamento = elementi.find(
-      (el) => el.id_richiesta === payload.IdRichiesta,
-    )?.tipo_permesso;
+    let tipoPerAggiornamento: string | undefined;
 
     impostaElementi((correnti) => {
       precedenti = correnti;
+      tipoPerAggiornamento = correnti.find(
+        (el) => el.id_richiesta === payload.IdRichiesta,
+      )?.tipo_permesso;
       return correnti.map((el) => {
         if (el.id_richiesta === payload.IdRichiesta) {
           return {
