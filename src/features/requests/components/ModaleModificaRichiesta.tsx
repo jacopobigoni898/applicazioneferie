@@ -1,6 +1,6 @@
 // Modale per la modifica di una richiesta esistente.
-// Gestisce selezione date con picker iOS/Android e stato approvazione con dropdown.
-import React, { useEffect, useMemo, useState } from "react";
+// Gestisce selezione date con SelettoreDataPiattaforma e stato approvazione con dropdown.
+import React, { useMemo, useState } from "react";
 import {
   KeyboardAvoidingView,
   Modal,
@@ -10,9 +10,6 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import DateTimePicker, {
-  DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
 import { Dropdown } from "react-native-element-dropdown";
 import { stiliModaleRichiesta } from "../../../core/style/commonStyles";
 import { Colori } from "../../../core/theme/theme";
@@ -20,6 +17,8 @@ import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
 import { InputAggiornamentoFerie } from "../services/requestsService";
 import { StatoRichiesta } from "../../../domain/entities/RequestStatus";
 import { useFormRichiesta } from "../hooks/useRequestForm";
+import { useSelettoreDataModifica } from "../hooks/useSelettoreDataModifica";
+import SelettoreDataPiattaforma from "./SelettoreDataPiattaforma";
 
 // Opzioni dropdown per lo stato di approvazione
 const OPZIONI_STATO = [
@@ -43,9 +42,6 @@ const ModaleModificaRichiesta = ({
   suConferma,
   inSalvataggio = false,
 }: PropsModaleModifica) => {
-  // Stato picker date
-  const [mostraSelettoreInizio, impostaMostraSelettoreInizio] = useState(false);
-  const [mostraSelettoreFine, impostaMostraSelettoreFine] = useState(false);
   const [inFocus, impostaInFocus] = useState(false);
 
   // Hook del form in modalità modifica
@@ -68,19 +64,8 @@ const ModaleModificaRichiesta = ({
     suInvio: suConferma,
   });
 
-  // Date temporanee per iOS (conferma esplicita)
-  const [dataInizioTemp, impostaDataInizioTemp] = useState<Date | null>(null);
-  const [dataFineTemp, impostaDataFineTemp] = useState<Date | null>(null);
-
-  // Reset stato quando la modale appare
-  useEffect(() => {
-    if (visibile) {
-      impostaMostraSelettoreInizio(false);
-      impostaMostraSelettoreFine(false);
-      impostaDataInizioTemp(null);
-      impostaDataFineTemp(null);
-    }
-  }, [visibile, elemento]);
+  // Stato apertura/chiusura selettori data
+  const selettori = useSelettoreDataModifica(visibile);
 
   // Controlla se è richiesta per un singolo giorno
   const eGiornoSingolo = useMemo(() => {
@@ -90,118 +75,6 @@ const ModaleModificaRichiesta = ({
       dataFine.toISOString().slice(0, 10)
     );
   }, [dataInizio, dataFine]);
-
-  // Gestione cambio data differenziata per piattaforma
-  const gestisciCambioData = (
-    tipo: "inizio" | "fine",
-    _evento: DateTimePickerEvent,
-    data?: Date,
-  ) => {
-    if (tipo === "inizio") {
-      if (Platform.OS === "ios") {
-        if (data) impostaDataInizioTemp(data);
-      } else {
-        if (data) impostaDataInizio(data);
-        impostaMostraSelettoreInizio(false);
-      }
-    } else {
-      if (Platform.OS === "ios") {
-        if (data) impostaDataFineTemp(data);
-      } else {
-        if (data) impostaDataFine(data);
-        impostaMostraSelettoreFine(false);
-      }
-    }
-  };
-
-  // Chiude il picker senza applicare modifiche
-  const chiudiSelettore = (tipo: "inizio" | "fine") => {
-    if (tipo === "inizio") {
-      impostaMostraSelettoreInizio(false);
-      impostaDataInizioTemp(null);
-    } else {
-      impostaMostraSelettoreFine(false);
-      impostaDataFineTemp(null);
-    }
-  };
-
-  // Conferma la data selezionata nel picker iOS
-  const confermaSelettore = (tipo: "inizio" | "fine") => {
-    if (tipo === "inizio") {
-      if (dataInizioTemp) impostaDataInizio(dataInizioTemp);
-      impostaMostraSelettoreInizio(false);
-      impostaDataInizioTemp(null);
-    } else {
-      if (dataFineTemp) impostaDataFine(dataFineTemp);
-      impostaMostraSelettoreFine(false);
-      impostaDataFineTemp(null);
-    }
-  };
-
-  // Renderizza il picker data per iOS o Android
-  const renderizzaSelettoreData = (tipo: "inizio" | "fine") => {
-    const visibileFlag =
-      tipo === "inizio" ? mostraSelettoreInizio : mostraSelettoreFine;
-    const valore =
-      tipo === "inizio" ? (dataInizio ?? new Date()) : (dataFine ?? new Date());
-    if (!visibileFlag) return null;
-
-    if (Platform.OS === "ios") {
-      const valoreTemp =
-        tipo === "inizio"
-          ? (dataInizioTemp ?? valore)
-          : (dataFineTemp ?? valore);
-      return (
-        <Modal transparent animationType="fade" visible={visibileFlag}>
-          <TouchableWithoutFeedback onPress={() => chiudiSelettore(tipo)}>
-            <View style={stiliModaleRichiesta.sovrapposizioneSelettore} />
-          </TouchableWithoutFeedback>
-
-          <View style={stiliModaleRichiesta.foglioSelettore}>
-            <View style={stiliModaleRichiesta.intestazioneSelettore}>
-              <Text style={stiliModaleRichiesta.titoloSelettore}>
-                Seleziona data
-              </Text>
-              <TouchableOpacity onPress={() => chiudiSelettore(tipo)}>
-                <Text style={stiliModaleRichiesta.chiudiSelettore}>Chiudi</Text>
-              </TouchableOpacity>
-            </View>
-
-            <DateTimePicker
-              value={valoreTemp}
-              mode="date"
-              display="spinner"
-              onChange={(evento, data) =>
-                gestisciCambioData(tipo, evento, data || valoreTemp)
-              }
-              style={stiliModaleRichiesta.selettoreIOS}
-              textColor={Colori.testoPrimario}
-            />
-
-            <TouchableOpacity
-              style={stiliModaleRichiesta.confermaSelettore}
-              onPress={() => confermaSelettore(tipo)}
-            >
-              <Text style={stiliModaleRichiesta.testoConfermaSelettore}>
-                OK
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
-      );
-    }
-
-    return (
-      <DateTimePicker
-        value={valore}
-        mode="date"
-        display="default"
-        onChange={(evento, data) =>
-          gestisciCambioData(tipo, evento, data || valore)
-        }
-      />
-    );
-  };
 
   return (
     <Modal
@@ -234,10 +107,7 @@ const ModaleModificaRichiesta = ({
                     <Text style={stiliModaleRichiesta.etichettaData}>Dal:</Text>
                     <TouchableOpacity
                       style={stiliModaleRichiesta.inputOrario}
-                      onPress={() => {
-                        impostaDataInizioTemp(dataInizio ?? new Date());
-                        impostaMostraSelettoreInizio(true);
-                      }}
+                      onPress={selettori.apriInizio}
                     >
                       <Text style={stiliModaleRichiesta.valoreData}>
                         {formattaData(dataInizio)}
@@ -248,10 +118,7 @@ const ModaleModificaRichiesta = ({
                     <Text style={stiliModaleRichiesta.etichettaData}>Al:</Text>
                     <TouchableOpacity
                       style={stiliModaleRichiesta.inputOrario}
-                      onPress={() => {
-                        impostaDataFineTemp(dataFine ?? new Date());
-                        impostaMostraSelettoreFine(true);
-                      }}
+                      onPress={selettori.apriFine}
                     >
                       <Text style={stiliModaleRichiesta.valoreData}>
                         {formattaData(dataFine)}
@@ -314,8 +181,24 @@ const ModaleModificaRichiesta = ({
                   </TouchableOpacity>
                 </View>
 
-                {renderizzaSelettoreData("inizio")}
-                {renderizzaSelettoreData("fine")}
+                <SelettoreDataPiattaforma
+                  visibile={selettori.mostraInizio}
+                  valore={dataInizio ?? new Date()}
+                  suConferma={(data) => {
+                    impostaDataInizio(data);
+                    selettori.chiudiInizio();
+                  }}
+                  suChiusura={selettori.chiudiInizio}
+                />
+                <SelettoreDataPiattaforma
+                  visibile={selettori.mostraFine}
+                  valore={dataFine ?? new Date()}
+                  suConferma={(data) => {
+                    impostaDataFine(data);
+                    selettori.chiudiFine();
+                  }}
+                  suChiusura={selettori.chiudiFine}
+                />
                 <View style={{ height: 20 }} />
               </View>
             </KeyboardAvoidingView>
