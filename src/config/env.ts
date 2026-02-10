@@ -2,9 +2,9 @@ import { Platform } from "react-native";
 
 // URL base dell'API centralizzato (IP LAN della macchina host)
 export const URL_BASE_API = Platform.select({
-  ios: "http://192.168.10.73:5000/api",
-  android: "http://192.168.10.73:5000/api",
-  default: "http://192.168.10.73:5000/api",
+  ios: "http://192.168.10.104:5000/api",
+  android: "http://192.168.10.104.73:5000/api",
+  default: "http://192.168.10.104:5000/api",
 }) as string;
 
 // Configurazione Microsoft Entra ID / MSAL
