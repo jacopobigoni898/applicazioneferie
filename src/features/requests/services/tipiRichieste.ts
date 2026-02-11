@@ -22,6 +22,32 @@ export const ENDPOINT_AGGIORNA_PERMESSI =
 export const ENDPOINT_ELIMINA_PERMESSI =
   "/RichiestaPermessi/utente/deleteRichiestaPermessi";
 
+// Nuovi endpoint unificati
+export const ENDPOINT_TUTTE_RICHIESTE =
+  "/Richieste/utente/getAllRichiesteById";
+export const ENDPOINT_AGGIUNGI_RICHIESTA =
+  "/Richieste/utente/addRichiesta";
+export const ENDPOINT_TUTTI_TIPO_RICHIESTA =
+  "/TipoRichiesta/getAllTipoRichiesta";
+
+// --- Modello TipoRichiesta dal backend ---
+
+export interface TipoRichiestaDTO {
+  idTipoRichiesta: number;
+  tipoRichiesta: string;
+  richiedeDocumenti: boolean;
+  richiedeCodice: boolean;
+}
+
+// --- Payload per la creazione di una nuova richiesta (nuovo endpoint) ---
+
+export type AddRichiestaPayload = {
+  dataInizio: string;
+  dataFine: string;
+  idTipoRichiesta: number;
+  nota: string;
+};
+
 // --- Union dei payload gestiti ---
 
 export type PayloadRichiesta =

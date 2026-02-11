@@ -6,6 +6,7 @@ import {
   eliminaFeriePerId,
   aggiornaRichiesta,
   recuperaFerieConToken,
+  recuperaTutteRichieste,
   InputAggiornamentoFerie,
 } from "../services/requestsService";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
@@ -40,9 +41,13 @@ export function useRichieste(tipo: TipoScheda = "inviate") {
     impostaInCaricamento(true);
     impostaErrore(null);
     try {
-      // Per ora usiamo lo stesso endpoint per inviate/ricevute;
-      // quando l'admin avrà un endpoint dedicato, `tipo` guiderà la scelta
-      const dati = await recuperaFerieConToken();
+      // Usa il nuovo endpoint unificato; fallback al vecchio se fallisce
+      let dati: RichiestaFerie[];
+      try {
+        dati = await recuperaTutteRichieste();
+      } catch {
+        dati = await recuperaFerieConToken();
+      }
       impostaElementi(dati);
     } catch (err: unknown) {
       impostaErrore(estraiMessaggio(err, "Errore di caricamento"));

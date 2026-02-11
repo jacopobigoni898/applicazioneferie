@@ -12,8 +12,13 @@ import {
   costruisciPayloadRichiesta,
   PayloadRichiesta,
   InputAggiornamentoFerie,
+  TipoRichiestaDTO,
+  AddRichiestaPayload,
 } from "../services/requestsService";
-import { formatoAnnoMeseGiorno } from "../services/serializzazioneDate";
+import {
+  formatoAnnoMeseGiorno,
+  aStringaIsoLocale,
+} from "../services/serializzazioneDate";
 
 export type ModalitaForm = "crea" | "modifica";
 
@@ -26,6 +31,8 @@ export type ParametriFormRichiesta =
       tipoPrincipale: "assenza" | "straordinari";
       idUtente: number | null;
       suInvio: (payload: PayloadRichiesta) => void;
+      tipiRichiesta?: TipoRichiestaDTO[];
+      suInvioNuovo?: (payload: AddRichiestaPayload) => void;
     }
   | {
       modalita: "modifica";
@@ -108,6 +115,10 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
       : StatoRichiesta.IN_ATTESA,
   );
   const [sottoTipo, impostaSottoTipo] = useState<string | null>(null);
+  const [idTipoRichiesta, impostaIdTipoRichiesta] = useState<number | null>(
+    null,
+  );
+  const [nota, impostaNota] = useState("");
   const [inFocus, impostaInFocus] = useState(false);
   const [orarioInizio, impostaOrarioInizio] = useState("09:00");
   const [orarioFine, impostaOrarioFine] = useState("18:00");
@@ -124,12 +135,25 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
     return sottoTipo === TipoRichiesta.MALATTIA;
   }, [sottoTipo]);
 
+  // Tipi di richiesta dal backend (solo in modalità crea)
+  const tipiRichiestaBackend =
+    parametri.modalita === "crea" ? parametri.tipiRichiesta : undefined;
+  const haTipiBackend =
+    Array.isArray(tipiRichiestaBackend) && tipiRichiestaBackend.length > 0;
+
   const opzioniCorrente = useMemo(() => {
     if (parametri.modalita !== "crea") return [];
+    // Se sono disponibili i tipi dal backend, usa quelli
+    if (haTipiBackend) {
+      return tipiRichiestaBackend!.map((t) => ({
+        label: t.tipoRichiesta,
+        value: String(t.idTipoRichiesta),
+      }));
+    }
     return parametri.tipoPrincipale === "straordinari"
       ? OPZIONI_STRAORDINARIO
       : OPZIONI_ASSENZA;
-  }, [parametri]);
+  }, [parametri, haTipiBackend, tipiRichiestaBackend]);
 
   // Chiudi tutti i picker
   const chiudiSelettori = () => {
@@ -183,6 +207,8 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
           : StatoRichiesta.IN_ATTESA,
       );
       impostaSottoTipo(null);
+      impostaIdTipoRichiesta(null);
+      impostaNota("");
       impostaOrarioInizio("09:00");
       impostaOrarioFine("18:00");
       impostaTuttoIlGiorno(false);
@@ -207,7 +233,7 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
   // Valida e costruisce il payload per la creazione
   const gestisciInvioCreazione = () => {
     if (parametri.modalita !== "crea") return;
-    const { tipoPrincipale, idUtente, suInvio } = parametri;
+    const { tipoPrincipale, idUtente, suInvio, suInvioNuovo } = parametri;
 
     if (!sottoTipo) {
       alert("Seleziona una motivazione!");
@@ -217,6 +243,70 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
       alert("Date non valide!");
       return;
     }
+
+    // Flusso nuovo: usa endpoint unificato con idTipoRichiesta
+    if (haTipiBackend && idTipoRichiesta != null && suInvioNuovo) {
+      let dataInizioFinale = dataInizio;
+      let dataFineFinale = dataFine;
+
+      const inizioParsato = parsaOrario(orarioInizio);
+      const fineParsata = parsaOrario(orarioFine);
+      if (!inizioParsato || !fineParsata) {
+        alert("Inserisci orari validi nel formato HH:MM");
+        return;
+      }
+      if (eSelezioneGiornoSingolo) {
+        if (!tuttoIlGiorno) {
+          dataInizioFinale = applicaOrarioAData(
+            new Date(dataInizio.getTime()),
+            inizioParsato.ora,
+            inizioParsato.minuto,
+          );
+          dataFineFinale = applicaOrarioAData(
+            new Date(dataFine.getTime()),
+            fineParsata.ora,
+            fineParsata.minuto,
+          );
+          if (dataFineFinale < dataInizioFinale) {
+            alert("L'orario di fine deve essere successivo a quello di inizio");
+            return;
+          }
+        } else {
+          dataInizioFinale = applicaOrarioAData(
+            new Date(dataInizio.getTime()),
+            9,
+            0,
+          );
+          dataFineFinale = applicaOrarioAData(
+            new Date(dataFine.getTime()),
+            18,
+            0,
+          );
+        }
+      } else {
+        dataInizioFinale = applicaOrarioAData(
+          new Date(dataInizio.getTime()),
+          inizioParsato.ora,
+          inizioParsato.minuto,
+        );
+        dataFineFinale = applicaOrarioAData(
+          new Date(dataFine.getTime()),
+          fineParsata.ora,
+          fineParsata.minuto,
+        );
+      }
+
+      const payload: AddRichiestaPayload = {
+        dataInizio: aStringaIsoLocale(dataInizioFinale),
+        dataFine: aStringaIsoLocale(dataFineFinale),
+        idTipoRichiesta,
+        nota,
+      };
+      suInvioNuovo(payload);
+      return;
+    }
+
+    // Flusso legacy
     if (idUtente == null || Number.isNaN(idUtente)) {
       alert("Impossibile inviare la richiesta: utente non disponibile");
       return;
@@ -329,6 +419,10 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
     // Sotto-tipo (solo creazione)
     sottoTipo,
     impostaSottoTipo,
+    idTipoRichiesta,
+    impostaIdTipoRichiesta,
+    nota,
+    impostaNota,
     inFocus,
     impostaInFocus,
     opzioniCorrente,

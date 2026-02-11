@@ -3,9 +3,11 @@ import { Alert } from "react-native";
 import { ModalitaCalendario } from "../../../domain/entities/TypeRequest";
 import {
   PayloadRichiesta,
+  AddRichiestaPayload,
   inviaFerieConToken,
   inviaRichiesta,
   aggiungiRichiestaPermessi,
+  aggiungiRichiesta,
 } from "../../requests/services/requestsService";
 
 // Hook per la gestione dell'invio delle richieste dal calendario.
@@ -41,7 +43,37 @@ export function useInvioRichiestaCalendario(
     [tipoCalendario],
   );
 
-  // Gestisce l'invio finale della richiesta dalla modale.
+  // Gestisce l'invio di una richiesta tramite il nuovo endpoint unificato
+  const gestisciInvioNuovo = useCallback(
+    async (payload: AddRichiestaPayload) => {
+      try {
+        const risultato = await aggiungiRichiesta(payload);
+        const esitoOk = (risultato.Esito || "")
+          .toLowerCase()
+          .includes("riusc");
+        if (!esitoOk) {
+          Alert.alert(
+            "Errore",
+            risultato.Motivazione || risultato.Esito || "Invio non riuscito",
+          );
+          return;
+        }
+
+        impostaModaleVisibile(false);
+        Alert.alert("Successo", "Richiesta inviata!");
+        resettaIntervallo();
+      } catch (errore: any) {
+        const msg =
+          errore?.response?.data?.message ||
+          errore?.message ||
+          "Errore durante l'invio";
+        Alert.alert("Errore", msg);
+      }
+    },
+    [resettaIntervallo],
+  );
+
+  // Gestisce l'invio finale della richiesta dalla modale (legacy).
   // Instrada verso l'API corretta in base al tipo di richiesta.
   const gestisciInvio = useCallback(
     async (dati: PayloadRichiesta) => {
@@ -110,5 +142,6 @@ export function useInvioRichiestaCalendario(
     chiudiModale,
     gestisciConferma,
     gestisciInvio,
+    gestisciInvioNuovo,
   };
 }

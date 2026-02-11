@@ -47,11 +47,17 @@ export default function ComponenteCalendario() {
     gestisciSelezioneOpzione,
     opzioniVista,
     testoSegnaposto,
+    tipiRichiesta,
   } = useTipoCalendario();
 
   // Hook per l'invio della richiesta e la gestione della modale
-  const { modaleVisibile, chiudiModale, gestisciConferma, gestisciInvio } =
-    useInvioRichiestaCalendario(tipoCalendario, resettaIntervallo);
+  const {
+    modaleVisibile,
+    chiudiModale,
+    gestisciConferma,
+    gestisciInvio,
+    gestisciInvioNuovo,
+  } = useInvioRichiestaCalendario(tipoCalendario, resettaIntervallo);
 
   return (
     <View style={stiliCalendario.contenitore}>
@@ -100,6 +106,8 @@ export default function ComponenteCalendario() {
         }
         idUtente={idUtente}
         suInvio={gestisciInvio}
+        tipiRichiesta={tipiRichiesta}
+        suInvioNuovo={gestisciInvioNuovo}
       />
     </View>
   );

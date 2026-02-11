@@ -14,6 +14,8 @@ export {
   type DtoAggiuntaPermesso,
   type DtoAggiornamentoPermesso,
   type CategoriaRichiesta,
+  type TipoRichiestaDTO,
+  type AddRichiestaPayload,
   eRichiestaPermesso,
   eRichiestaMalattia,
   determinaCategoriaRichiesta,
@@ -49,6 +51,13 @@ export {
   aggiornaPermessi,
   aggiungiRichiestaPermessi,
 } from "./apiPermessi";
+
+// API Richieste (nuovi endpoint unificati)
+export {
+  recuperaTipiRichiesta,
+  recuperaTutteRichieste,
+  aggiungiRichiesta,
+} from "./apiRichieste";
 
 // --- Funzioni di orchestrazione (dipendono da più moduli) ---
 
