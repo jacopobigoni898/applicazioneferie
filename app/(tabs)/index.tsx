@@ -18,6 +18,7 @@ export default function SchermataProfilo() {
           <Text style={stiliSchermata.titolo}>Il mio Profilo</Text>
         </View>
       </View>
+
       <View style={stiliSchermata.superiore}>
         {inCaricamentoUtente ? (
           <Text style={{ padding: 16, color: "#808080" }}>
@@ -37,15 +38,14 @@ export default function SchermataProfilo() {
             Nessun profilo disponibile
           </Text>
         )}
+        <GraficoAssenze
+          richieste={inviate.elementi}
+          inCaricamento={inviate.inCaricamento}
+        />
         <View style={{ paddingHorizontal: 16 }}>
           <Button title="Esci" onPress={esci} />
         </View>
       </View>
-
-      <GraficoAssenze
-        richieste={inviate.elementi}
-        inCaricamento={inviate.inCaricamento}
-      />
     </SafeAreaView>
   );
 }
