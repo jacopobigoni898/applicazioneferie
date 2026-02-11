@@ -245,7 +245,9 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
     }
 
     // Flusso nuovo: usa endpoint unificato con idTipoRichiesta
-    if (haTipiBackend && idTipoRichiesta != null && suInvioNuovo) {
+    const usaFlussoNuovo =
+      haTipiBackend && idTipoRichiesta != null && suInvioNuovo;
+    if (usaFlussoNuovo) {
       let dataInizioFinale = dataInizio;
       let dataFineFinale = dataFine;
 

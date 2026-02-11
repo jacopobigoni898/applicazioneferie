@@ -300,7 +300,10 @@ const ModaleRichiesta = ({
                   onBlur={() => impostaInFocus(false)}
                   onChange={(item) => {
                     impostaSottoTipo(item.value);
-                    impostaIdTipoRichiesta(Number(item.value) || null);
+                    const parsed = Number(item.value);
+                    impostaIdTipoRichiesta(
+                      Number.isNaN(parsed) ? null : parsed,
+                    );
                     impostaInFocus(false);
                   }}
                 />

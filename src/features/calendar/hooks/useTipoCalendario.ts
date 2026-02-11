@@ -28,8 +28,8 @@ export function useTipoCalendario() {
       try {
         const dati = await recuperaTipiRichiesta();
         impostaTipiRichiesta(dati);
-      } catch {
-        // Silenzioso: i tipi resteranno vuoti
+      } catch (err) {
+        console.warn("Errore caricamento tipi richiesta:", err);
       }
     };
     carica();
