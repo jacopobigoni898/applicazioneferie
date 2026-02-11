@@ -5,7 +5,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   eliminaFeriePerId,
   aggiornaRichiesta,
-  recuperaFerieConToken,
   recuperaTutteRichieste,
   InputAggiornamentoFerie,
 } from "../services/requestsService";
@@ -41,13 +40,7 @@ export function useRichieste(tipo: TipoScheda = "inviate") {
     impostaInCaricamento(true);
     impostaErrore(null);
     try {
-      // Usa il nuovo endpoint unificato; fallback al vecchio se fallisce
-      let dati: RichiestaFerie[];
-      try {
-        dati = await recuperaTutteRichieste();
-      } catch {
-        dati = await recuperaFerieConToken();
-      }
+      const dati = await recuperaTutteRichieste();
       impostaElementi(dati);
     } catch (err: unknown) {
       impostaErrore(estraiMessaggio(err, "Errore di caricamento"));

@@ -2,15 +2,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Platform } from "react-native";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
-import {
-  OPZIONI_ASSENZA,
-  OPZIONI_STRAORDINARIO,
-  TipoRichiesta,
-} from "../../../domain/entities/TypeRequest";
 import { StatoRichiesta } from "../../../domain/entities/RequestStatus";
 import {
-  costruisciPayloadRichiesta,
-  PayloadRichiesta,
   InputAggiornamentoFerie,
   TipoRichiestaDTO,
   AddRichiestaPayload,
@@ -29,10 +22,8 @@ export type ParametriFormRichiesta =
       dataInizio: Date | null;
       dataFine: Date | null;
       tipoPrincipale: "assenza" | "straordinari";
-      idUtente: number | null;
-      suInvio: (payload: PayloadRichiesta) => void;
-      tipiRichiesta?: TipoRichiestaDTO[];
-      suInvioNuovo?: (payload: AddRichiestaPayload) => void;
+      tipiRichiesta: TipoRichiestaDTO[];
+      suInvio: (payload: AddRichiestaPayload) => void;
     }
   | {
       modalita: "modifica";
@@ -131,29 +122,17 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
     dataFine &&
     dataInizio.toDateString() === dataFine.toDateString();
 
-  const eRichiestaMalattia = useMemo(() => {
-    return sottoTipo === TipoRichiesta.MALATTIA;
-  }, [sottoTipo]);
-
   // Tipi di richiesta dal backend (solo in modalità crea)
   const tipiRichiestaBackend =
     parametri.modalita === "crea" ? parametri.tipiRichiesta : undefined;
-  const haTipiBackend =
-    Array.isArray(tipiRichiestaBackend) && tipiRichiestaBackend.length > 0;
 
   const opzioniCorrente = useMemo(() => {
     if (parametri.modalita !== "crea") return [];
-    // Se sono disponibili i tipi dal backend, usa quelli
-    if (haTipiBackend) {
-      return tipiRichiestaBackend!.map((t) => ({
-        label: t.tipoRichiesta,
-        value: String(t.idTipoRichiesta),
-      }));
-    }
-    return parametri.tipoPrincipale === "straordinari"
-      ? OPZIONI_STRAORDINARIO
-      : OPZIONI_ASSENZA;
-  }, [parametri, haTipiBackend, tipiRichiestaBackend]);
+    return (tipiRichiestaBackend || []).map((t) => ({
+      label: t.tipoRichiesta,
+      value: String(t.idTipoRichiesta),
+    }));
+  }, [parametri, tipiRichiestaBackend]);
 
   // Chiudi tutti i picker
   const chiudiSelettori = () => {
@@ -233,7 +212,7 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
   // Valida e costruisce il payload per la creazione
   const gestisciInvioCreazione = () => {
     if (parametri.modalita !== "crea") return;
-    const { tipoPrincipale, idUtente, suInvio, suInvioNuovo } = parametri;
+    const { suInvio } = parametri;
 
     if (!sottoTipo) {
       alert("Seleziona una motivazione!");
@@ -243,124 +222,22 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
       alert("Date non valide!");
       return;
     }
-
-    // Flusso nuovo: usa endpoint unificato con idTipoRichiesta
-    const usaFlussoNuovo =
-      haTipiBackend && idTipoRichiesta != null && suInvioNuovo;
-    if (usaFlussoNuovo) {
-      let dataInizioFinale = dataInizio;
-      let dataFineFinale = dataFine;
-
-      const inizioParsato = parsaOrario(orarioInizio);
-      const fineParsata = parsaOrario(orarioFine);
-      if (!inizioParsato || !fineParsata) {
-        alert("Inserisci orari validi nel formato HH:MM");
-        return;
-      }
-      if (eSelezioneGiornoSingolo) {
-        if (!tuttoIlGiorno) {
-          dataInizioFinale = applicaOrarioAData(
-            new Date(dataInizio.getTime()),
-            inizioParsato.ora,
-            inizioParsato.minuto,
-          );
-          dataFineFinale = applicaOrarioAData(
-            new Date(dataFine.getTime()),
-            fineParsata.ora,
-            fineParsata.minuto,
-          );
-          if (dataFineFinale < dataInizioFinale) {
-            alert("L'orario di fine deve essere successivo a quello di inizio");
-            return;
-          }
-        } else {
-          dataInizioFinale = applicaOrarioAData(
-            new Date(dataInizio.getTime()),
-            9,
-            0,
-          );
-          dataFineFinale = applicaOrarioAData(
-            new Date(dataFine.getTime()),
-            18,
-            0,
-          );
-        }
-      } else {
-        dataInizioFinale = applicaOrarioAData(
-          new Date(dataInizio.getTime()),
-          inizioParsato.ora,
-          inizioParsato.minuto,
-        );
-        dataFineFinale = applicaOrarioAData(
-          new Date(dataFine.getTime()),
-          fineParsata.ora,
-          fineParsata.minuto,
-        );
-      }
-
-      const payload: AddRichiestaPayload = {
-        dataInizio: aStringaIsoLocale(dataInizioFinale),
-        dataFine: aStringaIsoLocale(dataFineFinale),
-        idTipoRichiesta,
-        nota,
-      };
-      suInvioNuovo(payload);
-      return;
-    }
-
-    // Flusso legacy
-    if (idUtente == null || Number.isNaN(idUtente)) {
-      alert("Impossibile inviare la richiesta: utente non disponibile");
+    if (idTipoRichiesta == null) {
+      alert("Seleziona un tipo di richiesta!");
       return;
     }
 
     let dataInizioFinale = dataInizio;
     let dataFineFinale = dataFine;
 
-    if (eRichiestaMalattia) {
-      dataInizioFinale = applicaOrarioAData(
-        new Date(dataInizio.getTime()),
-        9,
-        0,
-      );
-      dataFineFinale = applicaOrarioAData(new Date(dataFine.getTime()), 18, 0);
-    } else {
-      const inizioParsato = parsaOrario(orarioInizio);
-      const fineParsata = parsaOrario(orarioFine);
-      if (!inizioParsato || !fineParsata) {
-        alert("Inserisci orari validi nel formato HH:MM");
-        return;
-      }
-      if (eSelezioneGiornoSingolo) {
-        const deveApplicareOrario = !tuttoIlGiorno;
-        if (deveApplicareOrario) {
-          dataInizioFinale = applicaOrarioAData(
-            new Date(dataInizio.getTime()),
-            inizioParsato.ora,
-            inizioParsato.minuto,
-          );
-          dataFineFinale = applicaOrarioAData(
-            new Date(dataFine.getTime()),
-            fineParsata.ora,
-            fineParsata.minuto,
-          );
-          if (dataFineFinale < dataInizioFinale) {
-            alert("L'orario di fine deve essere successivo a quello di inizio");
-            return;
-          }
-        } else {
-          dataInizioFinale = applicaOrarioAData(
-            new Date(dataInizio.getTime()),
-            9,
-            0,
-          );
-          dataFineFinale = applicaOrarioAData(
-            new Date(dataFine.getTime()),
-            18,
-            0,
-          );
-        }
-      } else {
+    const inizioParsato = parsaOrario(orarioInizio);
+    const fineParsata = parsaOrario(orarioFine);
+    if (!inizioParsato || !fineParsata) {
+      alert("Inserisci orari validi nel formato HH:MM");
+      return;
+    }
+    if (eSelezioneGiornoSingolo) {
+      if (!tuttoIlGiorno) {
         dataInizioFinale = applicaOrarioAData(
           new Date(dataInizio.getTime()),
           inizioParsato.ora,
@@ -371,19 +248,42 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
           fineParsata.ora,
           fineParsata.minuto,
         );
+        if (dataFineFinale < dataInizioFinale) {
+          alert("L'orario di fine deve essere successivo a quello di inizio");
+          return;
+        }
+      } else {
+        dataInizioFinale = applicaOrarioAData(
+          new Date(dataInizio.getTime()),
+          9,
+          0,
+        );
+        dataFineFinale = applicaOrarioAData(
+          new Date(dataFine.getTime()),
+          18,
+          0,
+        );
       }
+    } else {
+      dataInizioFinale = applicaOrarioAData(
+        new Date(dataInizio.getTime()),
+        inizioParsato.ora,
+        inizioParsato.minuto,
+      );
+      dataFineFinale = applicaOrarioAData(
+        new Date(dataFine.getTime()),
+        fineParsata.ora,
+        fineParsata.minuto,
+      );
     }
 
-    const payloadRichiesta = costruisciPayloadRichiesta({
-      tipoPrincipale,
-      sottoTipo,
-      dataInizio: dataInizioFinale,
-      dataFine: dataFineFinale,
-      idUtente,
-      stato: StatoRichiesta.IN_ATTESA,
-    });
-
-    suInvio(payloadRichiesta);
+    const payload: AddRichiestaPayload = {
+      dataInizio: aStringaIsoLocale(dataInizioFinale),
+      dataFine: aStringaIsoLocale(dataFineFinale),
+      idTipoRichiesta,
+      nota,
+    };
+    suInvio(payload);
   };
 
   // Valida e costruisce payload per la modifica
@@ -416,7 +316,6 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
     stato,
     impostaStato,
     eSelezioneGiornoSingolo,
-    eRichiestaMalattia,
 
     // Sotto-tipo (solo creazione)
     sottoTipo,

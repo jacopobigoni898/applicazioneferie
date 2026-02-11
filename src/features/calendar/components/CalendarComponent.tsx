@@ -10,7 +10,6 @@ import SelettoreTipoCalendario from "./SelettoreTipoCalendario";
 import { configuraLocaleCalendario } from "../utils/calendarConfig";
 import ModaleRichiesta from "../../requests/components/RequestModal";
 import { ModalitaCalendario } from "../../../domain/entities/TypeRequest";
-import { useAuth } from "../../../../app/_providers/AuthProvider";
 
 // Configura localizzazione calendario (nomi mesi/giorni in italiano)
 configuraLocaleCalendario();
@@ -21,14 +20,6 @@ configuraLocaleCalendario();
 // - useTipoCalendario: gestione tipo/dropdown calendario
 // - useInvioRichiestaCalendario: gestione invio richiesta e stato modale
 export default function ComponenteCalendario() {
-  // Recupero ID utente dal contesto di autenticazione
-  const { utente } = useAuth();
-  const idUtenteParsato = utente ? Number(utente.id) : null;
-  const idUtente =
-    idUtenteParsato != null && !Number.isNaN(idUtenteParsato)
-      ? idUtenteParsato
-      : null;
-
   // Hook per la selezione dell'intervallo di date
   const {
     dataInizio,
@@ -56,7 +47,6 @@ export default function ComponenteCalendario() {
     chiudiModale,
     gestisciConferma,
     gestisciInvio,
-    gestisciInvioNuovo,
   } = useInvioRichiestaCalendario(tipoCalendario, resettaIntervallo);
 
   return (
@@ -104,10 +94,8 @@ export default function ComponenteCalendario() {
             ? "straordinari"
             : "assenza"
         }
-        idUtente={idUtente}
-        suInvio={gestisciInvio}
         tipiRichiesta={tipiRichiesta}
-        suInvioNuovo={gestisciInvioNuovo}
+        suInvio={gestisciInvio}
       />
     </View>
   );

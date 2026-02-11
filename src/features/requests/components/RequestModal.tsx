@@ -17,7 +17,6 @@ import { Colori } from "../../../core/theme/theme";
 import { stiliModaleRichiesta } from "../../../core/style/commonStyles";
 import { useFormRichiesta } from "../hooks/useRequestForm";
 import {
-  PayloadRichiesta,
   TipoRichiestaDTO,
   AddRichiestaPayload,
 } from "../services/requestsService";
@@ -28,10 +27,8 @@ interface PropsModaleRichiesta {
   dataInizio: Date | null;
   dataFine: Date | null;
   tipoPrincipale: "assenza" | "straordinari";
-  idUtente: number | null;
-  suInvio: (dati: PayloadRichiesta) => void;
-  tipiRichiesta?: TipoRichiestaDTO[];
-  suInvioNuovo?: (dati: AddRichiestaPayload) => void;
+  tipiRichiesta: TipoRichiestaDTO[];
+  suInvio: (dati: AddRichiestaPayload) => void;
 }
 
 // Modale di creazione richiesta (assenze/straordinari) che delega la logica a useFormRichiesta
@@ -41,10 +38,8 @@ const ModaleRichiesta = ({
   dataInizio,
   dataFine,
   tipoPrincipale,
-  idUtente,
-  suInvio,
   tipiRichiesta,
-  suInvioNuovo,
+  suInvio,
 }: PropsModaleRichiesta) => {
   const {
     sottoTipo,
@@ -64,7 +59,6 @@ const ModaleRichiesta = ({
     tuttoIlGiorno,
     impostaTuttoIlGiorno,
     eSelezioneGiornoSingolo,
-    eRichiestaMalattia,
     opzioniCorrente,
     formattaData,
     apriSelettoreOrario,
@@ -77,10 +71,8 @@ const ModaleRichiesta = ({
     dataInizio,
     dataFine,
     tipoPrincipale,
-    idUtente,
-    suInvio,
     tipiRichiesta,
-    suInvioNuovo,
+    suInvio,
   });
 
   // Componente selettore orario per iOS
@@ -189,7 +181,7 @@ const ModaleRichiesta = ({
                   </View>
                 </View>
 
-                {eRichiestaMalattia ? null : eSelezioneGiornoSingolo ? (
+                {eSelezioneGiornoSingolo ? (
                   <>
                     <View style={stiliModaleRichiesta.rigaInterruttore}>
                       <Text style={stiliModaleRichiesta.etichettaInterruttore}>
