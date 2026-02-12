@@ -265,7 +265,7 @@ export const stiliModaleRichiesta = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
     paddingHorizontal: 12,
-    marginBottom: 140,
+    marginBottom: 30,
   },
   stileSegnaposto: { fontSize: 16, color: "#999" },
   stileTestoSelezionato: { fontSize: 16, color: Colori.testoPrimario },
