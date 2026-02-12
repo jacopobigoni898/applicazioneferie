@@ -9,13 +9,17 @@ import {
   KeyboardAvoidingView,
   Platform,
   Switch,
+  TextInput,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Dropdown } from "react-native-element-dropdown";
 import { Colori } from "../../../core/theme/theme";
 import { stiliModaleRichiesta } from "../../../core/style/commonStyles";
 import { useFormRichiesta } from "../hooks/useRequestForm";
-import { PayloadRichiesta } from "../services/requestsService";
+import {
+  TipoRichiestaDTO,
+  AddRichiestaPayload,
+} from "../services/requestsService";
 
 interface PropsModaleRichiesta {
   visibile: boolean;
@@ -23,8 +27,8 @@ interface PropsModaleRichiesta {
   dataInizio: Date | null;
   dataFine: Date | null;
   tipoPrincipale: "assenza" | "straordinari";
-  idUtente: number | null;
-  suInvio: (dati: PayloadRichiesta) => void;
+  tipiRichiesta: TipoRichiestaDTO[];
+  suInvio: (dati: AddRichiestaPayload) => void;
 }
 
 // Modale di creazione richiesta (assenze/straordinari) che delega la logica a useFormRichiesta
@@ -34,12 +38,16 @@ const ModaleRichiesta = ({
   dataInizio,
   dataFine,
   tipoPrincipale,
-  idUtente,
+  tipiRichiesta,
   suInvio,
 }: PropsModaleRichiesta) => {
   const {
     sottoTipo,
     impostaSottoTipo,
+    idTipoRichiesta,
+    impostaIdTipoRichiesta,
+    nota,
+    impostaNota,
     inFocus,
     impostaInFocus,
     dataInizio: dataInizioForm,
@@ -51,7 +59,6 @@ const ModaleRichiesta = ({
     tuttoIlGiorno,
     impostaTuttoIlGiorno,
     eSelezioneGiornoSingolo,
-    eRichiestaMalattia,
     opzioniCorrente,
     formattaData,
     apriSelettoreOrario,
@@ -64,7 +71,7 @@ const ModaleRichiesta = ({
     dataInizio,
     dataFine,
     tipoPrincipale,
-    idUtente,
+    tipiRichiesta,
     suInvio,
   });
 
@@ -174,7 +181,7 @@ const ModaleRichiesta = ({
                   </View>
                 </View>
 
-                {eRichiestaMalattia ? null : eSelezioneGiornoSingolo ? (
+                {eSelezioneGiornoSingolo ? (
                   <>
                     <View style={stiliModaleRichiesta.rigaInterruttore}>
                       <Text style={stiliModaleRichiesta.etichettaInterruttore}>
@@ -267,7 +274,7 @@ const ModaleRichiesta = ({
                 )}
 
                 <Text style={stiliModaleRichiesta.etichetta}>
-                  Motivazione:
+                  Tipo Richiesta:
                 </Text>
                 <Dropdown
                   style={[
@@ -285,8 +292,25 @@ const ModaleRichiesta = ({
                   onBlur={() => impostaInFocus(false)}
                   onChange={(item) => {
                     impostaSottoTipo(item.value);
+                    const parsed = Number(item.value);
+                    impostaIdTipoRichiesta(
+                      Number.isNaN(parsed) ? null : parsed,
+                    );
                     impostaInFocus(false);
                   }}
+                />
+
+                <Text style={stiliModaleRichiesta.etichetta}>Nota:</Text>
+                <TextInput
+                  style={[
+                    stiliModaleRichiesta.menuATendina,
+                    { paddingHorizontal: 12, paddingVertical: 10 },
+                  ]}
+                  placeholder="Inserisci una nota (opzionale)"
+                  placeholderTextColor="#999"
+                  value={nota}
+                  onChangeText={impostaNota}
+                  multiline
                 />
                 <View style={stiliModaleRichiesta.rigaPulsanti}>
                   <TouchableOpacity

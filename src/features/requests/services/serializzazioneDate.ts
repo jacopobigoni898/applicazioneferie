@@ -1,5 +1,4 @@
 // Helper per la serializzazione delle date verso il backend.
-// Gestisce i diversi formati richiesti dall'API.
 
 // Formatta un numero con zero iniziale a due cifre
 export const formattaDueCifre = (n: number) => String(n).padStart(2, "0");
@@ -13,11 +12,6 @@ export const aStringaIsoLocale = (data: Date) => {
   const min = formattaDueCifre(data.getUTCMinutes());
   const s = formattaDueCifre(data.getUTCSeconds());
   return `${a}-${m}-${g}T${o}:${min}:${s}`;
-};
-
-// Versione con spazio al posto di "T" per backend che usa DateTime.Parse
-export const aStringaDataOraConSpazio = (data: Date) => {
-  return aStringaIsoLocale(data).replace("T", " ");
 };
 
 // Formatta una data come yyyy-MM-dd

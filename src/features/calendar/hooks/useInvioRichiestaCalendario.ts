@@ -2,15 +2,12 @@ import { useCallback, useState } from "react";
 import { Alert } from "react-native";
 import { ModalitaCalendario } from "../../../domain/entities/TypeRequest";
 import {
-  PayloadRichiesta,
-  inviaFerieConToken,
-  inviaRichiesta,
-  aggiungiRichiestaPermessi,
+  AddRichiestaPayload,
+  aggiungiRichiesta,
 } from "../../requests/services/requestsService";
 
 // Hook per la gestione dell'invio delle richieste dal calendario.
-// Gestisce la visibilità della modale e il routing verso le API corrette
-// in base al tipo di richiesta (ferie, permessi, generica).
+// Gestisce la visibilità della modale e l'invio tramite API unificata.
 export function useInvioRichiestaCalendario(
   tipoCalendario: string,
   resettaIntervallo: () => void,
@@ -41,53 +38,20 @@ export function useInvioRichiestaCalendario(
     [tipoCalendario],
   );
 
-  // Gestisce l'invio finale della richiesta dalla modale.
-  // Instrada verso l'API corretta in base al tipo di richiesta.
+  // Gestisce l'invio della richiesta tramite l'endpoint unificato
   const gestisciInvio = useCallback(
-    async (dati: PayloadRichiesta) => {
+    async (payload: AddRichiestaPayload) => {
       try {
-        const eMalattia =
-          (dati as any).certificato_medico !== undefined;
-        const ePermesso = (dati as any).tipo_permesso !== undefined;
-        const eFerie =
-          tipoCalendario === ModalitaCalendario.ASSENZA &&
-          !ePermesso &&
-          !eMalattia;
-
-        if (ePermesso) {
-          const risultato = await aggiungiRichiestaPermessi(
-            dati.data_inizio,
-            dati.data_fine,
-            (dati as any).tipo_permesso,
+        const risultato = await aggiungiRichiesta(payload);
+        const esitoOk = (risultato.Esito || "")
+          .toLowerCase()
+          .includes("riusc");
+        if (!esitoOk) {
+          Alert.alert(
+            "Errore",
+            risultato.Motivazione || risultato.Esito || "Invio non riuscito",
           );
-          const esitoOk = (risultato.Esito || "")
-            .toLowerCase()
-            .includes("riusc");
-          if (!esitoOk) {
-            Alert.alert(
-              "Errore",
-              risultato.Motivazione || risultato.Esito || "Invio non riuscito",
-            );
-            return;
-          }
-        } else if (eFerie) {
-          const risultato = await inviaFerieConToken(
-            dati.data_inizio,
-            dati.data_fine,
-          );
-          const esitoOk = (risultato.Esito || "")
-            .toLowerCase()
-            .includes("riusc");
-          if (!esitoOk) {
-            Alert.alert(
-              "Errore",
-              risultato.Motivazione || risultato.Esito || "Invio non riuscito",
-            );
-            return;
-          }
-        } else {
-          // malattia, straordinari o altri tipi gestiti dall'endpoint generico
-          await inviaRichiesta(dati);
+          return;
         }
 
         impostaModaleVisibile(false);
@@ -101,7 +65,7 @@ export function useInvioRichiestaCalendario(
         Alert.alert("Errore", msg);
       }
     },
-    [tipoCalendario, resettaIntervallo],
+    [resettaIntervallo],
   );
 
   return {

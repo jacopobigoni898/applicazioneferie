@@ -1,45 +1,43 @@
-// Tipi, DTO e type guards condivisi per il servizio richieste.
-import { StatoRichiesta } from "../../../domain/entities/RequestStatus";
-import { RichiestaStraordinario } from "../../../domain/entities/RequestExtraordinary";
-import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
-import { RichiestaPermesso } from "../../../domain/entities/PermitsRequest";
-import { RichiestaMalattia } from "../../../domain/entities/SickRequest";
+// Tipi, DTO e costanti condivisi per il servizio richieste.
 
-// --- Endpoint del backend ---
+// --- Endpoint del backend (legacy, per delete/update) ---
 
-export const ENDPOINT_RICHIESTE = "/requests";
-export const ENDPOINT_AGGIUNGI_FERIE =
-  "/RichiestaFerie/utente/addRichiestaFerie";
-export const ENDPOINT_LISTA_FERIE = "/RichiestaFerie/utente/getAllAssenzeById";
 export const ENDPOINT_ELIMINA_FERIE =
   "/RichiestaFerie/utente/deleteRichiestaFerie";
 export const ENDPOINT_AGGIORNA_FERIE =
   "/RichiestaFerie/utente/updateRichiestaFerie";
-export const ENDPOINT_AGGIUNGI_PERMESSI =
-  "/RichiestaPermessi/utente/addRichiestaPermessi";
 export const ENDPOINT_AGGIORNA_PERMESSI =
   "/RichiestaPermessi/utente/updateRichiestaPermessi";
 export const ENDPOINT_ELIMINA_PERMESSI =
   "/RichiestaPermessi/utente/deleteRichiestaPermessi";
 
-// --- Union dei payload gestiti ---
+// Nuovi endpoint unificati
+export const ENDPOINT_TUTTE_RICHIESTE =
+  "/Richieste/utente/getAllRichiesteById";
+export const ENDPOINT_AGGIUNGI_RICHIESTA =
+  "/Richieste/utente/addRichiesta";
+export const ENDPOINT_TUTTI_TIPO_RICHIESTA =
+  "/TipoRichiesta/getAllTipoRichiesta";
 
-export type PayloadRichiesta =
-  | RichiestaStraordinario
-  | RichiestaFerie
-  | RichiestaPermesso
-  | RichiestaMalattia;
+// --- Modello TipoRichiesta dal backend ---
 
-// --- Parametri e DTO ---
+export interface TipoRichiestaDTO {
+  idTipoRichiesta: number;
+  tipoRichiesta: string;
+  richiedeDocumenti: boolean;
+  richiedeCodice: boolean;
+}
 
-export type ParametriCostruzioneRichiesta = {
-  tipoPrincipale: "assenza" | "straordinari";
-  sottoTipo: string;
-  dataInizio: Date;
-  dataFine: Date;
-  idUtente: number;
-  stato?: StatoRichiesta;
+// --- Payload per la creazione di una nuova richiesta (nuovo endpoint) ---
+
+export type AddRichiestaPayload = {
+  dataInizio: string;
+  dataFine: string;
+  idTipoRichiesta: number;
+  nota: string;
 };
+
+// --- DTO e tipi ancora in uso per delete/update ---
 
 export type RisultatoPostDTO = {
   Esito: string;
@@ -60,30 +58,6 @@ export type InputAggiornamentoFerie = {
   StatoApprovazione: string;
 };
 
-export type DtoBase = {
-  id_richiesta: number;
-  id_utente: number;
-  data_inizio: string;
-  data_fine: string;
-  stato_approvazione: StatoRichiesta;
-};
-
-export type DtoRichiesta =
-  | (DtoBase & { tipo_permesso?: string })
-  | (DtoBase & { certificato_medico?: string });
-
-export type DtoAggiuntaFerie = {
-  DataInizio: string;
-  DataFine: string;
-  StatoApprovazione: string;
-};
-
-export type DtoAggiuntaPermesso = {
-  tipoPermesso: string;
-  dataInizio: string;
-  dataFine: string;
-};
-
 export type DtoAggiornamentoPermesso = {
   tipo: string;
   dataInizio: string;
@@ -92,26 +66,13 @@ export type DtoAggiornamentoPermesso = {
   idRichiesta: number;
 };
 
-// --- Type guards ---
-
-export const eRichiestaPermesso = (
-  payload: PayloadRichiesta,
-): payload is RichiestaPermesso =>
-  (payload as RichiestaPermesso).tipo_permesso !== undefined;
-
-export const eRichiestaMalattia = (
-  payload: PayloadRichiesta,
-): payload is RichiestaMalattia =>
-  (payload as RichiestaMalattia).certificato_medico !== undefined;
-
-// --- Helper per determinare la categoria di richiesta ---
+// --- Helper per determinare la categoria di richiesta (per delete/update routing) ---
 
 export type CategoriaRichiesta = "ferie" | "permesso" | "sconosciuto";
 
 export const determinaCategoriaRichiesta = (
   tipo?: string,
 ): CategoriaRichiesta => {
-  //console.log(tipo);
   const tipoMinuscolo = (tipo || "").toLowerCase();
   if (tipoMinuscolo.includes("ferie") || tipoMinuscolo === "") return "ferie";
   if (

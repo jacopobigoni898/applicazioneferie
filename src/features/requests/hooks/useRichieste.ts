@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   eliminaFeriePerId,
   aggiornaRichiesta,
-  recuperaFerieConToken,
+  recuperaTutteRichieste,
   InputAggiornamentoFerie,
 } from "../services/requestsService";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
@@ -40,9 +40,7 @@ export function useRichieste(tipo: TipoScheda = "inviate") {
     impostaInCaricamento(true);
     impostaErrore(null);
     try {
-      // Per ora usiamo lo stesso endpoint per inviate/ricevute;
-      // quando l'admin avrà un endpoint dedicato, `tipo` guiderà la scelta
-      const dati = await recuperaFerieConToken();
+      const dati = await recuperaTutteRichieste();
       impostaElementi(dati);
     } catch (err: unknown) {
       impostaErrore(estraiMessaggio(err, "Errore di caricamento"));

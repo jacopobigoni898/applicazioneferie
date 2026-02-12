@@ -1,54 +1,39 @@
 // Barrel file: re-export da tutti i moduli del servizio richieste.
 // I consumatori possono continuare a importare da qui senza cambiare nulla.
 
-// Tipi, DTO, type guards e costanti condivise
+// Tipi, DTO e costanti condivise
 export {
-  type PayloadRichiesta,
-  type ParametriCostruzioneRichiesta,
+  type TipoRichiestaDTO,
+  type AddRichiestaPayload,
   type RisultatoPostDTO,
   type RisultatoDeleteDTO,
   type InputAggiornamentoFerie,
-  type DtoBase,
-  type DtoRichiesta,
-  type DtoAggiuntaFerie,
-  type DtoAggiuntaPermesso,
   type DtoAggiornamentoPermesso,
   type CategoriaRichiesta,
-  eRichiestaPermesso,
-  eRichiestaMalattia,
   determinaCategoriaRichiesta,
 } from "./tipiRichieste";
 
 // Helper di serializzazione date
 export {
-  formattaDueCifre,
   aStringaIsoLocale,
-  aStringaDataOraConSpazio,
   formatoAnnoMeseGiorno,
 } from "./serializzazioneDate";
 
-// Costruzione payload e conversione a DTO
-export {
-  costruisciDtoAggiornamentoPermesso,
-  costruisciPayloadRichiesta,
-  mappaPayloadADto,
-} from "./costruttorePayload";
+// Costruzione DTO per aggiornamento
+export { costruisciDtoAggiornamentoPermesso } from "./costruttorePayload";
 
-// API Ferie
-export {
-  inviaFerieConToken,
-  recuperaFerieConToken,
-  eliminaFeriePerIdDiretto,
-  aggiornaFerie,
-} from "./apiFerie";
+// API Ferie (delete/update)
+export { eliminaFeriePerIdDiretto, aggiornaFerie } from "./apiFerie";
 
-// API Permessi
+// API Permessi (delete/update)
+export { eliminaPermessiPerId, aggiornaPermessi } from "./apiPermessi";
+
+// API Richieste (nuovi endpoint unificati)
 export {
-  inviaRichiesta,
-  eliminaPermessiPerId,
-  aggiornaPermessi,
-  aggiungiRichiestaPermessi,
-} from "./apiPermessi";
+  recuperaTipiRichiesta,
+  recuperaTutteRichieste,
+  aggiungiRichiesta,
+} from "./apiRichieste";
 
 // --- Funzioni di orchestrazione (dipendono da più moduli) ---
 
@@ -90,7 +75,6 @@ export const aggiornaRichiesta = async (
 
   if (categoria === "permesso") {
     const dtoPermesso = costruisciDtoAggiornamentoPermesso(payload, tipo);
-    console.log(dtoPermesso);
     return aggiornaPermessi(dtoPermesso);
   }
 
