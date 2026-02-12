@@ -22,13 +22,13 @@ import {
 } from "../services/requestsService";
 
 interface PropsModaleRichiesta {
-  visibile: boolean;
-  suChiusura: () => void;
-  dataInizio: Date | null;
-  dataFine: Date | null;
+  visibile: boolean; //visibilità modale
+  suChiusura: () => void; //callback chiusura modale
+  dataInizio: Date | null; //data inzio selezionata dal calendario
+  dataFine: Date | null; // Data fine selezionata dal calendario
   tipoPrincipale: "assenza" | "straordinari";
-  tipiRichiesta: TipoRichiestaDTO[];
-  suInvio: (dati: AddRichiestaPayload) => void;
+  tipiRichiesta: TipoRichiestaDTO[]; // Lista tipi dal backend (dropdown)
+  suInvio: (dati: AddRichiestaPayload) => void; // Callback di invio
 }
 
 // Modale di creazione richiesta (assenze/straordinari) che delega la logica a useFormRichiesta
@@ -166,9 +166,7 @@ const ModaleRichiesta = ({
 
                 <View style={stiliModaleRichiesta.rigaDate}>
                   <View style={stiliModaleRichiesta.casellaData}>
-                    <Text style={stiliModaleRichiesta.etichettaData}>
-                      Dal:
-                    </Text>
+                    <Text style={stiliModaleRichiesta.etichettaData}>Dal:</Text>
                     <Text style={stiliModaleRichiesta.valoreData}>
                       {formattaData(dataInizioForm)}
                     </Text>
