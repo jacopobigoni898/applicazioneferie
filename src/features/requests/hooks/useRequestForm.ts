@@ -110,6 +110,7 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
     null,
   );
   const [nota, impostaNota] = useState("");
+  const [codiceRichiesta, impostaCodiceRichiesta] = useState("");
   const [inFocus, impostaInFocus] = useState(false);
   const [orarioInizio, impostaOrarioInizio] = useState("09:00");
   const [orarioFine, impostaOrarioFine] = useState("18:00");
@@ -133,6 +134,17 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
       value: String(t.idTipoRichiesta),
     }));
   }, [parametri, tipiRichiestaBackend]);
+
+  // Determina se il tipo selezionato richiede codice o documenti
+  const tipoSelezionato = useMemo(() => {
+    if (parametri.modalita !== "crea" || idTipoRichiesta == null) return null;
+    return (tipiRichiestaBackend || []).find(
+      (t) => t.idTipoRichiesta === idTipoRichiesta,
+    ) ?? null;
+  }, [parametri, tipiRichiestaBackend, idTipoRichiesta]);
+
+  const richiedeCodice = tipoSelezionato?.richiedeCodice ?? false;
+  const richiedeDocumenti = tipoSelezionato?.richiedeDocumenti ?? false;
 
   // Chiudi tutti i picker
   const chiudiSelettori = () => {
@@ -188,6 +200,7 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
       impostaSottoTipo(null);
       impostaIdTipoRichiesta(null);
       impostaNota("");
+      impostaCodiceRichiesta("");
       impostaOrarioInizio("09:00");
       impostaOrarioFine("18:00");
       impostaTuttoIlGiorno(false);
@@ -282,6 +295,9 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
       dataFine: aStringaIsoLocale(dataFineFinale),
       idTipoRichiesta,
       nota,
+      ...(richiedeCodice && codiceRichiesta.trim() !== ""
+        ? { codiceRichiesta: codiceRichiesta.trim() }
+        : {}),
     };
     suInvio(payload);
   };
@@ -324,6 +340,10 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
     impostaIdTipoRichiesta,
     nota,
     impostaNota,
+    codiceRichiesta,
+    impostaCodiceRichiesta,
+    richiedeCodice,
+    richiedeDocumenti,
     inFocus,
     impostaInFocus,
     opzioniCorrente,

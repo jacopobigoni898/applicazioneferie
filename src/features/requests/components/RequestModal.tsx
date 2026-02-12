@@ -51,6 +51,10 @@ const ModaleRichiesta = ({
     impostaIdTipoRichiesta,
     nota,
     impostaNota,
+    codiceRichiesta,
+    impostaCodiceRichiesta,
+    richiedeCodice,
+    richiedeDocumenti,
     inFocus,
     impostaInFocus,
     dataInizio: dataInizioForm,
@@ -314,6 +318,46 @@ const ModaleRichiesta = ({
                       impostaInFocus(false);
                     }}
                   />
+
+                  {richiedeCodice && (
+                    <>
+                      <Text style={stiliModaleRichiesta.etichetta}>
+                        Codice Richiesta:
+                      </Text>
+                      <TextInput
+                        style={[
+                          stiliModaleRichiesta.menuATendina,
+                          { paddingHorizontal: 12, paddingVertical: 10 },
+                        ]}
+                        placeholder="Inserisci il codice"
+                        placeholderTextColor="#999"
+                        value={codiceRichiesta}
+                        onChangeText={impostaCodiceRichiesta}
+                      />
+                    </>
+                  )}
+
+                  {richiedeDocumenti && (
+                    <>
+                      <Text style={stiliModaleRichiesta.etichetta}>
+                        Documento:
+                      </Text>
+                      <View
+                        style={[
+                          stiliModaleRichiesta.menuATendina,
+                          {
+                            justifyContent: "center",
+                            alignItems: "center",
+                            paddingVertical: 10,
+                          },
+                        ]}
+                      >
+                        <Text style={{ color: "#999", fontSize: 14 }}>
+                          Caricamento documenti non ancora disponibile
+                        </Text>
+                      </View>
+                    </>
+                  )}
 
                   <Text style={stiliModaleRichiesta.etichetta}>Nota:</Text>
                   <TextInput

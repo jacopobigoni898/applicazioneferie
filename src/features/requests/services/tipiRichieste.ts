@@ -29,6 +29,7 @@ export type AddRichiestaPayload = {
   dataFine: string;
   idTipoRichiesta: number;
   nota: string;
+  codiceRichiesta?: string;
 };
 
 // --- DTO per le risposte ---
