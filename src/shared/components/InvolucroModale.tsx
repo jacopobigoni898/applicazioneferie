@@ -5,10 +5,12 @@ import {
   KeyboardAvoidingView,
   Modal,
   Platform,
+  StyleSheet,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { stiliModaleRichiesta } from "../../core/style/commonStyles";
+import { Spaziatura } from "../../core/theme/theme";
 
 interface PropsInvolucroModale {
   visibile: boolean;
@@ -43,7 +45,7 @@ const InvolucroModale = ({
             <View style={stiliModaleRichiesta.contenuto}>
               <View style={stiliModaleRichiesta.indicatoreManiglia} />
               {children}
-              <View style={{ height: 20 }} />
+              <View style={stili.spaziatureFondo} />
             </View>
           </KeyboardAvoidingView>
         </TouchableWithoutFeedback>
@@ -52,5 +54,9 @@ const InvolucroModale = ({
     {contenutoEsterno}
   </Modal>
 );
+
+const stili = StyleSheet.create({
+  spaziatureFondo: { height: Spaziatura.lg - 4 },
+});
 
 export default InvolucroModale;
