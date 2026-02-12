@@ -51,14 +51,12 @@ export default function ElementoRichiesta({
       <View style={stiliElementoRichiesta.accentoSinistra} />
       <View style={stiliElementoRichiesta.contenuto}>
         <Text style={stiliElementoRichiesta.titolo}>
-          {elemento.tipo_permesso || "Ferie"}
+          {elemento.tipo_permesso}
         </Text>
         <Text style={stiliElementoRichiesta.testoRiga}>
           Dal: {inizioFallback}
         </Text>
-        <Text style={stiliElementoRichiesta.testoRiga}>
-          Al: {fineFallback}
-        </Text>
+        <Text style={stiliElementoRichiesta.testoRiga}>Al: {fineFallback}</Text>
       </View>
 
       <View style={stiliElementoRichiesta.destra}>
