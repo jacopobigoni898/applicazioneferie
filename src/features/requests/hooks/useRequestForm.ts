@@ -295,10 +295,10 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
       dataFine: aStringaIsoLocale(dataFineFinale),
       idTipoRichiesta,
       nota,
-      ...(richiedeCodice && codiceRichiesta.trim() !== ""
-        ? { codiceRichiesta: codiceRichiesta.trim() }
-        : {}),
     };
+    if (richiedeCodice && codiceRichiesta.trim() !== "") {
+      payload.codiceRichiesta = codiceRichiesta.trim();
+    }
     suInvio(payload);
   };
 

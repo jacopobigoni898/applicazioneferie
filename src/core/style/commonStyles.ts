@@ -331,6 +331,10 @@ export const stiliModaleRichiesta = StyleSheet.create({
   selettoreIOS: {
     backgroundColor: Colori.superficie,
   },
+  testoSegnapostoDocumento: {
+    color: "#999",
+    fontSize: 14,
+  },
 });
 
 // Stili per il singolo elemento richiesta nella lista

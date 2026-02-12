@@ -352,7 +352,7 @@ const ModaleRichiesta = ({
                           },
                         ]}
                       >
-                        <Text style={{ color: "#999", fontSize: 14 }}>
+                        <Text style={stiliModaleRichiesta.testoSegnapostoDocumento}>
                           Caricamento documenti non ancora disponibile
                         </Text>
                       </View>
