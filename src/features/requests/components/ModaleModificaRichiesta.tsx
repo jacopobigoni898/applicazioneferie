@@ -17,7 +17,7 @@ import { Dropdown } from "react-native-element-dropdown";
 import { stiliModaleRichiesta } from "../../../core/style/commonStyles";
 import { Colori } from "../../../core/theme/theme";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
-import { InputAggiornamentoFerie } from "../services/requestsService";
+import { InputAggiornamentoRichiesta } from "../services/requestsService";
 import { StatoRichiesta } from "../../../domain/entities/RequestStatus";
 import { useFormRichiesta } from "../hooks/useRequestForm";
 
@@ -32,7 +32,7 @@ export interface PropsModaleModifica {
   visibile: boolean;
   elemento: RichiestaFerie | null;
   suChiusura: () => void;
-  suConferma: (payload: InputAggiornamentoFerie) => void;
+  suConferma: (payload: InputAggiornamentoRichiesta) => void;
   inSalvataggio?: boolean;
 }
 

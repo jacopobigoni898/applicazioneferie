@@ -4,7 +4,7 @@ import { Platform } from "react-native";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { StatoRichiesta } from "../../../domain/entities/RequestStatus";
 import {
-  InputAggiornamentoFerie,
+  InputAggiornamentoRichiesta,
   TipoRichiestaDTO,
   AddRichiestaPayload,
 } from "../services/requestsService";
@@ -32,7 +32,7 @@ export type ParametriFormRichiesta =
       dataFine: Date | string | null;
       idRichiesta: number;
       statoIniziale?: StatoRichiesta;
-      suInvio: (payload: InputAggiornamentoFerie) => void;
+      suInvio: (payload: InputAggiornamentoRichiesta) => void;
     };
 
 // Helper: formatta una data per la visualizzazione
@@ -300,7 +300,7 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
       return;
     }
 
-    const payload: InputAggiornamentoFerie = {
+    const payload: InputAggiornamentoRichiesta = {
       IdRichiesta: parametri.idRichiesta,
       DataInizio: formatoAnnoMeseGiorno(dataInizio),
       DataFine: formatoAnnoMeseGiorno(dataFine),

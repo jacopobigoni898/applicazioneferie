@@ -1,4 +1,4 @@
-// Servizio API per i nuovi endpoint unificati delle richieste.
+// Servizio API per gli endpoint unificati delle richieste.
 import { http } from "../../../api/httpClient";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
 import { mappaRispostaFerie } from "../mappers/holidayMapper";
@@ -7,8 +7,12 @@ import {
   TipoRichiestaDTO,
   AddRichiestaPayload,
   RisultatoPostDTO,
+  RisultatoDeleteDTO,
+  InputAggiornamentoRichiesta,
   ENDPOINT_TUTTE_RICHIESTE,
   ENDPOINT_AGGIUNGI_RICHIESTA,
+  ENDPOINT_AGGIORNA_RICHIESTA,
+  ENDPOINT_ELIMINA_RICHIESTA,
   ENDPOINT_TUTTI_TIPO_RICHIESTA,
 } from "./tipiRichieste";
 
@@ -51,4 +55,25 @@ export const aggiungiRichiesta = async (
         : [],
     Motivazione: data?.motivazione ?? data?.Motivazione ?? null,
   };
+};
+
+// Elimina una richiesta per ID
+export const eliminaRichiesta = async (
+  id: number,
+): Promise<RisultatoDeleteDTO> => {
+  const { data } = await http.delete<any>(
+    `${ENDPOINT_ELIMINA_RICHIESTA}?id=${id}`,
+  );
+  return {
+    Esito: String(data?.esito ?? data?.Esito ?? ""),
+    Motivazione: data?.motivazione ?? data?.Motivazione ?? null,
+  };
+};
+
+// Aggiorna una richiesta esistente
+export const aggiornaRichiesta = async (
+  payload: InputAggiornamentoRichiesta,
+) => {
+  const { data } = await http.put(ENDPOINT_AGGIORNA_RICHIESTA, payload);
+  return data;
 };
