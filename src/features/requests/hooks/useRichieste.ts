@@ -3,10 +3,10 @@
 // e aggiornamento con rollback in caso di errore.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  eliminaFeriePerId,
+  eliminaRichiesta,
   aggiornaRichiesta,
   recuperaTutteRichieste,
-  InputAggiornamentoFerie,
+  InputAggiornamentoRichiesta,
 } from "../services/requestsService";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
 import { formattaStringaData } from "../utils/formattaData";
@@ -30,8 +30,6 @@ const estraiMessaggio = (err: unknown, fallback: string): string => {
 
 export function useRichieste(tipo: TipoScheda = "inviate") {
   const [elementi, impostaElementi] = useState<RichiestaFerie[]>([]);
-  const elementiRef = useRef<RichiestaFerie[]>(elementi);
-  elementiRef.current = elementi;
   const [inCaricamento, impostaInCaricamento] = useState(false);
   const [errore, impostaErrore] = useState<string | null>(null);
 
@@ -69,17 +67,13 @@ export function useRichieste(tipo: TipoScheda = "inviate") {
     impostaErrore(null);
     let precedenti: RichiestaFerie[] = [];
 
-    const tipoPerEliminazione = elementiRef.current.find(
-      (el) => el.id_richiesta === id,
-    )?.tipo_permesso;
-
     impostaElementi((correnti) => {
       precedenti = correnti;
       return correnti.filter((el) => el.id_richiesta !== id);
     });
 
     try {
-      await eliminaFeriePerId(id, tipoPerEliminazione);
+      await eliminaRichiesta(id);
     } catch (err: unknown) {
       impostaErrore(estraiMessaggio(err, "Errore eliminazione"));
       impostaElementi(precedenti); // rollback
@@ -87,37 +81,36 @@ export function useRichieste(tipo: TipoScheda = "inviate") {
   }, []);
 
   // Aggiorna una richiesta con aggiornamento ottimistico e rollback
-  const aggiorna = useCallback(async (payload: InputAggiornamentoFerie) => {
-    impostaErrore(null);
-    let precedenti: RichiestaFerie[] = [];
+  const aggiorna = useCallback(
+    async (payload: InputAggiornamentoRichiesta) => {
+      impostaErrore(null);
+      let precedenti: RichiestaFerie[] = [];
 
-    const tipoPerAggiornamento = elementiRef.current.find(
-      (el) => el.id_richiesta === payload.IdRichiesta,
-    )?.tipo_permesso;
-
-    impostaElementi((correnti) => {
-      precedenti = correnti;
-      return correnti.map((el) => {
-        if (el.id_richiesta === payload.IdRichiesta) {
-          return {
-            ...el,
-            data_inizio: new Date(payload.DataInizio),
-            data_fine: new Date(payload.DataFine),
-            stato_approvazione: payload.StatoApprovazione as any,
-          };
-        }
-        return el;
+      impostaElementi((correnti) => {
+        precedenti = correnti;
+        return correnti.map((el) => {
+          if (el.id_richiesta === payload.IdRichiesta) {
+            return {
+              ...el,
+              data_inizio: new Date(payload.DataInizio),
+              data_fine: new Date(payload.DataFine),
+              stato_approvazione: payload.StatoApprovazione as any,
+            };
+          }
+          return el;
+        });
       });
-    });
 
-    try {
-      await aggiornaRichiesta(payload, tipoPerAggiornamento);
-    } catch (err: unknown) {
-      impostaErrore(estraiMessaggio(err, "Errore aggiornamento"));
-      impostaElementi(precedenti); // rollback
-      throw err; // ri-lanciato per la modale
-    }
-  }, []);
+      try {
+        await aggiornaRichiesta(payload);
+      } catch (err: unknown) {
+        impostaErrore(estraiMessaggio(err, "Errore aggiornamento"));
+        impostaElementi(precedenti); // rollback
+        throw err; // ri-lanciato per la modale
+      }
+    },
+    [],
+  );
 
   return {
     elementi,

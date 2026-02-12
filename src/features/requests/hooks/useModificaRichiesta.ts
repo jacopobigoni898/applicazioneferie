@@ -4,10 +4,10 @@
 import { useCallback, useState } from "react";
 import { Alert } from "react-native";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
-import { InputAggiornamentoFerie } from "../services/requestsService";
+import { InputAggiornamentoRichiesta } from "../services/requestsService";
 
 type FunzioneAggiornamento = (
-  payload: InputAggiornamentoFerie,
+  payload: InputAggiornamentoRichiesta,
 ) => Promise<void>;
 
 type ContestoModifica = {
@@ -37,7 +37,7 @@ export function useModificaRichiesta() {
 
   // Conferma la modifica e gestisce errori
   const confermaModifica = useCallback(
-    async (payload: InputAggiornamentoFerie) => {
+    async (payload: InputAggiornamentoRichiesta) => {
       if (!contesto) return;
       try {
         impostaInSalvataggio(true);
