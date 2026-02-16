@@ -58,6 +58,13 @@ const ModaleModificaRichiesta = ({
     impostaStato,
     formattaData,
     gestisciInvioModifica,
+    orarioInizio,
+    orarioFine,
+    apriSelettoreOrario,
+    gestisciCambioOrario,
+    mostraSelettoreInizio: mostraSelettoreOrarioInizio,
+    mostraSelettoreFine: mostraSelettoreOrarioFine,
+    chiudiSelettori,
   } = useFormRichiesta({
     modalita: "modifica",
     visibile,
@@ -203,6 +210,69 @@ const ModaleModificaRichiesta = ({
     );
   };
 
+  // Renderizza il picker orario per iOS
+  const renderizzaSelettoreOrario = () => {
+    if (Platform.OS !== "ios") return null;
+    if (!mostraSelettoreOrarioInizio && !mostraSelettoreOrarioFine) return null;
+
+    const eInizio = mostraSelettoreOrarioInizio;
+    const valore = eInizio
+      ? dataInizio || new Date()
+      : dataFine || new Date();
+    const tipo = eInizio ? "inizio" : "fine";
+
+    return (
+      <Modal
+        transparent
+        animationType="fade"
+        visible={mostraSelettoreOrarioInizio || mostraSelettoreOrarioFine}
+        onRequestClose={chiudiSelettori}
+      >
+        <TouchableWithoutFeedback onPress={chiudiSelettori}>
+          <View style={stiliModaleRichiesta.sovrapposizioneSelettore}>
+            <TouchableWithoutFeedback>
+              <View style={stiliModaleRichiesta.foglioSelettore}>
+                <View style={stiliModaleRichiesta.intestazioneSelettore}>
+                  <Text style={stiliModaleRichiesta.titoloSelettore}>
+                    Seleziona orario
+                  </Text>
+                  <TouchableOpacity onPress={chiudiSelettori}>
+                    <Text style={stiliModaleRichiesta.chiudiSelettore}>
+                      Chiudi
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                <DateTimePicker
+                  value={valore}
+                  mode="time"
+                  is24Hour
+                  display={Platform.OS === "ios" ? "spinner" : "clock"}
+                  minuteInterval={Platform.OS === "ios" ? 30 : undefined}
+                  themeVariant="light"
+                  textColor={Colori.testoPrimario}
+                  onChange={(evento, data) => {
+                    gestisciCambioOrario(tipo, evento, data || valore);
+                  }}
+                  style={stiliModaleRichiesta.selettoreIOS}
+                />
+
+                <TouchableOpacity
+                  style={stiliModaleRichiesta.confermaSelettore}
+                  onPress={chiudiSelettori}
+                >
+                  <Text style={stiliModaleRichiesta.testoConfermaSelettore}>
+                    OK
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+    );
+  };
+
   return (
     <Modal
       animationType="slide"
@@ -255,6 +325,36 @@ const ModaleModificaRichiesta = ({
                     >
                       <Text style={stiliModaleRichiesta.valoreData}>
                         {formattaData(dataFine)}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <Text style={stiliModaleRichiesta.etichetta}>Orario</Text>
+                <View style={stiliModaleRichiesta.rigaOrario}>
+                  <View style={stiliModaleRichiesta.casellaOrario}>
+                    <Text style={stiliModaleRichiesta.etichettaData}>
+                      Inizio
+                    </Text>
+                    <TouchableOpacity
+                      style={stiliModaleRichiesta.inputOrario}
+                      onPress={() => apriSelettoreOrario("inizio")}
+                    >
+                      <Text style={stiliModaleRichiesta.testoOrario}>
+                        {orarioInizio}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View style={stiliModaleRichiesta.casellaOrario}>
+                    <Text style={stiliModaleRichiesta.etichettaData}>
+                      Fine
+                    </Text>
+                    <TouchableOpacity
+                      style={stiliModaleRichiesta.inputOrario}
+                      onPress={() => apriSelettoreOrario("fine")}
+                    >
+                      <Text style={stiliModaleRichiesta.testoOrario}>
+                        {orarioFine}
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -316,6 +416,7 @@ const ModaleModificaRichiesta = ({
 
                 {renderizzaSelettoreData("inizio")}
                 {renderizzaSelettoreData("fine")}
+                {renderizzaSelettoreOrario()}
                 <View style={{ height: 20 }} />
               </View>
             </KeyboardAvoidingView>
