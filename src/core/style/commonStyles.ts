@@ -341,7 +341,7 @@ export const stiliModaleRichiesta = StyleSheet.create({
 export const stiliElementoRichiesta = StyleSheet.create({
   scheda: {
     marginHorizontal: 16,
-    backgroundColor: Colori.superficie,
+    backgroundColor: Colori.superficiecard,
     borderRadius: 18,
     padding: 16,
     marginBottom: 14,

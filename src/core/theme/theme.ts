@@ -7,6 +7,7 @@ export const Colori = {
   intestazione: "#ffffff",
   sfondo: "#ffffff",
   superficie: "#f9f9f9",
+  superficiecard: "#ffefd9",
   testoPrimario: "#000000",
   testoSecondario: "#808080",
   errore: "#d32f2f",
