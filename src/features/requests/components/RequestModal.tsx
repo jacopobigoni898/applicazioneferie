@@ -12,6 +12,7 @@ import {
   TextInput,
   ScrollView,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Dropdown } from "react-native-element-dropdown";
 import { Colori } from "../../../core/theme/theme";
@@ -148,34 +149,42 @@ const ModaleRichiesta = ({
   return (
     <Modal
       animationType="slide"
-      transparent={true}
+      transparent={false}
       visible={visibile}
       onRequestClose={suChiusura}
     >
-      <TouchableWithoutFeedback onPress={suChiusura}>
-        <View style={stiliModaleRichiesta.sovrapposizione}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={stiliModaleRichiesta.contenitoreModale}
-            keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
+      <View style={stiliModaleRichiesta.sovrapposizione}>
+        <View style={stiliModaleRichiesta.intestazionePagina}>
+          <TouchableOpacity
+            style={stiliModaleRichiesta.pulsanteIndietro}
+            onPress={suChiusura}
           >
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <View style={stiliModaleRichiesta.contenuto}>
-                <View style={stiliModaleRichiesta.indicatoreManiglia} />
-                <ScrollView
-                  ref={scrollRef}
-                  showsVerticalScrollIndicator={false}
-                  keyboardShouldPersistTaps="handled"
-                  bounces={false}
-                >
-                  <Text style={stiliModaleRichiesta.titoloIntestazione}>
-                    Nuova Richiesta
-                  </Text>
-                  <Text style={stiliModaleRichiesta.sottointestazione}>
-                    {tipoPrincipale === "assenza"
-                      ? "Assenza / Permesso"
-                      : "Straordinario"}
-                  </Text>
+            <Ionicons name="chevron-back" size={24} color={Colori.primario} />
+            <Text style={stiliModaleRichiesta.testoIndietro}>Indietro</Text>
+          </TouchableOpacity>
+        </View>
+
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={stiliModaleRichiesta.contenitoreModale}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={stiliModaleRichiesta.contenuto}>
+              <ScrollView
+                ref={scrollRef}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                bounces={false}
+              >
+                <Text style={stiliModaleRichiesta.titoloIntestazione}>
+                  Nuova Richiesta
+                </Text>
+                <Text style={stiliModaleRichiesta.sottointestazione}>
+                  {tipoPrincipale === "assenza"
+                    ? "Assenza / Permesso"
+                    : "Straordinario"}
+                </Text>
 
                   <View style={stiliModaleRichiesta.rigaDate}>
                     <View style={stiliModaleRichiesta.casellaData}>
@@ -403,13 +412,12 @@ const ModaleRichiesta = ({
                     </TouchableOpacity>
                   </View>
 
-                  <View style={{ height: 20 }} />
-                </ScrollView>
-              </View>
-            </TouchableWithoutFeedback>
-          </KeyboardAvoidingView>
-        </View>
-      </TouchableWithoutFeedback>
+                <View style={{ height: 20 }} />
+              </ScrollView>
+            </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+      </View>
       {renderSelettoreOrario()}
     </Modal>
   );
