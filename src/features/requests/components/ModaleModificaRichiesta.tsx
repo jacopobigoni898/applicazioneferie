@@ -5,11 +5,13 @@ import {
   KeyboardAvoidingView,
   Modal,
   Platform,
+  ScrollView,
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
@@ -276,153 +278,164 @@ const ModaleModificaRichiesta = ({
   return (
     <Modal
       animationType="slide"
-      transparent
+      transparent={false}
       visible={visibile}
       onRequestClose={suChiusura}
     >
-      <TouchableWithoutFeedback onPress={suChiusura}>
-        <View style={stiliModaleRichiesta.sovrapposizione}>
-          <TouchableWithoutFeedback>
-            <KeyboardAvoidingView
-              behavior={Platform.OS === "ios" ? "padding" : "height"}
-              style={stiliModaleRichiesta.contenitoreModale}
-            >
-              <View style={stiliModaleRichiesta.contenuto}>
-                <View style={stiliModaleRichiesta.indicatoreManiglia} />
-                <Text style={stiliModaleRichiesta.titoloIntestazione}>
-                  Modifica richiesta
-                </Text>
-                {elemento?.tipo_permesso ? (
-                  <Text style={stiliModaleRichiesta.sottointestazione}>
-                    {elemento.tipo_permesso}
-                  </Text>
-                ) : null}
-
-                <Text style={stiliModaleRichiesta.etichetta}>Periodo</Text>
-                <View style={stiliModaleRichiesta.rigaDate}>
-                  <View style={stiliModaleRichiesta.casellaData}>
-                    <Text style={stiliModaleRichiesta.etichettaData}>Dal:</Text>
-                    <TouchableOpacity
-                      style={stiliModaleRichiesta.inputOrario}
-                      onPress={() => {
-                        impostaDataInizioTemp(dataInizio ?? new Date());
-                        impostaMostraSelettoreInizio(true);
-                      }}
-                    >
-                      <Text style={stiliModaleRichiesta.valoreData}>
-                        {formattaData(dataInizio)}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  <View style={stiliModaleRichiesta.casellaData}>
-                    <Text style={stiliModaleRichiesta.etichettaData}>Al:</Text>
-                    <TouchableOpacity
-                      style={stiliModaleRichiesta.inputOrario}
-                      onPress={() => {
-                        impostaDataFineTemp(dataFine ?? new Date());
-                        impostaMostraSelettoreFine(true);
-                      }}
-                    >
-                      <Text style={stiliModaleRichiesta.valoreData}>
-                        {formattaData(dataFine)}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-
-                <Text style={stiliModaleRichiesta.etichetta}>Orario</Text>
-                <View style={stiliModaleRichiesta.rigaOrario}>
-                  <View style={stiliModaleRichiesta.casellaOrario}>
-                    <Text style={stiliModaleRichiesta.etichettaData}>
-                      Inizio
-                    </Text>
-                    <TouchableOpacity
-                      style={stiliModaleRichiesta.inputOrario}
-                      onPress={() => apriSelettoreOrario("inizio")}
-                    >
-                      <Text style={stiliModaleRichiesta.testoOrario}>
-                        {orarioInizio}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  <View style={stiliModaleRichiesta.casellaOrario}>
-                    <Text style={stiliModaleRichiesta.etichettaData}>
-                      Fine
-                    </Text>
-                    <TouchableOpacity
-                      style={stiliModaleRichiesta.inputOrario}
-                      onPress={() => apriSelettoreOrario("fine")}
-                    >
-                      <Text style={stiliModaleRichiesta.testoOrario}>
-                        {orarioFine}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-
-                <Text style={stiliModaleRichiesta.etichetta}>
-                  Stato approvazione
-                </Text>
-                <Dropdown
-                  style={[
-                    stiliModaleRichiesta.menuATendina,
-                    inFocus && { borderColor: Colori.primario },
-                  ]}
-                  placeholderStyle={stiliModaleRichiesta.stileSegnaposto}
-                  selectedTextStyle={stiliModaleRichiesta.stileTestoSelezionato}
-                  data={OPZIONI_STATO}
-                  labelField="etichetta"
-                  valueField="valore"
-                  placeholder="Seleziona..."
-                  value={stato}
-                  onFocus={() => impostaInFocus(true)}
-                  onBlur={() => impostaInFocus(false)}
-                  onChange={(voce) => {
-                    impostaStato(voce.valore as StatoRichiesta);
-                    impostaInFocus(false);
-                  }}
-                />
-
-                <Text style={stiliModaleRichiesta.sottointestazione}>
-                  {eGiornoSingolo
-                    ? "Richiesta singolo giorno"
-                    : "Richiesta multi giorno"}
-                </Text>
-
-                <View style={stiliModaleRichiesta.rigaPulsanti}>
-                  <TouchableOpacity
-                    style={stiliModaleRichiesta.pulsanteAnnulla}
-                    onPress={suChiusura}
-                    disabled={inSalvataggio}
-                  >
-                    <Text style={stiliModaleRichiesta.testoPulsanteAnnulla}>
-                      Annulla
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[
-                      stiliModaleRichiesta.pulsanteConferma,
-                      inSalvataggio &&
-                        stiliModaleRichiesta.pulsanteDisabilitato,
-                    ]}
-                    onPress={gestisciInvioModifica}
-                    disabled={inSalvataggio}
-                  >
-                    <Text style={stiliModaleRichiesta.testoPulsanteConferma}>
-                      {inSalvataggio ? "Salvataggio..." : "Salva"}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-                {renderizzaSelettoreData("inizio")}
-                {renderizzaSelettoreData("fine")}
-                {renderizzaSelettoreOrario()}
-                <View style={{ height: 20 }} />
-              </View>
-            </KeyboardAvoidingView>
-          </TouchableWithoutFeedback>
+      <View style={stiliModaleRichiesta.sovrapposizione}>
+        <View style={stiliModaleRichiesta.intestazionePagina}>
+          <TouchableOpacity
+            style={stiliModaleRichiesta.pulsanteIndietro}
+            onPress={suChiusura}
+            disabled={inSalvataggio}
+          >
+            <Ionicons name="chevron-back" size={24} color={Colori.primario} />
+            <Text style={stiliModaleRichiesta.testoIndietro}>Indietro</Text>
+          </TouchableOpacity>
         </View>
-      </TouchableWithoutFeedback>
+
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={stiliModaleRichiesta.contenitoreModale}
+        >
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            bounces={false}
+            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}
+          >
+            <Text style={stiliModaleRichiesta.titoloIntestazione}>
+              Modifica richiesta
+            </Text>
+            {elemento?.tipo_permesso ? (
+              <Text style={stiliModaleRichiesta.sottointestazione}>
+                {elemento.tipo_permesso}
+              </Text>
+            ) : null}
+
+            <Text style={stiliModaleRichiesta.etichetta}>Periodo</Text>
+            <View style={stiliModaleRichiesta.rigaDate}>
+              <View style={stiliModaleRichiesta.casellaData}>
+                <Text style={stiliModaleRichiesta.etichettaData}>Dal:</Text>
+                <TouchableOpacity
+                  style={stiliModaleRichiesta.inputOrario}
+                  onPress={() => {
+                    impostaDataInizioTemp(dataInizio ?? new Date());
+                    impostaMostraSelettoreInizio(true);
+                  }}
+                >
+                  <Text style={stiliModaleRichiesta.valoreData}>
+                    {formattaData(dataInizio)}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <View style={stiliModaleRichiesta.casellaData}>
+                <Text style={stiliModaleRichiesta.etichettaData}>Al:</Text>
+                <TouchableOpacity
+                  style={stiliModaleRichiesta.inputOrario}
+                  onPress={() => {
+                    impostaDataFineTemp(dataFine ?? new Date());
+                    impostaMostraSelettoreFine(true);
+                  }}
+                >
+                  <Text style={stiliModaleRichiesta.valoreData}>
+                    {formattaData(dataFine)}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <Text style={stiliModaleRichiesta.etichetta}>Orario</Text>
+            <View style={stiliModaleRichiesta.rigaOrario}>
+              <View style={stiliModaleRichiesta.casellaOrario}>
+                <Text style={stiliModaleRichiesta.etichettaData}>
+                  Inizio
+                </Text>
+                <TouchableOpacity
+                  style={stiliModaleRichiesta.inputOrario}
+                  onPress={() => apriSelettoreOrario("inizio")}
+                >
+                  <Text style={stiliModaleRichiesta.testoOrario}>
+                    {orarioInizio}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <View style={stiliModaleRichiesta.casellaOrario}>
+                <Text style={stiliModaleRichiesta.etichettaData}>
+                  Fine
+                </Text>
+                <TouchableOpacity
+                  style={stiliModaleRichiesta.inputOrario}
+                  onPress={() => apriSelettoreOrario("fine")}
+                >
+                  <Text style={stiliModaleRichiesta.testoOrario}>
+                    {orarioFine}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <Text style={stiliModaleRichiesta.etichetta}>
+              Stato approvazione
+            </Text>
+            <Dropdown
+              style={[
+                stiliModaleRichiesta.menuATendina,
+                inFocus && { borderColor: Colori.primario },
+              ]}
+              placeholderStyle={stiliModaleRichiesta.stileSegnaposto}
+              selectedTextStyle={stiliModaleRichiesta.stileTestoSelezionato}
+              data={OPZIONI_STATO}
+              labelField="etichetta"
+              valueField="valore"
+              placeholder="Seleziona..."
+              value={stato}
+              onFocus={() => impostaInFocus(true)}
+              onBlur={() => impostaInFocus(false)}
+              onChange={(voce) => {
+                impostaStato(voce.valore as StatoRichiesta);
+                impostaInFocus(false);
+              }}
+            />
+
+            <Text style={stiliModaleRichiesta.sottointestazione}>
+              {eGiornoSingolo
+                ? "Richiesta singolo giorno"
+                : "Richiesta multi giorno"}
+            </Text>
+
+            <View style={stiliModaleRichiesta.rigaPulsanti}>
+              <TouchableOpacity
+                style={stiliModaleRichiesta.pulsanteAnnulla}
+                onPress={suChiusura}
+                disabled={inSalvataggio}
+              >
+                <Text style={stiliModaleRichiesta.testoPulsanteAnnulla}>
+                  Annulla
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  stiliModaleRichiesta.pulsanteConferma,
+                  inSalvataggio &&
+                    stiliModaleRichiesta.pulsanteDisabilitato,
+                ]}
+                onPress={gestisciInvioModifica}
+                disabled={inSalvataggio}
+              >
+                <Text style={stiliModaleRichiesta.testoPulsanteConferma}>
+                  {inSalvataggio ? "Salvataggio..." : "Salva"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {renderizzaSelettoreData("inizio")}
+            {renderizzaSelettoreData("fine")}
+            {renderizzaSelettoreOrario()}
+            <View style={{ height: 20 }} />
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </View>
     </Modal>
   );
 };
