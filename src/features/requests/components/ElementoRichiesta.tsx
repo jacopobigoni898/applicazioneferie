@@ -48,18 +48,12 @@ export default function ElementoRichiesta({
 
   return (
     <View style={stiliElementoRichiesta.scheda}>
-      <View style={stiliElementoRichiesta.accentoSinistra} />
-      <View style={stiliElementoRichiesta.contenuto}>
-        <Text style={stiliElementoRichiesta.titolo}>
+      {/* Riga superiore: icona + titolo + badge */}
+      <View style={stiliElementoRichiesta.intestazione}>
+        <View style={stiliElementoRichiesta.accentoSinistra} />
+        <Text style={stiliElementoRichiesta.titolo} numberOfLines={1}>
           {elemento.tipo_permesso}
         </Text>
-        <Text style={stiliElementoRichiesta.testoRiga}>
-          Dal: {inizioFallback}
-        </Text>
-        <Text style={stiliElementoRichiesta.testoRiga}>Al: {fineFallback}</Text>
-      </View>
-
-      <View style={stiliElementoRichiesta.destra}>
         <View
           style={[
             stiliElementoRichiesta.badge,
@@ -70,19 +64,32 @@ export default function ElementoRichiesta({
             {elemento.stato_approvazione}
           </Text>
         </View>
-        <View style={stiliElementoRichiesta.azioniContenitore}>
-          <TouchableOpacity
-            onPress={() => suModifica?.(elemento)}
-            style={stiliElementoRichiesta.azioneModifica}
-          >
-            <Text style={stiliElementoRichiesta.testoModifica}>Modifica</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => suEliminazione?.(elemento.id_richiesta)}
-          >
-            <Text style={stiliElementoRichiesta.testoElimina}>Elimina</Text>
-          </TouchableOpacity>
-        </View>
+      </View>
+
+      {/* Date */}
+      <View style={stiliElementoRichiesta.sezioneDate}>
+        <Text style={stiliElementoRichiesta.testoRiga}>
+          Dal: {inizioFallback}
+        </Text>
+        <Text style={stiliElementoRichiesta.testoRiga}>Al: {fineFallback}</Text>
+      </View>
+
+      {/* Azioni */}
+      <View style={stiliElementoRichiesta.azioniContenitore}>
+        <TouchableOpacity
+          onPress={() => suModifica?.(elemento)}
+          style={stiliElementoRichiesta.azioneModifica}
+          activeOpacity={0.7}
+        >
+          <Text style={stiliElementoRichiesta.testoModifica}>Modifica</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => suEliminazione?.(elemento.id_richiesta)}
+          style={stiliElementoRichiesta.azioneElimina}
+          activeOpacity={0.7}
+        >
+          <Text style={stiliElementoRichiesta.testoElimina}>Elimina</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
