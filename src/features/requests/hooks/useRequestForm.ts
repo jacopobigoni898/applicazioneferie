@@ -9,7 +9,6 @@ import {
   AddRichiestaPayload,
 } from "../services/requestsService";
 import {
-  formatoAnnoMeseGiorno,
   aStringaIsoLocale,
 } from "../services/serializzazioneDate";
 
@@ -157,7 +156,6 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
     evento: any,
     dataSelezionata?: Date,
   ) => {
-    if (parametri.modalita !== "crea") return;
     if (Platform.OS === "ios" && evento?.type === "dismissed") return;
     const dataPresa = dataSelezionata || new Date();
     const arrotondata = arrotondaAMezzora(dataPresa);
@@ -170,8 +168,6 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
   };
 
   const apriSelettoreOrario = (tipo: "inizio" | "fine") => {
-    if (parametri.modalita !== "crea") return;
-
     if (Platform.OS === "android") {
       DateTimePickerAndroid.open({
         value:
@@ -201,17 +197,27 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
       impostaIdTipoRichiesta(null);
       impostaNota("");
       impostaCodiceRichiesta("");
-      impostaOrarioInizio("09:00");
-      impostaOrarioFine("18:00");
       impostaTuttoIlGiorno(false);
       chiudiSelettori();
 
-      impostaDataInizio(
-        parametri.dataInizio ? parsaData(parametri.dataInizio) : null,
-      );
-      impostaDataFine(
-        parametri.dataFine ? parsaData(parametri.dataFine) : null,
-      );
+      const dataInizioParsata = parametri.dataInizio ? parsaData(parametri.dataInizio) : null;
+      const dataFineParsata = parametri.dataFine ? parsaData(parametri.dataFine) : null;
+
+      if (parametri.modalita === "modifica") {
+        // Estrai orario dalle date esistenti della richiesta
+        const oreInizio = dataInizioParsata ? String(dataInizioParsata.getHours()).padStart(2, "0") : "09";
+        const minInizio = dataInizioParsata ? String(dataInizioParsata.getMinutes()).padStart(2, "0") : "00";
+        const oreFine = dataFineParsata ? String(dataFineParsata.getHours()).padStart(2, "0") : "18";
+        const minFine = dataFineParsata ? String(dataFineParsata.getMinutes()).padStart(2, "0") : "00";
+        impostaOrarioInizio(`${oreInizio}:${minInizio}`);
+        impostaOrarioFine(`${oreFine}:${minFine}`);
+      } else {
+        impostaOrarioInizio("09:00");
+        impostaOrarioFine("18:00");
+      }
+
+      impostaDataInizio(dataInizioParsata);
+      impostaDataFine(dataFineParsata);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -309,17 +315,36 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
       alert("Date non valide!");
       return;
     }
-    if (dataFine < dataInizio) {
+
+    const inizioParsato = parsaOrario(orarioInizio);
+    const fineParsata = parsaOrario(orarioFine);
+    if (!inizioParsato || !fineParsata) {
+      alert("Inserisci orari validi nel formato HH:MM");
+      return;
+    }
+
+    const dataInizioFinale = applicaOrarioAData(
+      new Date(dataInizio.getTime()),
+      inizioParsato.ora,
+      inizioParsato.minuto,
+    );
+    const dataFineFinale = applicaOrarioAData(
+      new Date(dataFine.getTime()),
+      fineParsata.ora,
+      fineParsata.minuto,
+    );
+
+    if (dataFineFinale < dataInizioFinale) {
       alert(
-        "La data di fine deve essere successiva o uguale a quella di inizio",
+        "La data/ora di fine deve essere successiva o uguale a quella di inizio",
       );
       return;
     }
 
     const payload: InputAggiornamentoRichiesta = {
       IdRichiesta: parametri.idRichiesta,
-      DataInizio: formatoAnnoMeseGiorno(dataInizio),
-      DataFine: formatoAnnoMeseGiorno(dataFine),
+      DataInizio: aStringaIsoLocale(dataInizioFinale),
+      DataFine: aStringaIsoLocale(dataFineFinale),
       StatoApprovazione: stato,
     };
 
@@ -354,7 +379,7 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
     impostaDataInizio,
     impostaDataFine,
 
-    // Orari (solo creazione)
+    // Orari
     orarioInizio,
     orarioFine,
     mostraSelettoreInizio,
