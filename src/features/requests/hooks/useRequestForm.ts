@@ -209,8 +209,11 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
         const minInizio = dataInizioParsata ? String(dataInizioParsata.getMinutes()).padStart(2, "0") : "00";
         const oreFine = dataFineParsata ? String(dataFineParsata.getHours()).padStart(2, "0") : "18";
         const minFine = dataFineParsata ? String(dataFineParsata.getMinutes()).padStart(2, "0") : "00";
-        impostaOrarioInizio(`${oreInizio}:${minInizio}`);
-        impostaOrarioFine(`${oreFine}:${minFine}`);
+        // Se entrambi gli orari sono 00:00, usa valori di default (dati legacy senza orario)
+        const inizioEZero = oreInizio === "00" && minInizio === "00";
+        const fineEZero = oreFine === "00" && minFine === "00";
+        impostaOrarioInizio(inizioEZero && fineEZero ? "09:00" : `${oreInizio}:${minInizio}`);
+        impostaOrarioFine(inizioEZero && fineEZero ? "18:00" : `${oreFine}:${minFine}`);
       } else {
         impostaOrarioInizio("09:00");
         impostaOrarioFine("18:00");
