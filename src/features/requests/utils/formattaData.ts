@@ -16,9 +16,11 @@ const opzioniOrario: Intl.DateTimeFormatOptions = {
 export function formattaStringaData(grezzo?: string | Date | null): string {
   if (!grezzo) return "";
 
-  // Se è già un oggetto Date, formatta direttamente
+  // Se è già un oggetto Date, formatta data e orario
   if (grezzo instanceof Date) {
-    return new Intl.DateTimeFormat("it-IT", opzioniData).format(grezzo);
+    const parteData = new Intl.DateTimeFormat("it-IT", opzioniData).format(grezzo);
+    const parteOrario = new Intl.DateTimeFormat("it-IT", opzioniOrario).format(grezzo);
+    return `${parteData} ${parteOrario}`;
   }
 
   const stringa = String(grezzo);
