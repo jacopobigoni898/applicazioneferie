@@ -42,9 +42,9 @@ export default function ElementoRichiesta({
   );
 
   const inizioFallback =
-    inizioFormattato ?? elemento.data_inizio.toLocaleDateString("it-IT");
+    inizioFormattato ?? elemento.data_inizio.toLocaleString("it-IT");
   const fineFallback =
-    fineFormattata ?? elemento.data_fine.toLocaleDateString("it-IT");
+    fineFormattata ?? elemento.data_fine.toLocaleString("it-IT");
 
   return (
     <View style={stiliElementoRichiesta.scheda}>
