@@ -4,11 +4,34 @@ import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
 import { stiliElementoRichiesta } from "../../../core/style/commonStyles";
+import { Colori } from "../../../core/theme/theme"; // ← PASSO 1: aggiungi questo import
 
 // Colori per il badge stato
 const COLORE_APPROVATO = "#16a34a";
 const COLORE_RIFIUTATO = "#dc2626";
 const COLORE_IN_ATTESA = "#f59e0b";
+
+const COLORI_TIPO: Record<string, string> = {
+  ferie: "#6BCB77", // verde
+  permesso: "#4D9DE0", // azzurro
+  malattia: "#FF6B6B", // rosso
+  studio: "#7A5AF8", // viola
+  maternità: "#F4B4D6", // rosa
+  congedo: "#F59E0B", // giallo
+};
+function getColoreTipo(tipo?: string): string {
+  if (!tipo) return Colori.primario;
+  const chiave = tipo.toLowerCase().trim();
+  return COLORI_TIPO[chiave] ?? Colori.primario;
+}
+function capitalizza(testo?: string): string {
+  if (!testo) return "";
+  return testo
+    .toLowerCase()
+    .split(" ")
+    .map((parola) => parola.charAt(0).toUpperCase() + parola.slice(1))
+    .join(" ");
+}
 
 interface PropsElementoRichiesta {
   elemento: RichiestaFerie;
@@ -50,9 +73,15 @@ export default function ElementoRichiesta({
     <View style={stiliElementoRichiesta.scheda}>
       {/* Riga superiore: icona + titolo + badge */}
       <View style={stiliElementoRichiesta.intestazione}>
-        <View style={stiliElementoRichiesta.accentoSinistra} />
+        {/* ← PASSO 3: sostituisci accentoSinistra con il pallino colorato */}
+        <View
+          style={[
+            stiliElementoRichiesta.accentoSinistra,
+            { backgroundColor: getColoreTipo(elemento.tipo_permesso) },
+          ]}
+        />
         <Text style={stiliElementoRichiesta.titolo} numberOfLines={1}>
-          {elemento.tipo_permesso}
+          {capitalizza(elemento.tipo_permesso)}
         </Text>
         <View
           style={[
@@ -61,7 +90,7 @@ export default function ElementoRichiesta({
           ]}
         >
           <Text style={stiliElementoRichiesta.testoBadge}>
-            {elemento.stato_approvazione}
+            {capitalizza(String(elemento.stato_approvazione || ""))}
           </Text>
         </View>
       </View>

@@ -11,6 +11,7 @@ import {
 } from "../services/requestsService";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
 import { formattaStringaData } from "../utils/formattaData";
+import { useFocusEffect } from "@react-navigation/native";
 
 // Estensione con date formattate per la visualizzazione
 export type RichiestaFormattata = RichiestaFerie & {
@@ -50,9 +51,12 @@ export function useRichieste(tipo: TipoScheda = "inviate") {
   }, [tipo]);
 
   // Carica al montaggio e al cambio di tipo
-  useEffect(() => {
-    caricaDati();
-  }, [caricaDati]);
+
+  useFocusEffect(
+    useCallback(() => {
+      caricaDati();
+    }, [caricaDati]),
+  );
 
   // Elementi con date formattate per la visualizzazione
   const elementiFormattati: RichiestaFormattata[] = useMemo(() => {

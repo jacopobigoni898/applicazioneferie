@@ -4,14 +4,21 @@ import Svg, { Path } from "react-native-svg";
 import { Colori, Tipografia } from "../../../core/theme/theme";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
 
-const PALETTE = [
-  Colori.primario,
-  "#4D9DE0",
-  "#6BCB77",
-  "#FF6B6B",
-  "#7A5AF8",
-  "#F4B4D6",
-];
+// Mappa colori per tipo (stessi di ElementoRichiesta)
+const COLORI_TIPO: Record<string, string> = {
+  Ferie: "#6BCB77",
+  "Permesso studio": "#7A5AF8",
+  "Visita medica": "#4D9DE0",
+  "Permesso 104": "#F59E0B",
+  "Congedo genitoriale": "#F4B4D6",
+  "Permesso matrimoniale": "#FF6B6B",
+  Malattia: "#FF6B6B",
+  Permesso: "#4D9DE0",
+  Assenza: Colori.primario,
+};
+const getColoreTipo = (label: string): string => {
+  return COLORI_TIPO[label] ?? Colori.primario;
+};
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
@@ -85,10 +92,10 @@ export default function GraficoAssenze({ richieste, inCaricamento }: Props) {
       bucket.set(label, (bucket.get(label) || 0) + giorni);
     });
 
-    return Array.from(bucket.entries()).map(([label, value], idx) => ({
+    return Array.from(bucket.entries()).map(([label, value]) => ({
       label,
       value,
-      color: PALETTE[idx % PALETTE.length],
+      color: getColoreTipo(label), // ← usa il colore per tipo invece dell'indice
     }));
   }, [richieste]);
 
