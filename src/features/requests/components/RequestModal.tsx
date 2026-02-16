@@ -5,18 +5,19 @@ import {
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Switch,
   TextInput,
   ScrollView,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Dropdown } from "react-native-element-dropdown";
 import { Colori } from "../../../core/theme/theme";
 import { stiliModaleRichiesta } from "../../../core/style/commonStyles";
+import { sw, sh } from "../../../core/style/responsive";
 import { useFormRichiesta } from "../hooks/useRequestForm";
 import {
   TipoRichiestaDTO,
@@ -44,6 +45,7 @@ const ModaleRichiesta = ({
   suInvio,
 }: PropsModaleRichiesta) => {
   const scrollRef = useRef<ScrollView>(null);
+  const insets = useSafeAreaInsets();
 
   const {
     sottoTipo,
@@ -154,12 +156,12 @@ const ModaleRichiesta = ({
       onRequestClose={suChiusura}
     >
       <View style={stiliModaleRichiesta.sovrapposizione}>
-        <View style={stiliModaleRichiesta.intestazionePagina}>
+        <View style={[stiliModaleRichiesta.intestazionePagina, { paddingTop: insets.top + sh(8) }]}>
           <TouchableOpacity
             style={stiliModaleRichiesta.pulsanteIndietro}
             onPress={suChiusura}
           >
-            <Ionicons name="chevron-back" size={24} color={Colori.primario} />
+            <Ionicons name="chevron-back" size={sw(24)} color={Colori.primario} />
             <Text style={stiliModaleRichiesta.testoIndietro}>Indietro</Text>
           </TouchableOpacity>
         </View>
@@ -169,8 +171,13 @@ const ModaleRichiesta = ({
           style={stiliModaleRichiesta.contenitoreModale}
           keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
         >
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={stiliModaleRichiesta.contenuto}>
+          <ScrollView
+            ref={scrollRef}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            bounces={false}
+            contentContainerStyle={stiliModaleRichiesta.contenuto}
+          >
               <Text style={stiliModaleRichiesta.titoloIntestazione}>
                 Nuova Richiesta
               </Text>
@@ -318,7 +325,7 @@ const ModaleRichiesta = ({
                   <TextInput
                     style={[
                       stiliModaleRichiesta.menuATendina,
-                      { paddingHorizontal: 12, paddingVertical: 10 },
+                      { paddingHorizontal: sw(12), paddingVertical: sh(10) },
                     ]}
                     placeholder="Inserisci il codice"
                     placeholderTextColor="#999"
@@ -337,7 +344,7 @@ const ModaleRichiesta = ({
                       {
                         justifyContent: "center",
                         alignItems: "center",
-                        paddingVertical: 10,
+                        paddingVertical: sh(10),
                       },
                     ]}
                   >
@@ -353,9 +360,9 @@ const ModaleRichiesta = ({
                 style={[
                   stiliModaleRichiesta.menuATendina,
                   {
-                    paddingHorizontal: 12,
-                    paddingVertical: 10,
-                    minHeight: 60,
+                    paddingHorizontal: sw(12),
+                    paddingVertical: sh(10),
+                    minHeight: sh(60),
                   },
                 ]}
                 placeholder="Inserisci una nota (opzionale)"
@@ -369,19 +376,12 @@ const ModaleRichiesta = ({
                   }, 300);
                 }}
               />
-            </View>
-          </TouchableWithoutFeedback>
+            </ScrollView>
 
           {/* Bottoni fissi in basso */}
-          <View style={{
-            flexDirection: "row",
-            paddingHorizontal: 20,
-            paddingTop: 12,
-            paddingBottom: Platform.OS === "ios" ? 34 : 20,
-            gap: 12,
-          }}>
+          <View style={[stiliModaleRichiesta.rigaPulsanti, { paddingBottom: insets.bottom + sh(10) }]}>
             <TouchableOpacity
-              style={[stiliModaleRichiesta.pulsanteAnnulla, { flex: 1 }]}
+              style={stiliModaleRichiesta.pulsanteAnnulla}
               onPress={suChiusura}
             >
               <Text style={stiliModaleRichiesta.testoPulsanteAnnulla}>
@@ -391,7 +391,6 @@ const ModaleRichiesta = ({
             <TouchableOpacity
               style={[
                 stiliModaleRichiesta.pulsanteConferma,
-                { flex: 1 },
                 !sottoTipo && stiliModaleRichiesta.pulsanteDisabilitato,
               ]}
               onPress={gestisciInvioCreazione}
