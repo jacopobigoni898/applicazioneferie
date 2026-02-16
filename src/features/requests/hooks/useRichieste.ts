@@ -2,6 +2,7 @@
 // Carica i dati dal backend, supporta eliminazione con rollback ottimistico
 // e aggiornamento con rollback in caso di errore.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Alert } from "react-native";
 import {
   eliminaRichiesta,
   aggiornaRichiesta,
@@ -62,55 +63,65 @@ export function useRichieste(tipo: TipoScheda = "inviate") {
     }));
   }, [elementi]);
 
-  // Elimina una richiesta con aggiornamento ottimistico e rollback
-  const rimuovi = useCallback(async (id: number) => {
+  // Elimina una richiesta con conferma, aggiornamento ottimistico e rollback
+  const rimuovi = useCallback((id: number) => {
+    Alert.alert(
+      "Conferma eliminazione",
+      "Sei sicuro di voler eliminare questa richiesta?",
+      [
+        { text: "Annulla", style: "cancel" },
+        {
+          text: "Elimina",
+          style: "destructive",
+          onPress: async () => {
+            impostaErrore(null);
+            let precedenti: RichiestaFerie[] = [];
+
+            impostaElementi((correnti) => {
+              precedenti = correnti;
+              return correnti.filter((el) => el.id_richiesta !== id);
+            });
+
+            try {
+              await eliminaRichiesta(id);
+            } catch (err: unknown) {
+              impostaErrore(estraiMessaggio(err, "Errore eliminazione"));
+              impostaElementi(precedenti); // rollback
+            }
+          },
+        },
+      ],
+    );
+  }, []);
+
+  // Aggiorna una richiesta con aggiornamento ottimistico e rollback
+  const aggiorna = useCallback(async (payload: InputAggiornamentoRichiesta) => {
     impostaErrore(null);
     let precedenti: RichiestaFerie[] = [];
 
     impostaElementi((correnti) => {
       precedenti = correnti;
-      return correnti.filter((el) => el.id_richiesta !== id);
+      return correnti.map((el) => {
+        if (el.id_richiesta === payload.IdRichiesta) {
+          return {
+            ...el,
+            data_inizio: new Date(payload.DataInizio),
+            data_fine: new Date(payload.DataFine),
+            stato_approvazione: payload.StatoApprovazione as any,
+          };
+        }
+        return el;
+      });
     });
 
     try {
-      await eliminaRichiesta(id);
+      await aggiornaRichiesta(payload);
     } catch (err: unknown) {
-      impostaErrore(estraiMessaggio(err, "Errore eliminazione"));
+      impostaErrore(estraiMessaggio(err, "Errore aggiornamento"));
       impostaElementi(precedenti); // rollback
+      throw err; // ri-lanciato per la modale
     }
   }, []);
-
-  // Aggiorna una richiesta con aggiornamento ottimistico e rollback
-  const aggiorna = useCallback(
-    async (payload: InputAggiornamentoRichiesta) => {
-      impostaErrore(null);
-      let precedenti: RichiestaFerie[] = [];
-
-      impostaElementi((correnti) => {
-        precedenti = correnti;
-        return correnti.map((el) => {
-          if (el.id_richiesta === payload.IdRichiesta) {
-            return {
-              ...el,
-              data_inizio: new Date(payload.DataInizio),
-              data_fine: new Date(payload.DataFine),
-              stato_approvazione: payload.StatoApprovazione as any,
-            };
-          }
-          return el;
-        });
-      });
-
-      try {
-        await aggiornaRichiesta(payload);
-      } catch (err: unknown) {
-        impostaErrore(estraiMessaggio(err, "Errore aggiornamento"));
-        impostaElementi(precedenti); // rollback
-        throw err; // ri-lanciato per la modale
-      }
-    },
-    [],
-  );
 
   return {
     elementi,

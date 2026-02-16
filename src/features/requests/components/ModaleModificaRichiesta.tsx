@@ -284,13 +284,22 @@ const ModaleModificaRichiesta = ({
       onRequestClose={suChiusura}
     >
       <View style={stiliModaleRichiesta.sovrapposizione}>
-        <View style={[stiliModaleRichiesta.intestazionePagina, { paddingTop: insets.top + sh(8) }]}>
+        <View
+          style={[
+            stiliModaleRichiesta.intestazionePagina,
+            { paddingTop: insets.top + sh(8) },
+          ]}
+        >
           <TouchableOpacity
             style={stiliModaleRichiesta.pulsanteIndietro}
             onPress={suChiusura}
             disabled={inSalvataggio}
           >
-            <Ionicons name="chevron-back" size={sw(24)} color={Colori.primario} />
+            <Ionicons
+              name="chevron-back"
+              size={sw(24)}
+              color={Colori.primario}
+            />
             <Text style={stiliModaleRichiesta.testoIndietro}>Indietro</Text>
           </TouchableOpacity>
         </View>
@@ -303,7 +312,10 @@ const ModaleModificaRichiesta = ({
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
             bounces={false}
-            contentContainerStyle={{ paddingHorizontal: sw(20), paddingBottom: sh(24) }}
+            contentContainerStyle={{
+              paddingHorizontal: sw(20),
+              paddingBottom: sh(24),
+            }}
           >
             <Text style={stiliModaleRichiesta.titoloIntestazione}>
               Modifica richiesta
@@ -371,30 +383,6 @@ const ModaleModificaRichiesta = ({
                 </TouchableOpacity>
               </View>
             </View>
-
-            <Text style={stiliModaleRichiesta.etichetta}>
-              Stato approvazione
-            </Text>
-            <Dropdown
-              style={[
-                stiliModaleRichiesta.menuATendina,
-                inFocus && { borderColor: Colori.primario },
-              ]}
-              placeholderStyle={stiliModaleRichiesta.stileSegnaposto}
-              selectedTextStyle={stiliModaleRichiesta.stileTestoSelezionato}
-              data={OPZIONI_STATO}
-              labelField="etichetta"
-              valueField="valore"
-              placeholder="Seleziona..."
-              value={stato}
-              onFocus={() => impostaInFocus(true)}
-              onBlur={() => impostaInFocus(false)}
-              onChange={(voce) => {
-                impostaStato(voce.valore as StatoRichiesta);
-                impostaInFocus(false);
-              }}
-            />
-
             <Text style={stiliModaleRichiesta.sottointestazione}>
               {eGiornoSingolo
                 ? "Richiesta singolo giorno"
@@ -405,7 +393,12 @@ const ModaleModificaRichiesta = ({
             {renderizzaSelettoreOrario()}
             <View style={{ height: sh(16) }} />
           </ScrollView>
-          <View style={[stiliModaleRichiesta.rigaPulsanti, { paddingBottom: insets.bottom + sh(10) }]}>
+          <View
+            style={[
+              stiliModaleRichiesta.rigaPulsanti,
+              { paddingBottom: insets.bottom + sh(10) },
+            ]}
+          >
             <TouchableOpacity
               style={stiliModaleRichiesta.pulsanteAnnulla}
               onPress={suChiusura}
