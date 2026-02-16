@@ -171,102 +171,52 @@ const ModaleRichiesta = ({
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={stiliModaleRichiesta.contenuto}>
-              <ScrollView
-                ref={scrollRef}
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-                bounces={false}
-              >
-                <Text style={stiliModaleRichiesta.titoloIntestazione}>
-                  Nuova Richiesta
-                </Text>
-                <Text style={stiliModaleRichiesta.sottointestazione}>
-                  {tipoPrincipale === "assenza"
-                    ? "Assenza / Permesso"
-                    : "Straordinario"}
-                </Text>
+              <Text style={stiliModaleRichiesta.titoloIntestazione}>
+                Nuova Richiesta
+              </Text>
+              <Text style={stiliModaleRichiesta.sottointestazione}>
+                {tipoPrincipale === "assenza"
+                  ? "Assenza / Permesso"
+                  : "Straordinario"}
+              </Text>
 
-                  <View style={stiliModaleRichiesta.rigaDate}>
-                    <View style={stiliModaleRichiesta.casellaData}>
-                      <Text style={stiliModaleRichiesta.etichettaData}>
-                        Dal:
-                      </Text>
-                      <Text style={stiliModaleRichiesta.valoreData}>
-                        {formattaData(dataInizioForm)}
-                      </Text>
-                    </View>
-                    <View style={stiliModaleRichiesta.casellaData}>
-                      <Text style={stiliModaleRichiesta.etichettaData}>
-                        Al:
-                      </Text>
-                      <Text style={stiliModaleRichiesta.valoreData}>
-                        {formattaData(dataFineForm)}
-                      </Text>
-                    </View>
+              <View style={stiliModaleRichiesta.rigaDate}>
+                <View style={stiliModaleRichiesta.casellaData}>
+                  <Text style={stiliModaleRichiesta.etichettaData}>Dal:</Text>
+                  <Text style={stiliModaleRichiesta.valoreData}>
+                    {formattaData(dataInizioForm)}
+                  </Text>
+                </View>
+                <View style={stiliModaleRichiesta.casellaData}>
+                  <Text style={stiliModaleRichiesta.etichettaData}>Al:</Text>
+                  <Text style={stiliModaleRichiesta.valoreData}>
+                    {formattaData(dataFineForm)}
+                  </Text>
+                </View>
+              </View>
+
+              {eSelezioneGiornoSingolo ? (
+                <>
+                  <View style={stiliModaleRichiesta.rigaInterruttore}>
+                    <Text style={stiliModaleRichiesta.etichettaInterruttore}>
+                      Tutto il giorno
+                    </Text>
+                    <Switch
+                      value={tuttoIlGiorno}
+                      onValueChange={impostaTuttoIlGiorno}
+                      trackColor={{
+                        false: "#d3d6dc",
+                        true: Colori.primario,
+                      }}
+                      thumbColor={tuttoIlGiorno ? Colori.superficie : "#f4f4f4"}
+                      ios_backgroundColor="#d3d6dc"
+                    />
                   </View>
 
-                  {eSelezioneGiornoSingolo ? (
-                    <>
-                      <View style={stiliModaleRichiesta.rigaInterruttore}>
-                        <Text
-                          style={stiliModaleRichiesta.etichettaInterruttore}
-                        >
-                          Tutto il giorno
-                        </Text>
-                        <Switch
-                          value={tuttoIlGiorno}
-                          onValueChange={impostaTuttoIlGiorno}
-                          trackColor={{
-                            false: "#d3d6dc",
-                            true: Colori.primario,
-                          }}
-                          thumbColor={
-                            tuttoIlGiorno ? Colori.superficie : "#f4f4f4"
-                          }
-                          ios_backgroundColor="#d3d6dc"
-                        />
-                      </View>
-
-                      {!tuttoIlGiorno && (
-                        <>
-                          <Text style={stiliModaleRichiesta.etichetta}>
-                            Orario (solo se 1 giorno)
-                          </Text>
-                          <View style={stiliModaleRichiesta.rigaOrario}>
-                            <View style={stiliModaleRichiesta.casellaOrario}>
-                              <Text style={stiliModaleRichiesta.etichettaData}>
-                                Inizio
-                              </Text>
-                              <TouchableOpacity
-                                style={stiliModaleRichiesta.inputOrario}
-                                onPress={() => apriSelettoreOrario("inizio")}
-                              >
-                                <Text style={stiliModaleRichiesta.testoOrario}>
-                                  {orarioInizio}
-                                </Text>
-                              </TouchableOpacity>
-                            </View>
-                            <View style={stiliModaleRichiesta.casellaOrario}>
-                              <Text style={stiliModaleRichiesta.etichettaData}>
-                                Fine
-                              </Text>
-                              <TouchableOpacity
-                                style={stiliModaleRichiesta.inputOrario}
-                                onPress={() => apriSelettoreOrario("fine")}
-                              >
-                                <Text style={stiliModaleRichiesta.testoOrario}>
-                                  {orarioFine}
-                                </Text>
-                              </TouchableOpacity>
-                            </View>
-                          </View>
-                        </>
-                      )}
-                    </>
-                  ) : (
+                  {!tuttoIlGiorno && (
                     <>
                       <Text style={stiliModaleRichiesta.etichetta}>
-                        Orario primo/ultimo giorno
+                        Orario (solo se 1 giorno)
                       </Text>
                       <View style={stiliModaleRichiesta.rigaOrario}>
                         <View style={stiliModaleRichiesta.casellaOrario}>
@@ -298,124 +248,160 @@ const ModaleRichiesta = ({
                       </View>
                     </>
                   )}
-
+                </>
+              ) : (
+                <>
                   <Text style={stiliModaleRichiesta.etichetta}>
-                    Tipo Richiesta:
+                    Orario primo/ultimo giorno
                   </Text>
-                  <Dropdown
-                    style={[
-                      stiliModaleRichiesta.menuATendina,
-                      inFocus && { borderColor: Colori.primario },
-                    ]}
-                    placeholderStyle={stiliModaleRichiesta.stileSegnaposto}
-                    selectedTextStyle={
-                      stiliModaleRichiesta.stileTestoSelezionato
-                    }
-                    data={opzioniCorrente}
-                    labelField="label"
-                    valueField="value"
-                    placeholder="Seleziona..."
-                    value={sottoTipo}
-                    onFocus={() => impostaInFocus(true)}
-                    onBlur={() => impostaInFocus(false)}
-                    onChange={(item) => {
-                      impostaSottoTipo(item.value);
-                      const parsed = Number(item.value);
-                      impostaIdTipoRichiesta(
-                        Number.isNaN(parsed) ? null : parsed,
-                      );
-                      impostaInFocus(false);
-                    }}
-                  />
-
-                  {richiedeCodice && (
-                    <>
-                      <Text style={stiliModaleRichiesta.etichetta}>
-                        Codice Richiesta:
+                  <View style={stiliModaleRichiesta.rigaOrario}>
+                    <View style={stiliModaleRichiesta.casellaOrario}>
+                      <Text style={stiliModaleRichiesta.etichettaData}>
+                        Inizio
                       </Text>
-                      <TextInput
-                        style={[
-                          stiliModaleRichiesta.menuATendina,
-                          { paddingHorizontal: 12, paddingVertical: 10 },
-                        ]}
-                        placeholder="Inserisci il codice"
-                        placeholderTextColor="#999"
-                        value={codiceRichiesta}
-                        onChangeText={impostaCodiceRichiesta}
-                      />
-                    </>
-                  )}
-
-                  {richiedeDocumenti && (
-                    <>
-                      <Text style={stiliModaleRichiesta.etichetta}>
-                        Documento:
-                      </Text>
-                      <View
-                        style={[
-                          stiliModaleRichiesta.menuATendina,
-                          {
-                            justifyContent: "center",
-                            alignItems: "center",
-                            paddingVertical: 10,
-                          },
-                        ]}
+                      <TouchableOpacity
+                        style={stiliModaleRichiesta.inputOrario}
+                        onPress={() => apriSelettoreOrario("inizio")}
                       >
-                        <Text style={stiliModaleRichiesta.testoSegnapostoDocumento}>
-                          Caricamento documenti non ancora disponibile
+                        <Text style={stiliModaleRichiesta.testoOrario}>
+                          {orarioInizio}
                         </Text>
-                      </View>
-                    </>
-                  )}
+                      </TouchableOpacity>
+                    </View>
+                    <View style={stiliModaleRichiesta.casellaOrario}>
+                      <Text style={stiliModaleRichiesta.etichettaData}>
+                        Fine
+                      </Text>
+                      <TouchableOpacity
+                        style={stiliModaleRichiesta.inputOrario}
+                        onPress={() => apriSelettoreOrario("fine")}
+                      >
+                        <Text style={stiliModaleRichiesta.testoOrario}>
+                          {orarioFine}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </>
+              )}
 
-                  <Text style={stiliModaleRichiesta.etichetta}>Nota:</Text>
+              <Text style={stiliModaleRichiesta.etichetta}>
+                Tipo Richiesta:
+              </Text>
+              <Dropdown
+                style={[
+                  stiliModaleRichiesta.menuATendina,
+                  inFocus && { borderColor: Colori.primario },
+                ]}
+                placeholderStyle={stiliModaleRichiesta.stileSegnaposto}
+                selectedTextStyle={stiliModaleRichiesta.stileTestoSelezionato}
+                data={opzioniCorrente}
+                labelField="label"
+                valueField="value"
+                placeholder="Seleziona..."
+                value={sottoTipo}
+                onFocus={() => impostaInFocus(true)}
+                onBlur={() => impostaInFocus(false)}
+                onChange={(item) => {
+                  impostaSottoTipo(item.value);
+                  const parsed = Number(item.value);
+                  impostaIdTipoRichiesta(Number.isNaN(parsed) ? null : parsed);
+                  impostaInFocus(false);
+                }}
+              />
+
+              {richiedeCodice && (
+                <>
+                  <Text style={stiliModaleRichiesta.etichetta}>
+                    Codice Richiesta:
+                  </Text>
                   <TextInput
                     style={[
                       stiliModaleRichiesta.menuATendina,
+                      { paddingHorizontal: 12, paddingVertical: 10 },
+                    ]}
+                    placeholder="Inserisci il codice"
+                    placeholderTextColor="#999"
+                    value={codiceRichiesta}
+                    onChangeText={impostaCodiceRichiesta}
+                  />
+                </>
+              )}
+
+              {richiedeDocumenti && (
+                <>
+                  <Text style={stiliModaleRichiesta.etichetta}>Documento:</Text>
+                  <View
+                    style={[
+                      stiliModaleRichiesta.menuATendina,
                       {
-                        paddingHorizontal: 12,
+                        justifyContent: "center",
+                        alignItems: "center",
                         paddingVertical: 10,
-                        minHeight: 60,
                       },
                     ]}
-                    placeholder="Inserisci una nota (opzionale)"
-                    placeholderTextColor="#999"
-                    value={nota}
-                    onChangeText={impostaNota}
-                    multiline
-                    onFocus={() => {
-                      setTimeout(() => {
-                        scrollRef.current?.scrollToEnd({ animated: true });
-                      }, 300);
-                    }}
-                  />
-                  <View style={stiliModaleRichiesta.rigaPulsanti}>
-                    <TouchableOpacity
-                      style={stiliModaleRichiesta.pulsanteAnnulla}
-                      onPress={suChiusura}
-                    >
-                      <Text style={stiliModaleRichiesta.testoPulsanteAnnulla}>
-                        Annulla
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[
-                        stiliModaleRichiesta.pulsanteConferma,
-                        !sottoTipo && stiliModaleRichiesta.pulsanteDisabilitato,
-                      ]}
-                      onPress={gestisciInvioCreazione}
-                      disabled={!sottoTipo}
-                    >
-                      <Text style={stiliModaleRichiesta.testoPulsanteConferma}>
-                        Invia
-                      </Text>
-                    </TouchableOpacity>
+                  >
+                    <Text style={stiliModaleRichiesta.testoSegnapostoDocumento}>
+                      Caricamento documenti non ancora disponibile
+                    </Text>
                   </View>
+                </>
+              )}
 
-                <View style={{ height: 20 }} />
-              </ScrollView>
+              <Text style={stiliModaleRichiesta.etichetta}>Nota:</Text>
+              <TextInput
+                style={[
+                  stiliModaleRichiesta.menuATendina,
+                  {
+                    paddingHorizontal: 12,
+                    paddingVertical: 10,
+                    minHeight: 60,
+                  },
+                ]}
+                placeholder="Inserisci una nota (opzionale)"
+                placeholderTextColor="#999"
+                value={nota}
+                onChangeText={impostaNota}
+                multiline
+                onFocus={() => {
+                  setTimeout(() => {
+                    scrollRef.current?.scrollToEnd({ animated: true });
+                  }, 300);
+                }}
+              />
             </View>
           </TouchableWithoutFeedback>
+
+          {/* Bottoni fissi in basso */}
+          <View style={{
+            flexDirection: "row",
+            paddingHorizontal: 20,
+            paddingTop: 12,
+            paddingBottom: Platform.OS === "ios" ? 34 : 20,
+            gap: 12,
+          }}>
+            <TouchableOpacity
+              style={[stiliModaleRichiesta.pulsanteAnnulla, { flex: 1 }]}
+              onPress={suChiusura}
+            >
+              <Text style={stiliModaleRichiesta.testoPulsanteAnnulla}>
+                Annulla
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                stiliModaleRichiesta.pulsanteConferma,
+                { flex: 1 },
+                !sottoTipo && stiliModaleRichiesta.pulsanteDisabilitato,
+              ]}
+              onPress={gestisciInvioCreazione}
+              disabled={!sottoTipo}
+            >
+              <Text style={stiliModaleRichiesta.testoPulsanteConferma}>
+                Invia
+              </Text>
+            </TouchableOpacity>
+          </View>
         </KeyboardAvoidingView>
       </View>
       {renderSelettoreOrario()}

@@ -1,5 +1,6 @@
 import { Stack } from "expo-router";
 import { AuthProvider } from "./_providers/AuthProvider";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 // Navigatore principale dell'applicazione
 function NavigatorePrincipale() {
@@ -14,8 +15,10 @@ function NavigatorePrincipale() {
 // Layout radice dell'applicazione
 export default function LayoutRadice() {
   return (
-    <AuthProvider>
-      <NavigatorePrincipale />
-    </AuthProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <NavigatorePrincipale />
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }

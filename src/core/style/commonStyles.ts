@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import { Colori, Spaziatura, Tipografia } from "../theme/theme";
 
 // Stili comuni riutilizzabili
@@ -15,11 +15,17 @@ export const stiliComuni = StyleSheet.create({
     backgroundColor: Colori.superficie,
     borderRadius: 12,
     padding: Spaziatura.md,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 6,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.12,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 6,
+      },
+    }),
   },
 });
 
@@ -74,11 +80,17 @@ export const stiliCalendario = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     backgroundColor: Colori.superficie,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 6,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.12,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 6,
+      },
+    }),
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -135,11 +147,17 @@ export const stiliMenuATendinaIOS = StyleSheet.create({
     borderRadius: 16,
     borderColor: Colori.bordo,
     borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.14,
-    shadowRadius: 10,
-    elevation: 10,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.14,
+        shadowRadius: 10,
+      },
+      android: {
+        elevation: 10,
+      },
+    }),
     overflow: "hidden",
   },
   voceMenu: {
@@ -270,7 +288,13 @@ export const stiliModaleRichiesta = StyleSheet.create({
   },
   stileSegnaposto: { fontSize: 16, color: "#999" },
   stileTestoSelezionato: { fontSize: 16, color: Colori.testoPrimario },
-  rigaPulsanti: { flexDirection: "row", marginTop: 10 },
+  rigaPulsanti: {
+    flexDirection: "row",
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: Platform.OS === "ios" ? 34 : 20,
+    gap: 12,
+  },
   pulsanteAnnulla: {
     flex: 1,
     padding: 15,
@@ -346,11 +370,17 @@ export const stiliElementoRichiesta = StyleSheet.create({
     borderRadius: 18,
     padding: 16,
     marginBottom: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
   },
   intestazione: {
     flexDirection: "row",

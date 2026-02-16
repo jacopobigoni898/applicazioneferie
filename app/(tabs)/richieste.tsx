@@ -1,7 +1,13 @@
 // Schermata delle richieste: mostra richieste inviate (utente + admin)
 // e ricevute (solo admin) con TabView e pull-to-refresh.
 import React, { useState } from "react";
-import { Text, View, useWindowDimensions } from "react-native";
+import {
+  Text,
+  View,
+  useWindowDimensions,
+  StatusBar,
+  Platform,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TabView, TabBar } from "react-native-tab-view";
 import { stiliSchermata, stiliTab } from "../../src/core/style/commonStyles";
@@ -40,6 +46,10 @@ export default function SchermataRichieste() {
 
   return (
     <SafeAreaView style={stiliSchermata.contenitore} edges={["top"]}>
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor={Platform.OS === "android" ? "#f5f5f5" : undefined}
+      />
       <View style={stiliSchermata.intestazione}>
         <View style={stiliSchermata.bloccoTitolo}>
           <Text style={stiliSchermata.titolo}>Richieste</Text>

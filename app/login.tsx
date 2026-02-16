@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
-  SafeAreaView,
   StyleSheet,
   Text,
   View,
+  StatusBar,
+  Platform,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "./_providers/AuthProvider";
 
 // Schermata di accesso
@@ -26,7 +28,14 @@ export default function SchermataAccesso() {
   const occupato = inCaricamento || inAccesso;
 
   return (
-    <SafeAreaView style={stili.contenitore}>
+    <SafeAreaView
+      style={stili.contenitore}
+      edges={["top", "bottom", "left", "right"]}
+    >
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={Platform.OS === "android" ? "#0e1a2b" : undefined}
+      />
       <View style={stili.scheda}>
         <Text style={stili.titolo}>Accesso all'account</Text>
         <Text style={stili.sottotitolo}>

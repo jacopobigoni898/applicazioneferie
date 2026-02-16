@@ -218,9 +218,7 @@ const ModaleModificaRichiesta = ({
     if (!mostraSelettoreOrarioInizio && !mostraSelettoreOrarioFine) return null;
 
     const eInizio = mostraSelettoreOrarioInizio;
-    const valore = eInizio
-      ? dataInizio || new Date()
-      : dataFine || new Date();
+    const valore = eInizio ? dataInizio || new Date() : dataFine || new Date();
     const tipo = eInizio ? "inizio" : "fine";
 
     return (
@@ -348,9 +346,7 @@ const ModaleModificaRichiesta = ({
             <Text style={stiliModaleRichiesta.etichetta}>Orario</Text>
             <View style={stiliModaleRichiesta.rigaOrario}>
               <View style={stiliModaleRichiesta.casellaOrario}>
-                <Text style={stiliModaleRichiesta.etichettaData}>
-                  Inizio
-                </Text>
+                <Text style={stiliModaleRichiesta.etichettaData}>Inizio</Text>
                 <TouchableOpacity
                   style={stiliModaleRichiesta.inputOrario}
                   onPress={() => apriSelettoreOrario("inizio")}
@@ -361,9 +357,7 @@ const ModaleModificaRichiesta = ({
                 </TouchableOpacity>
               </View>
               <View style={stiliModaleRichiesta.casellaOrario}>
-                <Text style={stiliModaleRichiesta.etichettaData}>
-                  Fine
-                </Text>
+                <Text style={stiliModaleRichiesta.etichettaData}>Fine</Text>
                 <TouchableOpacity
                   style={stiliModaleRichiesta.inputOrario}
                   onPress={() => apriSelettoreOrario("fine")}
@@ -403,37 +397,34 @@ const ModaleModificaRichiesta = ({
                 ? "Richiesta singolo giorno"
                 : "Richiesta multi giorno"}
             </Text>
-
-            <View style={stiliModaleRichiesta.rigaPulsanti}>
-              <TouchableOpacity
-                style={stiliModaleRichiesta.pulsanteAnnulla}
-                onPress={suChiusura}
-                disabled={inSalvataggio}
-              >
-                <Text style={stiliModaleRichiesta.testoPulsanteAnnulla}>
-                  Annulla
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  stiliModaleRichiesta.pulsanteConferma,
-                  inSalvataggio &&
-                    stiliModaleRichiesta.pulsanteDisabilitato,
-                ]}
-                onPress={gestisciInvioModifica}
-                disabled={inSalvataggio}
-              >
-                <Text style={stiliModaleRichiesta.testoPulsanteConferma}>
-                  {inSalvataggio ? "Salvataggio..." : "Salva"}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
             {renderizzaSelettoreData("inizio")}
             {renderizzaSelettoreData("fine")}
             {renderizzaSelettoreOrario()}
             <View style={{ height: 20 }} />
           </ScrollView>
+          <View style={stiliModaleRichiesta.rigaPulsanti}>
+            <TouchableOpacity
+              style={stiliModaleRichiesta.pulsanteAnnulla}
+              onPress={suChiusura}
+              disabled={inSalvataggio}
+            >
+              <Text style={stiliModaleRichiesta.testoPulsanteAnnulla}>
+                Annulla
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                stiliModaleRichiesta.pulsanteConferma,
+                inSalvataggio && stiliModaleRichiesta.pulsanteDisabilitato,
+              ]}
+              onPress={gestisciInvioModifica}
+              disabled={inSalvataggio}
+            >
+              <Text style={stiliModaleRichiesta.testoPulsanteConferma}>
+                {inSalvataggio ? "Salvataggio..." : "Salva"}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </KeyboardAvoidingView>
       </View>
     </Modal>
