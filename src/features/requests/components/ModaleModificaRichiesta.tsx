@@ -11,12 +11,14 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import { Dropdown } from "react-native-element-dropdown";
 import { stiliModaleRichiesta } from "../../../core/style/commonStyles";
+import { sw, sh } from "../../../core/style/responsive";
 import { Colori } from "../../../core/theme/theme";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
 import { InputAggiornamentoRichiesta } from "../services/requestsService";
@@ -45,6 +47,7 @@ const ModaleModificaRichiesta = ({
   suConferma,
   inSalvataggio = false,
 }: PropsModaleModifica) => {
+  const insets = useSafeAreaInsets();
   // Stato picker date
   const [mostraSelettoreInizio, impostaMostraSelettoreInizio] = useState(false);
   const [mostraSelettoreFine, impostaMostraSelettoreFine] = useState(false);
@@ -281,13 +284,13 @@ const ModaleModificaRichiesta = ({
       onRequestClose={suChiusura}
     >
       <View style={stiliModaleRichiesta.sovrapposizione}>
-        <View style={stiliModaleRichiesta.intestazionePagina}>
+        <View style={[stiliModaleRichiesta.intestazionePagina, { paddingTop: insets.top + sh(8) }]}>
           <TouchableOpacity
             style={stiliModaleRichiesta.pulsanteIndietro}
             onPress={suChiusura}
             disabled={inSalvataggio}
           >
-            <Ionicons name="chevron-back" size={24} color={Colori.primario} />
+            <Ionicons name="chevron-back" size={sw(24)} color={Colori.primario} />
             <Text style={stiliModaleRichiesta.testoIndietro}>Indietro</Text>
           </TouchableOpacity>
         </View>
@@ -300,7 +303,7 @@ const ModaleModificaRichiesta = ({
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
             bounces={false}
-            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}
+            contentContainerStyle={{ paddingHorizontal: sw(20), paddingBottom: sh(24) }}
           >
             <Text style={stiliModaleRichiesta.titoloIntestazione}>
               Modifica richiesta
@@ -400,9 +403,9 @@ const ModaleModificaRichiesta = ({
             {renderizzaSelettoreData("inizio")}
             {renderizzaSelettoreData("fine")}
             {renderizzaSelettoreOrario()}
-            <View style={{ height: 20 }} />
+            <View style={{ height: sh(16) }} />
           </ScrollView>
-          <View style={stiliModaleRichiesta.rigaPulsanti}>
+          <View style={[stiliModaleRichiesta.rigaPulsanti, { paddingBottom: insets.bottom + sh(10) }]}>
             <TouchableOpacity
               style={stiliModaleRichiesta.pulsanteAnnulla}
               onPress={suChiusura}
