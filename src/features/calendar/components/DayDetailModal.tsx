@@ -10,7 +10,10 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { Colori, Tipografia } from "../../../core/theme/theme";
-import { stiliModaleRichiesta } from "../../../core/style/commonStyles";
+import {
+  stiliModaleRichiesta,
+  ModaleDettagliostyle,
+} from "../../../core/style/commonStyles";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
 import { sw, sh, ms } from "../../../core/style/responsive";
 import {
@@ -79,7 +82,12 @@ export default function DayDetailModal({
       onRequestClose={suChiusura}
     >
       <View style={stiliModaleRichiesta.sovrapposizione}>
-        <View style={[stiliModaleRichiesta.intestazionePagina, { paddingTop: insets.top + sh(8) }]}>
+        <View
+          style={[
+            stiliModaleRichiesta.intestazionePagina,
+            { paddingTop: insets.top + sh(8) },
+          ]}
+        >
           <TouchableOpacity
             style={stiliModaleRichiesta.pulsanteIndietro}
             onPress={suChiusura}
@@ -93,18 +101,18 @@ export default function DayDetailModal({
           </TouchableOpacity>
         </View>
 
-        <Text style={stili.titolo}>{giornoFormattato}</Text>
+        <Text style={ModaleDettagliostyle.titolo}>{giornoFormattato}</Text>
 
         {richiesteDelGiorno.length === 0 ? (
-          <View style={stili.vuoto}>
-            <Text style={stili.testoVuoto}>
+          <View style={ModaleDettagliostyle.vuoto}>
+            <Text style={ModaleDettagliostyle.testoVuoto}>
               Nessuna assenza registrata per questo giorno.
             </Text>
           </View>
         ) : (
           <ScrollView
-            style={stili.lista}
-            contentContainerStyle={stili.listaContenuto}
+            style={ModaleDettagliostyle.lista}
+            contentContainerStyle={ModaleDettagliostyle.listaContenuto}
             showsVerticalScrollIndicator={false}
           >
             {richiesteDelGiorno.map((r) => {
@@ -112,31 +120,43 @@ export default function DayDetailModal({
               const colore = getColoreTipo(tipoNorm);
               const stato = formattaStato(r.stato_approvazione);
               return (
-                <View key={r.id_richiesta} style={stili.card}>
-                  <View style={stili.cardHeader}>
-                    <View style={[stili.dot, { backgroundColor: colore }]} />
-                    <Text style={stili.tipoLabel}>{tipoNorm}</Text>
+                <View key={r.id_richiesta} style={ModaleDettagliostyle.card}>
+                  <View style={ModaleDettagliostyle.cardHeader}>
                     <View
                       style={[
-                        stili.badge,
-                        stato === "Approvata" && stili.badgeApprovata,
-                        stato === "Autorizzata" && stili.badgeAutorizzata,
-                        stato === "Rifiutata" && stili.badgeRifiutata,
+                        ModaleDettagliostyle.dot,
+                        { backgroundColor: colore },
+                      ]}
+                    />
+                    <Text style={ModaleDettagliostyle.tipoLabel}>
+                      {tipoNorm}
+                    </Text>
+                    <View
+                      style={[
+                        ModaleDettagliostyle.badge,
+                        stato === "Approvata" &&
+                          ModaleDettagliostyle.badgeApprovata,
+                        stato === "Autorizzata" &&
+                          ModaleDettagliostyle.badgeAutorizzata,
+                        stato === "Rifiutata" &&
+                          ModaleDettagliostyle.badgeRifiutata,
                       ]}
                     >
-                      <Text style={stili.badgeTesto}>{stato}</Text>
+                      <Text style={ModaleDettagliostyle.badgeTesto}>
+                        {stato}
+                      </Text>
                     </View>
                   </View>
 
-                  <View style={stili.riga}>
-                    <Text style={stili.etichetta}>Dal:</Text>
-                    <Text style={stili.valore}>
+                  <View style={ModaleDettagliostyle.riga}>
+                    <Text style={ModaleDettagliostyle.etichetta}>Dal:</Text>
+                    <Text style={ModaleDettagliostyle.valore}>
                       {formattaData(r.data_inizio)}
                     </Text>
                   </View>
-                  <View style={stili.riga}>
-                    <Text style={stili.etichetta}>Al:</Text>
-                    <Text style={stili.valore}>
+                  <View style={ModaleDettagliostyle.riga}>
+                    <Text style={ModaleDettagliostyle.etichetta}>Al:</Text>
+                    <Text style={ModaleDettagliostyle.valore}>
                       {formattaData(r.data_fine)}
                     </Text>
                   </View>
@@ -149,89 +169,3 @@ export default function DayDetailModal({
     </Modal>
   );
 }
-
-const stili = StyleSheet.create({
-  titolo: {
-    fontSize: ms(20),
-    fontWeight: Tipografia.peso.grassetto,
-    color: Colori.testoPrimario,
-    textTransform: "capitalize",
-    paddingHorizontal: sw(20),
-    paddingVertical: sh(16),
-  },
-  vuoto: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: sw(32),
-  },
-  testoVuoto: {
-    color: Colori.testoSecondario,
-    fontSize: ms(15),
-    textAlign: "center",
-  },
-  lista: {
-    flex: 1,
-  },
-  listaContenuto: {
-    paddingHorizontal: sw(20),
-    paddingBottom: sh(32),
-  },
-  card: {
-    backgroundColor: "#F5F5F5",
-    borderRadius: sw(12),
-    padding: sw(14),
-    marginBottom: sh(12),
-  },
-  cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: sh(12),
-  },
-  dot: {
-    width: sw(12),
-    height: sw(12),
-    borderRadius: sw(6),
-    marginRight: sw(8),
-  },
-  tipoLabel: {
-    flex: 1,
-    fontSize: ms(15),
-    fontWeight: Tipografia.peso.grassetto,
-    color: Colori.testoPrimario,
-  },
-  badge: {
-    paddingHorizontal: sw(10),
-    paddingVertical: sh(4),
-    borderRadius: sw(8),
-    backgroundColor: "#FEF3C7",
-  },
-  badgeApprovata: {
-    backgroundColor: "#D1FAE5",
-  },
-  badgeAutorizzata: {
-    backgroundColor: "#DBEAFE",
-  },
-  badgeRifiutata: {
-    backgroundColor: "#FEE2E2",
-  },
-  badgeTesto: {
-    fontSize: ms(12),
-    fontWeight: Tipografia.peso.medio,
-    color: Colori.testoPrimario,
-  },
-  riga: {
-    flexDirection: "row",
-    marginBottom: sh(4),
-  },
-  etichetta: {
-    width: sw(40),
-    color: Colori.testoSecondario,
-    fontSize: ms(13),
-  },
-  valore: {
-    flex: 1,
-    color: Colori.testoPrimario,
-    fontSize: ms(13),
-  },
-});
