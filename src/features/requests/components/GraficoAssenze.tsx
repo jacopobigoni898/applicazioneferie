@@ -3,22 +3,10 @@ import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { Colori, Tipografia } from "../../../core/theme/theme";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
-
-// Mappa colori per tipo (stessi di ElementoRichiesta)
-const COLORI_TIPO: Record<string, string> = {
-  Ferie: "#6BCB77",
-  "Permesso studio": "#7A5AF8",
-  "Visita medica": "#4D9DE0",
-  "Permesso 104": "#F59E0B",
-  "Congedo genitoriale": "#F4B4D6",
-  "Permesso matrimoniale": "#FF6B6B",
-  Malattia: "#FF6B6B",
-  Permesso: "#4D9DE0",
-  Assenza: Colori.primario,
-};
-const getColoreTipo = (label: string): string => {
-  return COLORI_TIPO[label] ?? Colori.primario;
-};
+import {
+  normalizzaTipo,
+  getColoreTipo,
+} from "../../../shared/utils/coloriTipoRichiesta";
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
@@ -33,19 +21,6 @@ const calcolaGiornate = (inizio: Date, fine: Date) => {
   const end = stripTime(fine).getTime();
   const diff = Math.max(end - start, 0);
   return Math.max(1, Math.round(diff / MS_PER_DAY) + 1);
-};
-
-const normalizzaTipo = (tipo?: string) => {
-  const t = (tipo || "ferie").toLowerCase();
-  if (t.includes("ferie")) return "Ferie";
-  if (t.includes("studio")) return "Permesso studio";
-  if (t.includes("visita")) return "Visita medica";
-  if (t.includes("l104")) return "Permesso 104";
-  if (t.includes("genitoriale")) return "Congedo genitoriale";
-  if (t.includes("matrimon")) return "Permesso matrimoniale";
-  if (t.includes("malatt")) return "Malattia";
-  if (t.includes("permess")) return "Permesso";
-  return "Assenza";
 };
 
 const polarToCartesian = (cx: number, cy: number, r: number, angle: number) => {

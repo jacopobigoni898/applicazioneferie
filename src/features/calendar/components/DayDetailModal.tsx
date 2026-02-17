@@ -10,36 +10,13 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { Colori, Tipografia } from "../../../core/theme/theme";
+import { stiliModaleRichiesta } from "../../../core/style/commonStyles";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
-import { sw, sh } from "../../../core/style/responsive";
-
-// Mappa colori per tipo (stessi di GraficoAssenze)
-const COLORI_TIPO: Record<string, string> = {
-  Ferie: "#6BCB77",
-  "Permesso studio": "#7A5AF8",
-  "Visita medica": "#4D9DE0",
-  "Permesso 104": "#F59E0B",
-  "Congedo genitoriale": "#F4B4D6",
-  "Permesso matrimoniale": "#FF6B6B",
-  Malattia: "#FF6B6B",
-  Permesso: "#4D9DE0",
-  Assenza: Colori.primario,
-};
-
-const getColoreTipo = (label: string) => COLORI_TIPO[label] ?? Colori.primario;
-
-const normalizzaTipo = (tipo?: string) => {
-  const t = (tipo || "ferie").toLowerCase();
-  if (t.includes("ferie")) return "Ferie";
-  if (t.includes("studio")) return "Permesso studio";
-  if (t.includes("visita")) return "Visita medica";
-  if (t.includes("l104")) return "Permesso 104";
-  if (t.includes("genitoriale")) return "Congedo genitoriale";
-  if (t.includes("matrimon")) return "Permesso matrimoniale";
-  if (t.includes("malatt")) return "Malattia";
-  if (t.includes("permess")) return "Permesso";
-  return "Assenza";
-};
+import { sw, sh, ms } from "../../../core/style/responsive";
+import {
+  normalizzaTipo,
+  getColoreTipo,
+} from "../../../shared/utils/coloriTipoRichiesta";
 
 const formattaData = (d: Date | string) => {
   const data = typeof d === "string" ? new Date(d) : d;
@@ -101,15 +78,18 @@ export default function DayDetailModal({
       visible={visibile}
       onRequestClose={suChiusura}
     >
-      <View style={stili.contenitore}>
-        <View style={[stili.intestazione, { paddingTop: insets.top + sh(8) }]}>
-          <TouchableOpacity style={stili.pulsanteIndietro} onPress={suChiusura}>
+      <View style={stiliModaleRichiesta.sovrapposizione}>
+        <View style={[stiliModaleRichiesta.intestazionePagina, { paddingTop: insets.top + sh(8) }]}>
+          <TouchableOpacity
+            style={stiliModaleRichiesta.pulsanteIndietro}
+            onPress={suChiusura}
+          >
             <Ionicons
               name="chevron-back"
               size={sw(24)}
               color={Colori.primario}
             />
-            <Text style={stili.testoIndietro}>Indietro</Text>
+            <Text style={stiliModaleRichiesta.testoIndietro}>Indietro</Text>
           </TouchableOpacity>
         </View>
 
@@ -160,12 +140,6 @@ export default function DayDetailModal({
                       {formattaData(r.data_fine)}
                     </Text>
                   </View>
-
-                  {/* Note - placeholder, se esiste campo nota nel modello */}
-                  {/* <View style={stili.riga}>
-                    <Text style={stili.etichetta}>Note:</Text>
-                    <Text style={stili.valore}>{r.nota || "-"}</Text>
-                  </View> */}
                 </View>
               );
             })}
@@ -177,34 +151,12 @@ export default function DayDetailModal({
 }
 
 const stili = StyleSheet.create({
-  contenitore: {
-    flex: 1,
-    backgroundColor: Colori.sfondo,
-  },
-  intestazione: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: sw(16),
-    paddingBottom: sh(8),
-    borderBottomWidth: 1,
-    borderBottomColor: "#ffffff",
-    backgroundColor: Colori.superficie,
-  },
-  pulsanteIndietro: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  testoIndietro: {
-    color: Colori.primario,
-    fontSize: Tipografia.dimensione.md,
-    marginLeft: sw(4),
-  },
   titolo: {
-    fontSize: Tipografia.dimensione.xl,
+    fontSize: ms(20),
     fontWeight: Tipografia.peso.grassetto,
     color: Colori.testoPrimario,
     textTransform: "capitalize",
-    paddingHorizontal: sw(16),
+    paddingHorizontal: sw(20),
     paddingVertical: sh(16),
   },
   vuoto: {
@@ -215,28 +167,21 @@ const stili = StyleSheet.create({
   },
   testoVuoto: {
     color: Colori.testoSecondario,
-    fontSize: Tipografia.dimensione.md,
+    fontSize: ms(15),
     textAlign: "center",
   },
   lista: {
     flex: 1,
   },
   listaContenuto: {
-    paddingHorizontal: sw(16),
+    paddingHorizontal: sw(20),
     paddingBottom: sh(32),
   },
   card: {
-    backgroundColor: Colori.superficie,
-    borderRadius: 12,
-    padding: sw(16),
+    backgroundColor: "#F5F5F5",
+    borderRadius: sw(12),
+    padding: sw(14),
     marginBottom: sh(12),
-    borderWidth: 1,
-    borderColor: "#f0f0f0",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
   },
   cardHeader: {
     flexDirection: "row",
@@ -251,14 +196,14 @@ const stili = StyleSheet.create({
   },
   tipoLabel: {
     flex: 1,
-    fontSize: Tipografia.dimensione.md,
+    fontSize: ms(15),
     fontWeight: Tipografia.peso.grassetto,
     color: Colori.testoPrimario,
   },
   badge: {
     paddingHorizontal: sw(10),
     paddingVertical: sh(4),
-    borderRadius: 8,
+    borderRadius: sw(8),
     backgroundColor: "#FEF3C7",
   },
   badgeApprovata: {
@@ -271,7 +216,7 @@ const stili = StyleSheet.create({
     backgroundColor: "#FEE2E2",
   },
   badgeTesto: {
-    fontSize: Tipografia.dimensione.sm,
+    fontSize: ms(12),
     fontWeight: Tipografia.peso.medio,
     color: Colori.testoPrimario,
   },
@@ -282,11 +227,11 @@ const stili = StyleSheet.create({
   etichetta: {
     width: sw(40),
     color: Colori.testoSecondario,
-    fontSize: Tipografia.dimensione.sm,
+    fontSize: ms(13),
   },
   valore: {
     flex: 1,
     color: Colori.testoPrimario,
-    fontSize: Tipografia.dimensione.sm,
+    fontSize: ms(13),
   },
 });
