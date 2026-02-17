@@ -16,8 +16,8 @@ export const COLORI_TIPO: Record<string, string> = {
 };
 
 // Restituisce il colore associato a un tipo di richiesta normalizzato
-export const getColoreTipo = (label: string): string =>
-  COLORI_TIPO[label] ?? Colori.primario;
+export const getColoreTipo = (tipoNormalizzato: string): string =>
+  COLORI_TIPO[tipoNormalizzato] ?? Colori.primario;
 
 // Normalizza la stringa tipo_permesso dal backend a un'etichetta standard
 export const normalizzaTipo = (tipo?: string): string => {
