@@ -40,11 +40,23 @@ export const recuperaTutteRichieste = async (
   return (data || []).map(mappaRispostaFerie);
 };
 
-// Invia una nuova richiesta con il payload unificato
+// Invia una nuova richiesta con il payload unificato (multipart/form-data)
 export const aggiungiRichiesta = async (
   payload: AddRichiestaPayload,
 ): Promise<RisultatoPostDTO> => {
-  const { data } = await http.post<any>(ENDPOINT_AGGIUNGI_RICHIESTA, payload);
+  const formData = new FormData();
+  formData.append("DataInizio", payload.dataInizio);
+  formData.append("DataFine", payload.dataFine);
+  formData.append("IdTipoRichiesta", String(payload.idTipoRichiesta));
+  formData.append("Nota", payload.nota);
+  if (payload.codiceRichiesta) {
+    formData.append("codiceRichiesta", payload.codiceRichiesta);
+  }
+  if (payload.documento) {
+    formData.append("Documento", payload.documento as any);
+  }
+
+  const { data } = await http.post<any>(ENDPOINT_AGGIUNGI_RICHIESTA, formData);
   return {
     Esito: String(data?.esito ?? data?.Esito ?? ""),
     CreatedCount: Number(data?.createdCount ?? data?.CreatedCount ?? 0),

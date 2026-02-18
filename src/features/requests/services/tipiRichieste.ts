@@ -30,6 +30,11 @@ export type AddRichiestaPayload = {
   idTipoRichiesta: number;
   nota: string;
   codiceRichiesta?: string;
+  documento?: {
+    uri: string;
+    name: string;
+    type: string;
+  };
 };
 
 // --- DTO per le risposte ---
