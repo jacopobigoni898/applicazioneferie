@@ -34,9 +34,7 @@ export const recuperaTutteRichieste = async (
       ? filtroData
       : formatoAnnoMeseGiorno(oggi);
   const query = `?data=${encodeURIComponent(filtro)}`;
-  const { data } = await http.get<any[]>(
-    `${ENDPOINT_TUTTE_RICHIESTE}${query}`,
-  );
+  const { data } = await http.get<any[]>(`${ENDPOINT_TUTTE_RICHIESTE}${query}`);
   return (data || []).map(mappaRispostaFerie);
 };
 
@@ -55,6 +53,7 @@ export const aggiungiRichiesta = async (
   if (payload.documento) {
     formData.append("Documento", payload.documento as any);
   }
+  console.log(payload);
 
   const { data } = await http.post<any>(ENDPOINT_AGGIUNGI_RICHIESTA, formData, {
     headers: { "Content-Type": "multipart/form-data" },
@@ -88,6 +87,14 @@ export const eliminaRichiesta = async (
 export const aggiornaRichiesta = async (
   payload: InputAggiornamentoRichiesta,
 ) => {
-  const { data } = await http.put(ENDPOINT_AGGIORNA_RICHIESTA, payload);
+  const formData = new FormData();
+  formData.append("IdRichiesta", String(payload.IdRichiesta));
+  formData.append("DataInizio", payload.DataInizio);
+  formData.append("DataFine", payload.DataFine);
+  formData.append("StatoApprovazione", payload.StatoApprovazione);
+
+  const { data } = await http.put<any>(ENDPOINT_AGGIORNA_RICHIESTA, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
   return data;
 };
