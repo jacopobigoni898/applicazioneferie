@@ -75,6 +75,9 @@ const ModaleRichiesta = ({
     gestisciCambioOrario,
     chiudiSelettori,
     gestisciInvioCreazione,
+    documento,
+    pickDocumento,
+    rimuoviDocumento,
   } = useFormRichiesta({
     modalita: "crea",
     visibile,
@@ -338,19 +341,26 @@ const ModaleRichiesta = ({
               {richiedeDocumenti && (
                 <>
                   <Text style={stiliModaleRichiesta.etichetta}>Documento:</Text>
-                  <View
-                    style={[
-                      stiliModaleRichiesta.menuATendina,
-                      {
-                        justifyContent: "center",
-                        alignItems: "center",
-                        paddingVertical: sh(10),
-                      },
-                    ]}
-                  >
-                    <Text style={stiliModaleRichiesta.testoSegnapostoDocumento}>
-                      Caricamento documenti non ancora disponibile
-                    </Text>
+                  <View style={{ marginBottom: sh(8) }}>
+                    <TouchableOpacity
+                      style={[
+                        stiliModaleRichiesta.menuATendina,
+                        { paddingVertical: sh(12), paddingHorizontal: sw(12) },
+                      ]}
+                      onPress={pickDocumento}
+                    >
+                      <Text style={stiliModaleRichiesta.testoSegnapostoDocumento}>
+                        {documento ? documento.name : "Seleziona un PDF"}
+                      </Text>
+                    </TouchableOpacity>
+                    {documento && (
+                      <View style={{ flexDirection: "row", alignItems: "center", marginTop: sh(6) }}>
+                        <Text style={{ flex: 1 }}>{documento.name}</Text>
+                        <TouchableOpacity onPress={rimuoviDocumento} style={{ marginLeft: sw(8) }}>
+                          <Ionicons name="close-circle" size={sw(20)} color="#999" />
+                        </TouchableOpacity>
+                      </View>
+                    )}
                   </View>
                 </>
               )}

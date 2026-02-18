@@ -8,9 +8,8 @@ import {
   TipoRichiestaDTO,
   AddRichiestaPayload,
 } from "../services/requestsService";
-import {
-  aStringaIsoLocale,
-} from "../services/serializzazioneDate";
+import * as DocumentPicker from "expo-document-picker";
+import { aStringaIsoLocale } from "../services/serializzazioneDate";
 
 export type ModalitaForm = "crea" | "modifica";
 
@@ -110,6 +109,11 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
   );
   const [nota, impostaNota] = useState("");
   const [codiceRichiesta, impostaCodiceRichiesta] = useState("");
+  const [documento, impostaDocumento] = useState<{
+    uri: string;
+    name: string;
+    type: string;
+  } | null>(null);
   const [inFocus, impostaInFocus] = useState(false);
   const [orarioInizio, impostaOrarioInizio] = useState("09:00");
   const [orarioFine, impostaOrarioFine] = useState("18:00");
@@ -137,9 +141,11 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
   // Determina se il tipo selezionato richiede codice o documenti
   const tipoSelezionato = useMemo(() => {
     if (parametri.modalita !== "crea" || idTipoRichiesta == null) return null;
-    return (tipiRichiestaBackend || []).find(
-      (t) => t.idTipoRichiesta === idTipoRichiesta,
-    ) ?? null;
+    return (
+      (tipiRichiestaBackend || []).find(
+        (t) => t.idTipoRichiesta === idTipoRichiesta,
+      ) ?? null
+    );
   }, [parametri, tipiRichiestaBackend, idTipoRichiesta]);
 
   const richiedeCodice = tipoSelezionato?.richiedeCodice ?? false;
@@ -150,6 +156,27 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
     impostaMostraSelettoreInizio(false);
     impostaMostraSelettoreFine(false);
   };
+
+  // Selettore documento (PDF)
+  const pickDocumento = async () => {
+    try {
+      const resAny = (await DocumentPicker.getDocumentAsync({
+        type: "application/pdf",
+        copyToCacheDirectory: true,
+      })) as any;
+      if (resAny.type === "success") {
+        impostaDocumento({
+          uri: resAny.uri,
+          name: resAny.name || "documento.pdf",
+          type: (resAny.mimeType as string) || "application/pdf",
+        });
+      }
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  const rimuoviDocumento = () => impostaDocumento(null);
 
   const gestisciCambioOrario = (
     tipo: "inizio" | "fine",
@@ -200,20 +227,36 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
       impostaTuttoIlGiorno(false);
       chiudiSelettori();
 
-      const dataInizioParsata = parametri.dataInizio ? parsaData(parametri.dataInizio) : null;
-      const dataFineParsata = parametri.dataFine ? parsaData(parametri.dataFine) : null;
+      const dataInizioParsata = parametri.dataInizio
+        ? parsaData(parametri.dataInizio)
+        : null;
+      const dataFineParsata = parametri.dataFine
+        ? parsaData(parametri.dataFine)
+        : null;
 
       if (parametri.modalita === "modifica") {
         // Estrai orario dalle date esistenti della richiesta
-        const oreInizio = dataInizioParsata ? String(dataInizioParsata.getHours()).padStart(2, "0") : "09";
-        const minInizio = dataInizioParsata ? String(dataInizioParsata.getMinutes()).padStart(2, "0") : "00";
-        const oreFine = dataFineParsata ? String(dataFineParsata.getHours()).padStart(2, "0") : "18";
-        const minFine = dataFineParsata ? String(dataFineParsata.getMinutes()).padStart(2, "0") : "00";
+        const oreInizio = dataInizioParsata
+          ? String(dataInizioParsata.getHours()).padStart(2, "0")
+          : "09";
+        const minInizio = dataInizioParsata
+          ? String(dataInizioParsata.getMinutes()).padStart(2, "0")
+          : "00";
+        const oreFine = dataFineParsata
+          ? String(dataFineParsata.getHours()).padStart(2, "0")
+          : "18";
+        const minFine = dataFineParsata
+          ? String(dataFineParsata.getMinutes()).padStart(2, "0")
+          : "00";
         // Se entrambi gli orari sono 00:00, usa valori di default (dati legacy senza orario)
         const inizioEZero = oreInizio === "00" && minInizio === "00";
         const fineEZero = oreFine === "00" && minFine === "00";
-        impostaOrarioInizio(inizioEZero && fineEZero ? "09:00" : `${oreInizio}:${minInizio}`);
-        impostaOrarioFine(inizioEZero && fineEZero ? "18:00" : `${oreFine}:${minFine}`);
+        impostaOrarioInizio(
+          inizioEZero && fineEZero ? "09:00" : `${oreInizio}:${minInizio}`,
+        );
+        impostaOrarioFine(
+          inizioEZero && fineEZero ? "18:00" : `${oreFine}:${minFine}`,
+        );
       } else {
         impostaOrarioInizio("09:00");
         impostaOrarioFine("18:00");
@@ -308,6 +351,13 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
     if (richiedeCodice && codiceRichiesta.trim() !== "") {
       payload.codiceRichiesta = codiceRichiesta.trim();
     }
+    if (richiedeDocumenti) {
+      if (!documento) {
+        alert("Questo tipo richiede un documento. Selezionalo.");
+        return;
+      }
+      payload.documento = documento;
+    }
     suInvio(payload);
   };
 
@@ -396,5 +446,9 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
     // Funzioni di invio
     gestisciInvioCreazione,
     gestisciInvioModifica,
+    // Documento
+    documento,
+    pickDocumento,
+    rimuoviDocumento,
   };
 };
