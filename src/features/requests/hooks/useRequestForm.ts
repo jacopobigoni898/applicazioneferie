@@ -164,7 +164,11 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
         type: "application/pdf",
         copyToCacheDirectory: true,
       });
-      if (!risultato.canceled && risultato.assets && risultato.assets.length > 0) {
+      if (
+        !risultato.canceled &&
+        risultato.assets &&
+        risultato.assets.length > 0
+      ) {
         const asset = risultato.assets[0];
         impostaDocumento({
           uri: asset.uri,
