@@ -12,6 +12,8 @@ export const ENDPOINT_ELIMINA_RICHIESTA =
   "/Richieste/utente/deleteRichiesta";
 export const ENDPOINT_TUTTI_TIPO_RICHIESTA =
   "/TipoRichiesta/getAllTipoRichiesta";
+export const ENDPOINT_TUTTE_RICHIESTE_ADMIN =
+  "/Richieste/admin/getAllRichieste";
 
 // --- Modello TipoRichiesta dal backend ---
 

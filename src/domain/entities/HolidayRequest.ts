@@ -8,4 +8,5 @@ export interface RichiestaFerie {
   data_fine: Date;
   stato_approvazione: StatoRichiesta;
   tipo_permesso?: string; // solo per riconoscerlo nell'app
+  nome_utente?: string; // nome e cognome dell'utente (per vista admin)
 }

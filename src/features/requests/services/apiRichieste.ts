@@ -14,6 +14,7 @@ import {
   ENDPOINT_AGGIORNA_RICHIESTA,
   ENDPOINT_ELIMINA_RICHIESTA,
   ENDPOINT_TUTTI_TIPO_RICHIESTA,
+  ENDPOINT_TUTTE_RICHIESTE_ADMIN,
 } from "./tipiRichieste";
 
 // Recupera tutte le tipologie di richiesta dal backend
@@ -100,4 +101,20 @@ export const aggiornaRichiesta = async (
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
+};
+
+// Recupera tutte le richieste di tutti gli utenti (solo admin)
+export const recuperaTutteRichiesteAdmin = async (
+  filtroData?: string,
+): Promise<RichiestaFerie[]> => {
+  const oggi = new Date();
+  const filtro =
+    filtroData && filtroData.trim() !== ""
+      ? filtroData
+      : formatoAnnoMeseGiorno(oggi);
+  const query = `?data=${encodeURIComponent(filtro)}`;
+  const { data } = await http.get<any[]>(
+    `${ENDPOINT_TUTTE_RICHIESTE_ADMIN}${query}`,
+  );
+  return (data || []).map(mappaRispostaFerie);
 };

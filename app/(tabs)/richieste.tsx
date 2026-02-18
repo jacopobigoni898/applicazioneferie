@@ -1,6 +1,6 @@
 // Schermata delle richieste: mostra richieste inviate (utente + admin)
 // e ricevute (solo admin) con TabView e pull-to-refresh.
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Text,
   View,
@@ -16,23 +16,37 @@ import {
   useRichieste,
   TipoScheda,
 } from "../../src/features/requests/hooks/useRichieste";
+import { useRichiesteAdmin } from "../../src/features/requests/hooks/useRichiesteAdmin";
 import { useModificaRichiesta } from "../../src/features/requests/hooks/useModificaRichiesta";
 import ListaRichieste from "../../src/features/requests/components/ListaRichieste";
+import ListaRichiesteAdmin from "../../src/features/requests/components/ListaRichiesteAdmin";
 import ModaleModificaRichiesta from "../../src/features/requests/components/ModaleModificaRichiesta";
-
-// Definizione delle tab
-const PERCORSI_TAB = [
-  { key: "inviate" as TipoScheda, title: "Richieste inviate" },
-  { key: "ricevute" as TipoScheda, title: "Richieste ricevute" },
-];
+import { useAuth } from "../_providers/AuthProvider";
+import { RuoloUtente } from "../../src/domain/entities/User";
+import { StatoRichiesta } from "../../src/domain/entities/RequestStatus";
 
 export default function SchermataRichieste() {
   const dimensioni = useWindowDimensions();
   const [indiceTab, impostaIndiceTab] = useState(0);
+  const { utente } = useAuth();
+  const eAdmin = utente?.ruolo === RuoloUtente.ADMIN;
 
-  // Hook per i dati delle due tab
+  // Tab visibili: solo "inviate" per utenti, entrambe per admin
+  const percorsiTab = useMemo(() => {
+    const tab: { key: TipoScheda; title: string }[] = [
+      { key: "inviate", title: "Richieste inviate" },
+    ];
+    if (eAdmin) {
+      tab.push({ key: "ricevute", title: "Richieste ricevute" });
+    }
+    return tab;
+  }, [eAdmin]);
+
+  // Hook per i dati delle richieste inviate
   const inviate = useRichieste("inviate");
-  const ricevute = useRichieste("ricevute");
+
+  // Hook per le richieste ricevute (admin) — esclude le proprie
+  const ricevuteAdmin = useRichiesteAdmin(utente?.id ?? "");
 
   // Hook per la gestione della modifica
   const {
@@ -57,17 +71,32 @@ export default function SchermataRichieste() {
       </View>
 
       <TabView
-        navigationState={{ index: indiceTab, routes: PERCORSI_TAB }}
+        navigationState={{ index: indiceTab, routes: percorsiTab }}
         renderScene={({ route }) => {
-          const datiTab = route.key === "inviate" ? inviate : ricevute;
+          if (route.key === "ricevute" && eAdmin) {
+            return (
+              <ListaRichiesteAdmin
+                dati={ricevuteAdmin.elementiFormattati}
+                inCaricamento={ricevuteAdmin.inCaricamento}
+                errore={ricevuteAdmin.errore}
+                suRicarica={ricevuteAdmin.ricarica}
+                suAutorizza={(id) =>
+                  ricevuteAdmin.aggiornaStato(id, StatoRichiesta.AUTORIZZATO)
+                }
+                suRifiuta={(id) =>
+                  ricevuteAdmin.aggiornaStato(id, StatoRichiesta.RIFIUTATO)
+                }
+              />
+            );
+          }
           return (
             <ListaRichieste
-              dati={datiTab.elementiFormattati}
-              inCaricamento={datiTab.inCaricamento}
-              errore={datiTab.errore}
-              suRicarica={datiTab.ricarica}
-              suEliminazione={datiTab.rimuovi}
-              suModifica={(el) => apriModifica(el, datiTab.aggiorna)}
+              dati={inviate.elementiFormattati}
+              inCaricamento={inviate.inCaricamento}
+              errore={inviate.errore}
+              suRicarica={inviate.ricarica}
+              suEliminazione={inviate.rimuovi}
+              suModifica={(el) => apriModifica(el, inviate.aggiorna)}
             />
           );
         }}

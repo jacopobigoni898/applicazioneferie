@@ -20,6 +20,7 @@ export {
 export {
   recuperaTipiRichiesta,
   recuperaTutteRichieste,
+  recuperaTutteRichiesteAdmin,
   aggiungiRichiesta,
   eliminaRichiesta,
   aggiornaRichiesta,
