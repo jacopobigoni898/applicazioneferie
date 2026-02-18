@@ -48,7 +48,7 @@ export const aggiungiRichiesta = async (
   formData.append("DataInizio", payload.dataInizio);
   formData.append("DataFine", payload.dataFine);
   formData.append("IdTipoRichiesta", String(payload.idTipoRichiesta));
-  formData.append("Nota", payload.nota);
+  formData.append("Nota", payload.nota ?? "");
   if (payload.codiceRichiesta) {
     formData.append("codiceRichiesta", payload.codiceRichiesta);
   }
@@ -56,7 +56,9 @@ export const aggiungiRichiesta = async (
     formData.append("Documento", payload.documento as any);
   }
 
-  const { data } = await http.post<any>(ENDPOINT_AGGIUNGI_RICHIESTA, formData);
+  const { data } = await http.post<any>(ENDPOINT_AGGIUNGI_RICHIESTA, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
   return {
     Esito: String(data?.esito ?? data?.Esito ?? ""),
     CreatedCount: Number(data?.createdCount ?? data?.CreatedCount ?? 0),
