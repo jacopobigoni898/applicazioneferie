@@ -160,15 +160,16 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
   // Selettore documento (PDF)
   const pickDocumento = async () => {
     try {
-      const resAny = (await DocumentPicker.getDocumentAsync({
+      const risultato = await DocumentPicker.getDocumentAsync({
         type: "application/pdf",
         copyToCacheDirectory: true,
-      })) as any;
-      if (resAny.type === "success") {
+      });
+      if (!risultato.canceled && risultato.assets && risultato.assets.length > 0) {
+        const asset = risultato.assets[0];
         impostaDocumento({
-          uri: resAny.uri,
-          name: resAny.name || "documento.pdf",
-          type: (resAny.mimeType as string) || "application/pdf",
+          uri: asset.uri,
+          name: asset.name || "documento.pdf",
+          type: asset.mimeType || "application/pdf",
         });
       }
     } catch (e) {
@@ -351,11 +352,7 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
     if (richiedeCodice && codiceRichiesta.trim() !== "") {
       payload.codiceRichiesta = codiceRichiesta.trim();
     }
-    if (richiedeDocumenti) {
-      if (!documento) {
-        alert("Questo tipo richiede un documento. Selezionalo.");
-        return;
-      }
+    if (documento) {
       payload.documento = documento;
     }
     suInvio(payload);
@@ -400,6 +397,9 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
       DataFine: aStringaIsoLocale(dataFineFinale),
       StatoApprovazione: stato,
     };
+    if (documento) {
+      payload.Documento = documento;
+    }
 
     parametri.suInvio(payload);
   };

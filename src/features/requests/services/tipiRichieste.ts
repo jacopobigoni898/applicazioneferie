@@ -58,4 +58,9 @@ export type InputAggiornamentoRichiesta = {
   DataInizio: string;
   DataFine: string;
   StatoApprovazione: string;
+  Documento?: {
+    uri: string;
+    name: string;
+    type: string;
+  };
 };

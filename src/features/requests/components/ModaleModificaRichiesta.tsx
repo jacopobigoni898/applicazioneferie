@@ -70,6 +70,9 @@ const ModaleModificaRichiesta = ({
     mostraSelettoreInizio: mostraSelettoreOrarioInizio,
     mostraSelettoreFine: mostraSelettoreOrarioFine,
     chiudiSelettori,
+    documento,
+    pickDocumento,
+    rimuoviDocumento,
   } = useFormRichiesta({
     modalita: "modifica",
     visibile,
@@ -391,6 +394,30 @@ const ModaleModificaRichiesta = ({
             {renderizzaSelettoreData("inizio")}
             {renderizzaSelettoreData("fine")}
             {renderizzaSelettoreOrario()}
+
+            <Text style={stiliModaleRichiesta.etichetta}>Documento (opzionale):</Text>
+            <View style={{ marginBottom: sh(8) }}>
+              <TouchableOpacity
+                style={[
+                  stiliModaleRichiesta.menuATendina,
+                  { paddingVertical: sh(12), paddingHorizontal: sw(12) },
+                ]}
+                onPress={pickDocumento}
+              >
+                <Text style={stiliModaleRichiesta.testoSegnapostoDocumento}>
+                  {documento ? documento.name : "Seleziona un PDF"}
+                </Text>
+              </TouchableOpacity>
+              {documento && (
+                <View style={{ flexDirection: "row", alignItems: "center", marginTop: sh(6) }}>
+                  <Text style={{ flex: 1 }}>{documento.name}</Text>
+                  <TouchableOpacity onPress={rimuoviDocumento} style={{ marginLeft: sw(8) }}>
+                    <Ionicons name="close-circle" size={sw(20)} color="#999" />
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+
             <View style={{ height: sh(16) }} />
           </ScrollView>
           <View
