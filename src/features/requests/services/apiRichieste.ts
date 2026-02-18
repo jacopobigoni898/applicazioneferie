@@ -92,6 +92,9 @@ export const aggiornaRichiesta = async (
   formData.append("DataInizio", payload.DataInizio);
   formData.append("DataFine", payload.DataFine);
   formData.append("StatoApprovazione", payload.StatoApprovazione);
+  if (payload.Documento) {
+    formData.append("Documento", payload.Documento as any);
+  }
 
   const { data } = await http.put<any>(ENDPOINT_AGGIORNA_RICHIESTA, formData, {
     headers: { "Content-Type": "multipart/form-data" },
