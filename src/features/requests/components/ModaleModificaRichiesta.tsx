@@ -24,6 +24,8 @@ import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
 import { InputAggiornamentoRichiesta } from "../services/requestsService";
 import { StatoRichiesta } from "../../../domain/entities/RequestStatus";
 import { useFormRichiesta } from "../hooks/useRequestForm";
+import { recuperaTipiRichiesta } from "../services/apiRichieste";
+import { normalizzaTipo } from "../../../shared/utils/coloriTipoRichiesta";
 
 // Opzioni dropdown per lo stato di approvazione
 const OPZIONI_STATO = [
@@ -86,6 +88,9 @@ const ModaleModificaRichiesta = ({
   // Date temporanee per iOS (conferma esplicita)
   const [dataInizioTemp, impostaDataInizioTemp] = useState<Date | null>(null);
   const [dataFineTemp, impostaDataFineTemp] = useState<Date | null>(null);
+  // Se la tipologia della richiesta permette la modifica del documento
+  const [modificaDocumentoAbilitata, setModificaDocumentoAbilitata] =
+    useState<boolean>(true);
 
   // Reset stato quando la modale appare
   useEffect(() => {
@@ -95,6 +100,38 @@ const ModaleModificaRichiesta = ({
       impostaDataInizioTemp(null);
       impostaDataFineTemp(null);
     }
+  }, [visibile, elemento]);
+
+  // Quando la modale si apre, recupera i tipi backend e determina
+  // se la tipologia corrente richiede documenti (quindi se consentire
+  // la modifica del documento nella modale di modifica).
+  useEffect(() => {
+    let annulla = false;
+    const valuta = async () => {
+      if (!visibile || !elemento) {
+        setModificaDocumentoAbilitata(false);
+        return;
+      }
+      try {
+        const tipi = await recuperaTipiRichiesta();
+        const tipoNorm = normalizzaTipo(elemento.tipo_permesso);
+        const trovato = tipi.find(
+          (t) =>
+            normalizzaTipo(t.tipoRichiesta) === tipoNorm ||
+            t.tipoRichiesta
+              ?.toLowerCase()
+              .includes((elemento.tipo_permesso || "").toLowerCase()),
+        );
+        if (!annulla)
+          setModificaDocumentoAbilitata(Boolean(trovato?.richiedeDocumenti));
+      } catch (e) {
+        if (!annulla) setModificaDocumentoAbilitata(false);
+      }
+    };
+    valuta();
+    return () => {
+      annulla = true;
+    };
   }, [visibile, elemento]);
 
   // Controlla se è richiesta per un singolo giorno
@@ -395,26 +432,54 @@ const ModaleModificaRichiesta = ({
             {renderizzaSelettoreData("fine")}
             {renderizzaSelettoreOrario()}
 
-            <Text style={stiliModaleRichiesta.etichetta}>Documento (opzionale):</Text>
+            <Text style={stiliModaleRichiesta.etichetta}>
+              Documento (opzionale):
+            </Text>
             <View style={{ marginBottom: sh(8) }}>
               <TouchableOpacity
                 style={[
                   stiliModaleRichiesta.menuATendina,
                   { paddingVertical: sh(12), paddingHorizontal: sw(12) },
+                  !modificaDocumentoAbilitata && { opacity: 0.6 },
                 ]}
-                onPress={pickDocumento}
+                onPress={modificaDocumentoAbilitata ? pickDocumento : undefined}
+                disabled={!modificaDocumentoAbilitata}
               >
                 <Text style={stiliModaleRichiesta.testoSegnapostoDocumento}>
-                  {documento ? documento.name : "Seleziona un PDF"}
+                  {documento
+                    ? documento.name
+                    : modificaDocumentoAbilitata
+                      ? "Seleziona un PDF"
+                      : "Documento non modificabile"}
                 </Text>
               </TouchableOpacity>
               {documento && (
-                <View style={{ flexDirection: "row", alignItems: "center", marginTop: sh(6) }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginTop: sh(6),
+                  }}
+                >
                   <Text style={{ flex: 1 }}>{documento.name}</Text>
-                  <TouchableOpacity onPress={rimuoviDocumento} style={{ marginLeft: sw(8) }}>
-                    <Ionicons name="close-circle" size={sw(20)} color="#999" />
-                  </TouchableOpacity>
+                  {modificaDocumentoAbilitata && (
+                    <TouchableOpacity
+                      onPress={rimuoviDocumento}
+                      style={{ marginLeft: sw(8) }}
+                    >
+                      <Ionicons
+                        name="close-circle"
+                        size={sw(20)}
+                        color="#999"
+                      />
+                    </TouchableOpacity>
+                  )}
                 </View>
+              )}
+              {!modificaDocumentoAbilitata && (
+                <Text style={stiliModaleRichiesta.sottointestazione}>
+                  Documento non modificabile per questo tipo di richiesta.
+                </Text>
               )}
             </View>
 
