@@ -432,56 +432,62 @@ const ModaleModificaRichiesta = ({
             {renderizzaSelettoreData("fine")}
             {renderizzaSelettoreOrario()}
 
-            <Text style={stiliModaleRichiesta.etichetta}>
-              Documento (opzionale):
-            </Text>
-            <View style={{ marginBottom: sh(8) }}>
-              <TouchableOpacity
-                style={[
-                  stiliModaleRichiesta.menuATendina,
-                  { paddingVertical: sh(12), paddingHorizontal: sw(12) },
-                  !modificaDocumentoAbilitata && { opacity: 0.6 },
-                ]}
-                onPress={modificaDocumentoAbilitata ? pickDocumento : undefined}
-                disabled={!modificaDocumentoAbilitata}
-              >
-                <Text style={stiliModaleRichiesta.testoSegnapostoDocumento}>
-                  {documento
-                    ? documento.name
-                    : modificaDocumentoAbilitata
-                      ? "Seleziona un PDF"
-                      : "Documento non modificabile"}
+            {(modificaDocumentoAbilitata || documento) && (
+              <>
+                <Text style={stiliModaleRichiesta.etichetta}>
+                  Documento (opzionale):
                 </Text>
-              </TouchableOpacity>
-              {documento && (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginTop: sh(6),
-                  }}
-                >
-                  <Text style={{ flex: 1 }}>{documento.name}</Text>
-                  {modificaDocumentoAbilitata && (
-                    <TouchableOpacity
-                      onPress={rimuoviDocumento}
-                      style={{ marginLeft: sw(8) }}
+                <View style={{ marginBottom: sh(8) }}>
+                  <TouchableOpacity
+                    style={[
+                      stiliModaleRichiesta.menuATendina,
+                      { paddingVertical: sh(12), paddingHorizontal: sw(12) },
+                      !modificaDocumentoAbilitata && { opacity: 0.6 },
+                    ]}
+                    onPress={
+                      modificaDocumentoAbilitata ? pickDocumento : undefined
+                    }
+                    disabled={!modificaDocumentoAbilitata}
+                  >
+                    <Text style={stiliModaleRichiesta.testoSegnapostoDocumento}>
+                      {documento
+                        ? documento.name
+                        : modificaDocumentoAbilitata
+                          ? "Seleziona un PDF"
+                          : "Documento non modificabile"}
+                    </Text>
+                  </TouchableOpacity>
+                  {documento && (
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginTop: sh(6),
+                      }}
                     >
-                      <Ionicons
-                        name="close-circle"
-                        size={sw(20)}
-                        color="#999"
-                      />
-                    </TouchableOpacity>
+                      <Text style={{ flex: 1 }}>{documento.name}</Text>
+                      {modificaDocumentoAbilitata && (
+                        <TouchableOpacity
+                          onPress={rimuoviDocumento}
+                          style={{ marginLeft: sw(8) }}
+                        >
+                          <Ionicons
+                            name="close-circle"
+                            size={sw(20)}
+                            color="#999"
+                          />
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  )}
+                  {!modificaDocumentoAbilitata && (
+                    <Text style={stiliModaleRichiesta.sottointestazione}>
+                      Documento non modificabile per questo tipo di richiesta.
+                    </Text>
                   )}
                 </View>
-              )}
-              {!modificaDocumentoAbilitata && (
-                <Text style={stiliModaleRichiesta.sottointestazione}>
-                  Documento non modificabile per questo tipo di richiesta.
-                </Text>
-              )}
-            </View>
+              </>
+            )}
 
             <View style={{ height: sh(16) }} />
           </ScrollView>
