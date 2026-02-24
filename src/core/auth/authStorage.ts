@@ -26,6 +26,7 @@ export const storageAuth = {
     try {
       const grezzo = await SecureStore.getItemAsync(CHIAVE_TOKEN_ACCESSO);
       return parseSicuro(grezzo);
+      console.log(grezzo);
     } catch (errore) {
       console.warn("Impossibile leggere il token da SecureStore", errore);
       return null;
