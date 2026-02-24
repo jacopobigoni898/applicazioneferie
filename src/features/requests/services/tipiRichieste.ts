@@ -10,6 +10,8 @@ export const ENDPOINT_TUTTI_TIPO_RICHIESTA =
   "/TipoRichiesta/getAllTipoRichiesta";
 
 export const ENDPOINT_GETDOCUMENTI = "/Richieste/utente/getDocumenti";
+export const ENDPOINT_ADMIN_TUTTE_RICHIESTE =
+  "/Richieste/admin/getAllRichieste";
 // --- Modello TipoRichiesta dal backend ---
 
 export interface TipoRichiestaDTO {

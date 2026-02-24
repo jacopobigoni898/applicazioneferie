@@ -457,6 +457,28 @@ export const stiliElementoRichiesta = StyleSheet.create({
     fontWeight: "700",
     fontSize: 13,
   },
+  azioneAutorizza: {
+    backgroundColor: "#f0fdf4",
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  testoAutorizza: {
+    color: "#16a34a",
+    fontWeight: "700",
+    fontSize: 13,
+  },
+  azioneNonAutorizza: {
+    backgroundColor: "#fef2f2",
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  testoNonAutorizza: {
+    color: "#dc2626",
+    fontWeight: "700",
+    fontSize: 13,
+  },
 });
 
 // Stili per le tab nella schermata richieste

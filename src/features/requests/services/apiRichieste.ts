@@ -16,6 +16,7 @@ import {
   ENDPOINT_ELIMINA_RICHIESTA,
   ENDPOINT_TUTTI_TIPO_RICHIESTA,
   ENDPOINT_GETDOCUMENTI,
+  ENDPOINT_ADMIN_TUTTE_RICHIESTE,
 } from "./tipiRichieste";
 
 // Recupera tutte le tipologie di richiesta dal backend
@@ -37,6 +38,22 @@ export const recuperaTutteRichieste = async (
       : formatoAnnoMeseGiorno(oggi);
   const query = `?data=${encodeURIComponent(filtro)}`;
   const { data } = await http.get<any[]>(`${ENDPOINT_TUTTE_RICHIESTE}${query}`);
+  return (data || []).map(mappaRispostaFerie);
+};
+
+// Recupera tutte le richieste degli utenti (solo admin), passando la data odierna come parametro
+export const recuperaTutteRichiesteAdmin = async (
+  filtroData?: string,
+): Promise<RichiestaFerie[]> => {
+  const oggi = new Date();
+  const filtro =
+    filtroData && filtroData.trim() !== ""
+      ? filtroData
+      : formatoAnnoMeseGiorno(oggi);
+  const query = `?data=${encodeURIComponent(filtro)}`;
+  const { data } = await http.get<any[]>(
+    `${ENDPOINT_ADMIN_TUTTE_RICHIESTE}${query}`,
+  );
   return (data || []).map(mappaRispostaFerie);
 };
 

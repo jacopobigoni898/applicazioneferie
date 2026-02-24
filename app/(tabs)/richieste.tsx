@@ -18,21 +18,27 @@ import {
 } from "../../src/features/requests/hooks/useRichieste";
 import { useModificaRichiesta } from "../../src/features/requests/hooks/useModificaRichiesta";
 import ListaRichieste from "../../src/features/requests/components/ListaRichieste";
+import ListaRichiesteAdmin from "../../src/features/requests/components/ListaRichiesteAdmin";
 import ModaleModificaRichiesta from "../../src/features/requests/components/ModaleModificaRichiesta";
+import { useAuth } from "../_providers/AuthProvider";
+import { RuoloUtente } from "../../src/domain/entities/User";
 
-// Definizione delle tab
-const PERCORSI_TAB = [
-  { key: "inviate" as TipoScheda, title: "Richieste inviate" },
-  { key: "ricevute" as TipoScheda, title: "Richieste ricevute" },
-];
+const PERCORSO_INVIATE = { key: "inviate" as TipoScheda, title: "Richieste inviate" };
+const PERCORSO_RICEVUTE = { key: "ricevute" as TipoScheda, title: "Richieste ricevute" };
 
 export default function SchermataRichieste() {
   const dimensioni = useWindowDimensions();
   const [indiceTab, impostaIndiceTab] = useState(0);
+  const { utente } = useAuth();
+  const isAdmin = utente?.ruolo === RuoloUtente.ADMIN;
+
+  const percorsiTab = isAdmin
+    ? [PERCORSO_INVIATE, PERCORSO_RICEVUTE]
+    : [PERCORSO_INVIATE];
 
   // Hook per i dati delle due tab
   const inviate = useRichieste("inviate");
-  const ricevute = useRichieste("ricevute");
+  const ricevute = useRichieste("ricevute", isAdmin);
 
   // Hook per la gestione della modifica
   const {
@@ -57,39 +63,50 @@ export default function SchermataRichieste() {
       </View>
 
       <TabView
-        navigationState={{ index: indiceTab, routes: PERCORSI_TAB }}
+        navigationState={{ index: indiceTab, routes: percorsiTab }}
         renderScene={({ route }) => {
-          const datiTab = route.key === "inviate" ? inviate : ricevute;
+          if (route.key === "ricevute") {
+            return (
+              <ListaRichiesteAdmin
+                dati={ricevute.elementiFormattati}
+                inCaricamento={ricevute.inCaricamento}
+                errore={ricevute.errore}
+                suRicarica={ricevute.ricarica}
+              />
+            );
+          }
           return (
             <ListaRichieste
-              dati={datiTab.elementiFormattati}
-              inCaricamento={datiTab.inCaricamento}
-              errore={datiTab.errore}
-              suRicarica={datiTab.ricarica}
-              suEliminazione={datiTab.rimuovi}
-              suModifica={(el) => apriModifica(el, datiTab.aggiorna)}
+              dati={inviate.elementiFormattati}
+              inCaricamento={inviate.inCaricamento}
+              errore={inviate.errore}
+              suRicarica={inviate.ricarica}
+              suEliminazione={inviate.rimuovi}
+              suModifica={(el) => apriModifica(el, inviate.aggiorna)}
             />
           );
         }}
         onIndexChange={impostaIndiceTab}
         initialLayout={{ width: dimensioni.width }}
-        renderTabBar={(props) => (
-          <TabBar
-            {...(props as any)}
-            labelAllowFontScaling={false}
-            indicatorStyle={{ backgroundColor: Colori.primario }}
-            style={{
-              backgroundColor: "transparent",
-              marginTop: 24,
-              height: 64,
-              justifyContent: "center",
-              paddingTop: 6,
-            }}
-            labelStyle={stiliTab.etichetta}
-            activeColor="#000000"
-            inactiveColor="#808080"
-          />
-        )}
+        renderTabBar={(props) =>
+          isAdmin ? (
+            <TabBar
+              {...(props as any)}
+              labelAllowFontScaling={false}
+              indicatorStyle={{ backgroundColor: Colori.primario }}
+              style={{
+                backgroundColor: "transparent",
+                marginTop: 24,
+                height: 64,
+                justifyContent: "center",
+                paddingTop: 6,
+              }}
+              labelStyle={stiliTab.etichetta}
+              activeColor="#000000"
+              inactiveColor="#808080"
+            />
+          ) : null
+        }
       />
 
       <ModaleModificaRichiesta

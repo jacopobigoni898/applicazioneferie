@@ -7,6 +7,7 @@ import {
   eliminaRichiesta,
   aggiornaRichiesta,
   recuperaTutteRichieste,
+  recuperaTutteRichiesteAdmin,
   InputAggiornamentoRichiesta,
 } from "../services/requestsService";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
@@ -30,17 +31,21 @@ const estraiMessaggio = (err: unknown, fallback: string): string => {
   return fallback;
 };
 
-export function useRichieste(tipo: TipoScheda = "inviate") {
+export function useRichieste(tipo: TipoScheda = "inviate", abilitato: boolean = true) {
   const [elementi, impostaElementi] = useState<RichiestaFerie[]>([]);
   const [inCaricamento, impostaInCaricamento] = useState(false);
   const [errore, impostaErrore] = useState<string | null>(null);
 
   // Carica le richieste dal backend
   const caricaDati = useCallback(async () => {
+    if (!abilitato) return;
     impostaInCaricamento(true);
     impostaErrore(null);
     try {
-      const dati = await recuperaTutteRichieste();
+      const dati =
+        tipo === "ricevute"
+          ? await recuperaTutteRichiesteAdmin()
+          : await recuperaTutteRichieste();
       impostaElementi(dati);
     } catch (err: unknown) {
       impostaErrore(estraiMessaggio(err, "Errore di caricamento"));
@@ -48,7 +53,7 @@ export function useRichieste(tipo: TipoScheda = "inviate") {
       impostaInCaricamento(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tipo]);
+  }, [tipo, abilitato]);
 
   // Carica al montaggio e al cambio di tipo
 
