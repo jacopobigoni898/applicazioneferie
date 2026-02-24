@@ -4,8 +4,6 @@ import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
 import { mappaRispostaFerie } from "../mappers/holidayMapper";
 import { formatoAnnoMeseGiorno } from "./serializzazioneDate";
 import { File as FSFile, Paths } from "expo-file-system";
-import { storageAuth } from "../../../core/auth/authStorage";
-import { URL_BASE_API } from "../../../config/env";
 import {
   TipoRichiestaDTO,
   AddRichiestaPayload,
@@ -106,26 +104,38 @@ export const aggiornaRichiesta = async (
   return data;
 };
 
-// Recupera il documento allegato a una richiesta (per ID richiesta)
+// Recupera il documento allegato a una richiesta (per ID richiesta).
+// Usa il client http (axios) per sfruttare l'interceptor di autenticazione.
 export const recuperaDocumento = async (
   idRichiesta: number,
 ): Promise<{ uri: string; name: string; type: string } | null> => {
   try {
-    const token = await storageAuth.recuperaTokenAccesso();
-    const url = `${URL_BASE_API}${ENDPOINT_GETDOCUMENTI}?id=${idRichiesta}`;
-
-    const file = await FSFile.downloadFileAsync(url, Paths.cache, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      idempotent: true,
+    const risposta = await http.get(ENDPOINT_GETDOCUMENTI, {
+      params: { id: idRichiesta },
+      responseType: "arraybuffer",
     });
+
+    const contentDisposition =
+      risposta.headers["content-disposition"] ?? "";
+    const match = /filename=([^;]+)/.exec(contentDisposition);
+    const nomeFile = match
+      ? match[1].trim().replace(/^["']|["']$/g, "")
+      : `documento_${idRichiesta}.pdf`;
+
+    const file = new FSFile(Paths.cache, nomeFile);
+    file.create({ overwrite: true });
+    file.write(new Uint8Array(risposta.data));
 
     return {
       uri: file.uri,
-      name: file.uri.split("/").pop() || `documento_${idRichiesta}.pdf`,
-      type: file.type || "application/pdf",
+      name: nomeFile,
+      type: risposta.headers["content-type"] ?? "application/pdf",
     };
-  } catch (e) {
-    console.warn("Errore nel recupero del documento:", e);
+  } catch (e: any) {
+    // Log solo errori imprevisti (rete, filesystem), non errori server attesi (es. 500 = nessun documento)
+    if (!e?.response?.status) {
+      console.warn("Errore nel recupero del documento:", e);
+    }
     return null;
   }
 };
