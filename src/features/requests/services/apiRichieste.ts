@@ -124,7 +124,8 @@ export const recuperaDocumento = async (
       name: file.uri.split("/").pop() || `documento_${idRichiesta}.pdf`,
       type: file.type || "application/pdf",
     };
-  } catch {
+  } catch (e) {
+    console.warn("Errore nel recupero del documento:", e);
     return null;
   }
 };
