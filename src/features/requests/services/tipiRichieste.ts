@@ -2,17 +2,14 @@
 
 // --- Endpoint unificati del backend ---
 
-export const ENDPOINT_TUTTE_RICHIESTE =
-  "/Richieste/utente/getAllRichiesteById";
-export const ENDPOINT_AGGIUNGI_RICHIESTA =
-  "/Richieste/utente/addRichiesta";
-export const ENDPOINT_AGGIORNA_RICHIESTA =
-  "/Richieste/utente/updateRichiesta";
-export const ENDPOINT_ELIMINA_RICHIESTA =
-  "/Richieste/utente/deleteRichiesta";
+export const ENDPOINT_TUTTE_RICHIESTE = "/Richieste/utente/getAllRichiesteById";
+export const ENDPOINT_AGGIUNGI_RICHIESTA = "/Richieste/utente/addRichiesta";
+export const ENDPOINT_AGGIORNA_RICHIESTA = "/Richieste/utente/updateRichiesta";
+export const ENDPOINT_ELIMINA_RICHIESTA = "/Richieste/utente/deleteRichiesta";
 export const ENDPOINT_TUTTI_TIPO_RICHIESTA =
   "/TipoRichiesta/getAllTipoRichiesta";
 
+export const ENDPOINT_GETDOCUMENTI = "Richieste/utente/getDocumenti";
 // --- Modello TipoRichiesta dal backend ---
 
 export interface TipoRichiestaDTO {
