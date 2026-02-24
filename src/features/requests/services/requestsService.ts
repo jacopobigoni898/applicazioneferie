@@ -23,4 +23,5 @@ export {
   aggiungiRichiesta,
   eliminaRichiesta,
   aggiornaRichiesta,
+  recuperaDocumento,
 } from "./apiRichieste";
