@@ -17,7 +17,6 @@ import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import { Dropdown } from "react-native-element-dropdown";
 import { stiliModaleRichiesta } from "../../../core/style/commonStyles";
 import { sw, sh } from "../../../core/style/responsive";
 import { Colori } from "../../../core/theme/theme";
@@ -27,6 +26,7 @@ import { StatoRichiesta } from "../../../domain/entities/RequestStatus";
 import { useFormRichiesta } from "../hooks/useRequestForm";
 import { recuperaTipiRichiesta } from "../services/apiRichieste";
 import { normalizzaTipo } from "../../../shared/utils/coloriTipoRichiesta";
+import SelettoreOrarioIOS from "../../../shared/components/SelettoreOrarioIOS";
 
 // Opzioni dropdown per lo stato di approvazione
 const OPZIONI_STATO = [
@@ -257,66 +257,11 @@ const ModaleModificaRichiesta = ({
     );
   };
 
-  // Renderizza il picker orario per iOS
-  const renderizzaSelettoreOrario = () => {
-    if (Platform.OS !== "ios") return null;
-    if (!mostraSelettoreOrarioInizio && !mostraSelettoreOrarioFine) return null;
-
-    const eInizio = mostraSelettoreOrarioInizio;
-    const valore = eInizio ? dataInizio || new Date() : dataFine || new Date();
-    const tipo = eInizio ? "inizio" : "fine";
-
-    return (
-      <Modal
-        transparent
-        animationType="fade"
-        visible={mostraSelettoreOrarioInizio || mostraSelettoreOrarioFine}
-        onRequestClose={chiudiSelettori}
-      >
-        <TouchableWithoutFeedback onPress={chiudiSelettori}>
-          <View style={stiliModaleRichiesta.sovrapposizioneSelettore}>
-            <TouchableWithoutFeedback>
-              <View style={stiliModaleRichiesta.foglioSelettore}>
-                <View style={stiliModaleRichiesta.intestazioneSelettore}>
-                  <Text style={stiliModaleRichiesta.titoloSelettore}>
-                    Seleziona orario
-                  </Text>
-                  <TouchableOpacity onPress={chiudiSelettori}>
-                    <Text style={stiliModaleRichiesta.chiudiSelettore}>
-                      Chiudi
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-                <DateTimePicker
-                  value={valore}
-                  mode="time"
-                  is24Hour
-                  display={Platform.OS === "ios" ? "spinner" : "clock"}
-                  minuteInterval={Platform.OS === "ios" ? 30 : undefined}
-                  themeVariant="light"
-                  textColor={Colori.testoPrimario}
-                  onChange={(evento, data) => {
-                    gestisciCambioOrario(tipo, evento, data || valore);
-                  }}
-                  style={stiliModaleRichiesta.selettoreIOS}
-                />
-
-                <TouchableOpacity
-                  style={stiliModaleRichiesta.confermaSelettore}
-                  onPress={chiudiSelettori}
-                >
-                  <Text style={stiliModaleRichiesta.testoConfermaSelettore}>
-                    OK
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-    );
-  };
+  // Calcola il valore corrente per il selettore orario
+  const valoreSelettoreOrario = mostraSelettoreOrarioInizio
+    ? dataInizio || new Date()
+    : dataFine || new Date();
+  const tipoSelettoreOrario = mostraSelettoreOrarioInizio ? "inizio" : "fine";
 
   return (
     <Modal
@@ -432,7 +377,14 @@ const ModaleModificaRichiesta = ({
             </Text>
             {renderizzaSelettoreData("inizio")}
             {renderizzaSelettoreData("fine")}
-            {renderizzaSelettoreOrario()}
+            <SelettoreOrarioIOS
+              visibile={mostraSelettoreOrarioInizio || mostraSelettoreOrarioFine}
+              valore={valoreSelettoreOrario}
+              suChiusura={chiudiSelettori}
+              suCambio={(evento, data) =>
+                gestisciCambioOrario(tipoSelettoreOrario, evento, data)
+              }
+            />
 
             {(modificaDocumentoAbilitata || documento || documentoInCaricamento) && (
               <>

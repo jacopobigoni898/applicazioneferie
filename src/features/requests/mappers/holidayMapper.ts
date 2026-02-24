@@ -1,11 +1,6 @@
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
 import { StatoRichiesta } from "../../../domain/entities/RequestStatus";
-
-// Parsing difensivo delle date dall'API
-const parsaData = (valore: any): Date => {
-  const d = valore ? new Date(valore) : new Date();
-  return Number.isNaN(d.getTime()) ? new Date() : d;
-};
+import { parsaData } from "../../../shared/utils/dateUtils";
 
 // Mappa la risposta del backend nell'entità RichiestaFerie
 export const mappaRispostaFerie = (grezzo: any): RichiestaFerie => {

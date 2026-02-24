@@ -20,15 +20,7 @@ import {
   normalizzaTipo,
   getColoreTipo,
 } from "../../../shared/utils/coloriTipoRichiesta";
-
-const formattaData = (d: Date | string) => {
-  const data = typeof d === "string" ? new Date(d) : d;
-  return data.toLocaleDateString("it-IT", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-};
+import { formattaDataDettaglio } from "../../../shared/utils/dateUtils";
 
 const formattaStato = (stato?: string) => {
   if (!stato) return "In attesa";
@@ -151,13 +143,13 @@ export default function DayDetailModal({
                   <View style={ModaleDettagliostyle.riga}>
                     <Text style={ModaleDettagliostyle.etichetta}>Dal:</Text>
                     <Text style={ModaleDettagliostyle.valore}>
-                      {formattaData(r.data_inizio)}
+                      {formattaDataDettaglio(r.data_inizio)}
                     </Text>
                   </View>
                   <View style={ModaleDettagliostyle.riga}>
                     <Text style={ModaleDettagliostyle.etichetta}>Al:</Text>
                     <Text style={ModaleDettagliostyle.valore}>
-                      {formattaData(r.data_fine)}
+                      {formattaDataDettaglio(r.data_fine)}
                     </Text>
                   </View>
                 </View>

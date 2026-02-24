@@ -12,6 +12,7 @@ import {
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
 import { formattaStringaData } from "../utils/formattaData";
 import { useFocusEffect } from "@react-navigation/native";
+import { estraiMessaggioErrore } from "../../../shared/utils/errorUtils";
 
 // Estensione con date formattate per la visualizzazione
 export type RichiestaFormattata = RichiestaFerie & {
@@ -20,15 +21,6 @@ export type RichiestaFormattata = RichiestaFerie & {
 };
 
 export type TipoScheda = "inviate" | "ricevute";
-
-// Estrae il messaggio di errore da un errore generico
-const estraiMessaggio = (err: unknown, fallback: string): string => {
-  if (typeof err === "object" && err !== null) {
-    const e = err as any;
-    return e?.response?.data?.message || e?.message || fallback;
-  }
-  return fallback;
-};
 
 export function useRichieste(tipo: TipoScheda = "inviate") {
   const [elementi, impostaElementi] = useState<RichiestaFerie[]>([]);
@@ -43,7 +35,7 @@ export function useRichieste(tipo: TipoScheda = "inviate") {
       const dati = await recuperaTutteRichieste();
       impostaElementi(dati);
     } catch (err: unknown) {
-      impostaErrore(estraiMessaggio(err, "Errore di caricamento"));
+      impostaErrore(estraiMessaggioErrore(err, "Errore di caricamento"));
     } finally {
       impostaInCaricamento(false);
     }
@@ -89,7 +81,7 @@ export function useRichieste(tipo: TipoScheda = "inviate") {
             try {
               await eliminaRichiesta(id);
             } catch (err: unknown) {
-              impostaErrore(estraiMessaggio(err, "Errore eliminazione"));
+              impostaErrore(estraiMessaggioErrore(err, "Errore eliminazione"));
               impostaElementi(precedenti); // rollback
             }
           },
@@ -121,7 +113,7 @@ export function useRichieste(tipo: TipoScheda = "inviate") {
     try {
       await aggiornaRichiesta(payload);
     } catch (err: unknown) {
-      impostaErrore(estraiMessaggio(err, "Errore aggiornamento"));
+      impostaErrore(estraiMessaggioErrore(err, "Errore aggiornamento"));
       impostaElementi(precedenti); // rollback
       throw err; // ri-lanciato per la modale
     }

@@ -40,26 +40,37 @@ export const recuperaTutteRichieste = async (
   return (data || []).map(mappaRispostaFerie);
 };
 
+// Costruisce un FormData a partire da un dizionario chiave-valore.
+// I valori null/undefined vengono ignorati; i non-stringa convertiti con String().
+const buildFormData = (campi: Record<string, unknown>): FormData => {
+  const fd = new FormData();
+  for (const [chiave, valore] of Object.entries(campi)) {
+    if (valore === null || valore === undefined) continue;
+    if (typeof valore === "object" && "uri" in (valore as any)) {
+      fd.append(chiave, valore as any);
+    } else {
+      fd.append(chiave, typeof valore === "string" ? valore : String(valore));
+    }
+  }
+  return fd;
+};
+
+const FORM_DATA_HEADERS = { headers: { "Content-Type": "multipart/form-data" } };
+
 // Invia una nuova richiesta con il payload unificato (multipart/form-data)
 export const aggiungiRichiesta = async (
   payload: AddRichiestaPayload,
 ): Promise<RisultatoPostDTO> => {
-  const formData = new FormData();
-  formData.append("DataInizio", payload.dataInizio);
-  formData.append("DataFine", payload.dataFine);
-  formData.append("IdTipoRichiesta", String(payload.idTipoRichiesta));
-  formData.append("Nota", payload.nota ?? "");
-  if (payload.codiceRichiesta) {
-    formData.append("codiceRichiesta", payload.codiceRichiesta);
-  }
-  if (payload.documento) {
-    formData.append("Documento", payload.documento as any);
-  }
-  console.log(payload);
-
-  const { data } = await http.post<any>(ENDPOINT_AGGIUNGI_RICHIESTA, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
+  const formData = buildFormData({
+    DataInizio: payload.dataInizio,
+    DataFine: payload.dataFine,
+    IdTipoRichiesta: payload.idTipoRichiesta,
+    Nota: payload.nota ?? "",
+    codiceRichiesta: payload.codiceRichiesta,
+    Documento: payload.documento,
   });
+
+  const { data } = await http.post<any>(ENDPOINT_AGGIUNGI_RICHIESTA, formData, FORM_DATA_HEADERS);
   return {
     Esito: String(data?.esito ?? data?.Esito ?? ""),
     CreatedCount: Number(data?.createdCount ?? data?.CreatedCount ?? 0),
@@ -89,18 +100,15 @@ export const eliminaRichiesta = async (
 export const aggiornaRichiesta = async (
   payload: InputAggiornamentoRichiesta,
 ) => {
-  const formData = new FormData();
-  formData.append("IdRichiesta", String(payload.IdRichiesta));
-  formData.append("DataInizio", payload.DataInizio);
-  formData.append("DataFine", payload.DataFine);
-  formData.append("StatoApprovazione", payload.StatoApprovazione);
-  if (payload.Documento) {
-    formData.append("Documento", payload.Documento as any);
-  }
-
-  const { data } = await http.put<any>(ENDPOINT_AGGIORNA_RICHIESTA, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
+  const formData = buildFormData({
+    IdRichiesta: payload.IdRichiesta,
+    DataInizio: payload.DataInizio,
+    DataFine: payload.DataFine,
+    StatoApprovazione: payload.StatoApprovazione,
+    Documento: payload.Documento,
   });
+
+  const { data } = await http.put<any>(ENDPOINT_AGGIORNA_RICHIESTA, formData, FORM_DATA_HEADERS);
   return data;
 };
 

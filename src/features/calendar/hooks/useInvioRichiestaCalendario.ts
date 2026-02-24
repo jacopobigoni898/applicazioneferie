@@ -5,6 +5,7 @@ import {
   AddRichiestaPayload,
   aggiungiRichiesta,
 } from "../../requests/services/requestsService";
+import { estraiMessaggioErrore } from "../../../shared/utils/errorUtils";
 
 // Hook per la gestione dell'invio delle richieste dal calendario.
 // Gestisce la visibilità della modale e l'invio tramite API unificata.
@@ -58,11 +59,7 @@ export function useInvioRichiestaCalendario(
         Alert.alert("Successo", "Richiesta inviata!");
         resettaIntervallo();
       } catch (errore: any) {
-        const msg =
-          errore?.response?.data?.message ||
-          errore?.message ||
-          "Errore durante l'invio";
-        Alert.alert("Errore", msg);
+        Alert.alert("Errore", estraiMessaggioErrore(errore, "Errore durante l'invio"));
       }
     },
     [resettaIntervallo],

@@ -5,6 +5,7 @@ import { useCallback, useState } from "react";
 import { Alert } from "react-native";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
 import { InputAggiornamentoRichiesta } from "../services/requestsService";
+import { estraiMessaggioErrore } from "../../../shared/utils/errorUtils";
 
 type FunzioneAggiornamento = (
   payload: InputAggiornamentoRichiesta,
@@ -45,12 +46,7 @@ export function useModificaRichiesta() {
         //console.log(payload);
         impostaContesto(null);
       } catch (err: unknown) {
-        const messaggio =
-          typeof err === "object" && err !== null
-            ? (err as any)?.response?.data?.message ||
-              (err as any)?.message ||
-              "Errore durante l'aggiornamento"
-            : "Errore durante l'aggiornamento";
+        const messaggio = estraiMessaggioErrore(err, "Errore durante l'aggiornamento");
         Alert.alert("Errore", messaggio);
       } finally {
         impostaInSalvataggio(false);

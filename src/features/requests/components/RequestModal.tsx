@@ -4,7 +4,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   KeyboardAvoidingView,
   Platform,
   Switch,
@@ -13,7 +12,6 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { Dropdown } from "react-native-element-dropdown";
 import { Colori } from "../../../core/theme/theme";
 import { stiliModaleRichiesta } from "../../../core/style/commonStyles";
@@ -23,6 +21,7 @@ import {
   TipoRichiestaDTO,
   AddRichiestaPayload,
 } from "../services/requestsService";
+import SelettoreOrarioIOS from "../../../shared/components/SelettoreOrarioIOS";
 
 interface PropsModaleRichiesta {
   visibile: boolean; //visibilità modale
@@ -88,68 +87,11 @@ const ModaleRichiesta = ({
     suInvio,
   });
 
-  // Componente selettore orario per iOS
-  const renderSelettoreOrario = () => {
-    if (Platform.OS !== "ios") return null;
-    if (!mostraSelettoreInizio && !mostraSelettoreFine) return null;
-
-    const eInizio = mostraSelettoreInizio;
-    const valore = eInizio
-      ? dataInizioForm || new Date()
-      : dataFineForm || new Date();
-    const tipo = eInizio ? "inizio" : "fine";
-
-    return (
-      <Modal
-        transparent
-        animationType="fade"
-        visible={mostraSelettoreInizio || mostraSelettoreFine}
-        onRequestClose={chiudiSelettori}
-      >
-        <TouchableWithoutFeedback onPress={chiudiSelettori}>
-          <View style={stiliModaleRichiesta.sovrapposizioneSelettore}>
-            <TouchableWithoutFeedback>
-              <View style={stiliModaleRichiesta.foglioSelettore}>
-                <View style={stiliModaleRichiesta.intestazioneSelettore}>
-                  <Text style={stiliModaleRichiesta.titoloSelettore}>
-                    Seleziona orario
-                  </Text>
-                  <TouchableOpacity onPress={chiudiSelettori}>
-                    <Text style={stiliModaleRichiesta.chiudiSelettore}>
-                      Chiudi
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-                <DateTimePicker
-                  value={valore}
-                  mode="time"
-                  is24Hour
-                  display={Platform.OS === "ios" ? "spinner" : "clock"}
-                  minuteInterval={Platform.OS === "ios" ? 30 : undefined}
-                  themeVariant="light"
-                  textColor={Colori.testoPrimario}
-                  onChange={(evento, data) => {
-                    gestisciCambioOrario(tipo, evento, data || valore);
-                  }}
-                  style={stiliModaleRichiesta.selettoreIOS}
-                />
-
-                <TouchableOpacity
-                  style={stiliModaleRichiesta.confermaSelettore}
-                  onPress={chiudiSelettori}
-                >
-                  <Text style={stiliModaleRichiesta.testoConfermaSelettore}>
-                    OK
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-    );
-  };
+  // Calcola il valore corrente per il selettore orario
+  const valoreSelettoreOrario = mostraSelettoreInizio
+    ? dataInizioForm || new Date()
+    : dataFineForm || new Date();
+  const tipoSelettoreOrario = mostraSelettoreInizio ? "inizio" : "fine";
 
   return (
     <Modal
@@ -413,7 +355,14 @@ const ModaleRichiesta = ({
           </View>
         </KeyboardAvoidingView>
       </View>
-      {renderSelettoreOrario()}
+      <SelettoreOrarioIOS
+        visibile={mostraSelettoreInizio || mostraSelettoreFine}
+        valore={valoreSelettoreOrario}
+        suChiusura={chiudiSelettori}
+        suCambio={(evento, data) =>
+          gestisciCambioOrario(tipoSelettoreOrario, evento, data)
+        }
+      />
     </Modal>
   );
 };

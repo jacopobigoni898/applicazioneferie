@@ -11,6 +11,13 @@ import {
 import * as DocumentPicker from "expo-document-picker";
 import { aStringaIsoLocale } from "../services/serializzazioneDate";
 import { recuperaDocumento } from "../services/apiRichieste";
+import { parsaData, formattaDataForm } from "../../../shared/utils/dateUtils";
+import {
+  parsaOrario,
+  arrotondaAMezzora,
+  applicaOrarioAData,
+  formattaOrario,
+} from "../../../shared/utils/timeUtils";
 
 export type ModalitaForm = "crea" | "modifica";
 
@@ -33,59 +40,6 @@ export type ParametriFormRichiesta =
       statoIniziale?: StatoRichiesta;
       suInvio: (payload: InputAggiornamentoRichiesta) => void;
     };
-
-// Helper: formatta una data per la visualizzazione
-const formattaData = (data: Date | null) =>
-  data ? data.toLocaleDateString("it-IT") : "--/--/----";
-
-// Helper: parsing difensivo di una data
-const parsaData = (valore?: string | Date | null) => {
-  if (!valore) return new Date();
-  if (valore instanceof Date) return valore;
-  const parsata = new Date(valore);
-  if (!Number.isNaN(parsata.getTime())) return parsata;
-  const parti = String(valore).split("-");
-  if (parti.length === 3) {
-    const a = Number(parti[0]);
-    const m = Number(parti[1]) - 1;
-    const g = Number(parti[2]);
-    const dataSicura = new Date(Date.UTC(a, m, g, 9, 0, 0, 0));
-    if (!Number.isNaN(dataSicura.getTime())) return dataSicura;
-  }
-  return new Date();
-};
-
-// Helper: parsing orario "HH:MM"
-const parsaOrario = (valore: string) => {
-  const match = /^(\d{1,2}):(\d{2})$/.exec(valore.trim());
-  if (!match) return null;
-  const ora = Number(match[1]);
-  const minuto = Number(match[2]);
-  if (ora < 0 || ora > 23 || minuto < 0 || minuto > 59) return null;
-  return { ora, minuto };
-};
-
-// Helper: arrotonda ai 30 minuti più vicini
-const arrotondaAMezzora = (data: Date) => {
-  const arrotondata = new Date(data);
-  const minuti = arrotondata.getMinutes();
-  if (minuti < 15) {
-    arrotondata.setMinutes(0, 0, 0);
-  } else if (minuti < 45) {
-    arrotondata.setMinutes(30, 0, 0);
-  } else {
-    arrotondata.setHours(arrotondata.getHours() + 1, 0, 0, 0);
-  }
-  return arrotondata;
-};
-
-// Helper: applica orario a una data usando UTC
-const applicaOrarioAData = (data: Date, ora: number, minuto: number) => {
-  const a = data.getFullYear();
-  const m = data.getMonth();
-  const g = data.getDate();
-  return new Date(Date.UTC(a, m, g, ora, minuto, 0, 0));
-};
 
 export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
   const { visibile } = parametri;
@@ -194,9 +148,7 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
     if (Platform.OS === "ios" && evento?.type === "dismissed") return;
     const dataPresa = dataSelezionata || new Date();
     const arrotondata = arrotondaAMezzora(dataPresa);
-    const ore = String(arrotondata.getHours()).padStart(2, "0");
-    const minuti = String(arrotondata.getMinutes()).padStart(2, "0");
-    const formattato = `${ore}:${minuti}`;
+    const formattato = formattaOrario(arrotondata.getHours(), arrotondata.getMinutes());
 
     if (tipo === "inizio") impostaOrarioInizio(formattato);
     else impostaOrarioFine(formattato);
@@ -244,26 +196,18 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
 
       if (parametri.modalita === "modifica") {
         // Estrai orario dalle date esistenti della richiesta
-        const oreInizio = dataInizioParsata
-          ? String(dataInizioParsata.getHours()).padStart(2, "0")
-          : "09";
-        const minInizio = dataInizioParsata
-          ? String(dataInizioParsata.getMinutes()).padStart(2, "0")
-          : "00";
-        const oreFine = dataFineParsata
-          ? String(dataFineParsata.getHours()).padStart(2, "0")
-          : "18";
-        const minFine = dataFineParsata
-          ? String(dataFineParsata.getMinutes()).padStart(2, "0")
-          : "00";
+        const oreInizio = dataInizioParsata ? dataInizioParsata.getHours() : 9;
+        const minInizio = dataInizioParsata ? dataInizioParsata.getMinutes() : 0;
+        const oreFine = dataFineParsata ? dataFineParsata.getHours() : 18;
+        const minFine = dataFineParsata ? dataFineParsata.getMinutes() : 0;
         // Se entrambi gli orari sono 00:00, usa valori di default (dati legacy senza orario)
-        const inizioEZero = oreInizio === "00" && minInizio === "00";
-        const fineEZero = oreFine === "00" && minFine === "00";
+        const inizioEZero = oreInizio === 0 && minInizio === 0;
+        const fineEZero = oreFine === 0 && minFine === 0;
         impostaOrarioInizio(
-          inizioEZero && fineEZero ? "09:00" : `${oreInizio}:${minInizio}`,
+          inizioEZero && fineEZero ? "09:00" : formattaOrario(oreInizio, minInizio),
         );
         impostaOrarioFine(
-          inizioEZero && fineEZero ? "18:00" : `${oreFine}:${minFine}`,
+          inizioEZero && fineEZero ? "18:00" : formattaOrario(oreFine, minFine),
         );
       } else {
         impostaOrarioInizio("09:00");
@@ -439,7 +383,7 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
 
   return {
     // Comuni
-    formattaData,
+    formattaData: formattaDataForm,
     stato,
     impostaStato,
     eSelezioneGiornoSingolo,
