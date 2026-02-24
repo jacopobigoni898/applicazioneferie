@@ -10,6 +10,7 @@ import {
 } from "../services/requestsService";
 import * as DocumentPicker from "expo-document-picker";
 import { aStringaIsoLocale } from "../services/serializzazioneDate";
+import { recuperaDocumento } from "../services/apiRichieste";
 
 export type ModalitaForm = "crea" | "modifica";
 
@@ -114,6 +115,8 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
     name: string;
     type: string;
   } | null>(null);
+  const [documentoInCaricamento, impostaDocumentoInCaricamento] =
+    useState(false);
   const [inFocus, impostaInFocus] = useState(false);
   const [orarioInizio, impostaOrarioInizio] = useState("09:00");
   const [orarioFine, impostaOrarioFine] = useState("18:00");
@@ -278,6 +281,32 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
     parametri.dataInizio,
     parametri.dataFine,
   ]);
+
+  // Carica il documento esistente quando la modale di modifica si apre
+  useEffect(() => {
+    let annulla = false;
+    if (
+      visibile &&
+      parametri.modalita === "modifica" &&
+      parametri.idRichiesta
+    ) {
+      impostaDocumentoInCaricamento(true);
+      recuperaDocumento(parametri.idRichiesta)
+        .then((doc) => {
+          if (!annulla) impostaDocumento(doc);
+        })
+        .finally(() => {
+          if (!annulla) impostaDocumentoInCaricamento(false);
+        });
+    } else {
+      impostaDocumento(null);
+      impostaDocumentoInCaricamento(false);
+    }
+    return () => {
+      annulla = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibile, parametri.modalita === "modifica" ? parametri.idRichiesta : null]);
 
   // Valida e costruisce il payload per la creazione
   const gestisciInvioCreazione = () => {
@@ -452,6 +481,7 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
     gestisciInvioModifica,
     // Documento
     documento,
+    documentoInCaricamento,
     pickDocumento,
     rimuoviDocumento,
   };

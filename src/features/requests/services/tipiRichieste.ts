@@ -9,7 +9,7 @@ export const ENDPOINT_ELIMINA_RICHIESTA = "/Richieste/utente/deleteRichiesta";
 export const ENDPOINT_TUTTI_TIPO_RICHIESTA =
   "/TipoRichiesta/getAllTipoRichiesta";
 
-export const ENDPOINT_GETDOCUMENTI = "Richieste/utente/getDocumenti";
+export const ENDPOINT_GETDOCUMENTI = "/Richieste/utente/getDocumenti";
 // --- Modello TipoRichiesta dal backend ---
 
 export interface TipoRichiestaDTO {

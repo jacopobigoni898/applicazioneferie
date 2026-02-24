@@ -2,6 +2,7 @@
 // Gestisce selezione date con picker iOS/Android e stato approvazione con dropdown.
 import React, { useEffect, useMemo, useState } from "react";
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -73,6 +74,7 @@ const ModaleModificaRichiesta = ({
     mostraSelettoreFine: mostraSelettoreOrarioFine,
     chiudiSelettori,
     documento,
+    documentoInCaricamento,
     pickDocumento,
     rimuoviDocumento,
   } = useFormRichiesta({
@@ -432,7 +434,7 @@ const ModaleModificaRichiesta = ({
             {renderizzaSelettoreData("fine")}
             {renderizzaSelettoreOrario()}
 
-            {(modificaDocumentoAbilitata || documento) && (
+            {(modificaDocumentoAbilitata || documento || documentoInCaricamento) && (
               <>
                 <Text style={stiliModaleRichiesta.etichetta}>
                   Documento (opzionale):
@@ -442,20 +444,29 @@ const ModaleModificaRichiesta = ({
                     style={[
                       stiliModaleRichiesta.menuATendina,
                       { paddingVertical: sh(12), paddingHorizontal: sw(12) },
-                      !modificaDocumentoAbilitata && { opacity: 0.6 },
+                      (!modificaDocumentoAbilitata || documentoInCaricamento) && { opacity: 0.6 },
                     ]}
                     onPress={
-                      modificaDocumentoAbilitata ? pickDocumento : undefined
+                      modificaDocumentoAbilitata && !documentoInCaricamento ? pickDocumento : undefined
                     }
-                    disabled={!modificaDocumentoAbilitata}
+                    disabled={!modificaDocumentoAbilitata || documentoInCaricamento}
                   >
-                    <Text style={stiliModaleRichiesta.testoSegnapostoDocumento}>
-                      {documento
-                        ? documento.name
-                        : modificaDocumentoAbilitata
-                          ? "Seleziona un PDF"
-                          : "Documento non modificabile"}
-                    </Text>
+                    {documentoInCaricamento ? (
+                      <View style={{ flexDirection: "row", alignItems: "center" }}>
+                        <ActivityIndicator size="small" color={Colori.primario} style={{ marginRight: sw(8) }} />
+                        <Text style={stiliModaleRichiesta.testoSegnapostoDocumento}>
+                          Caricamento documento...
+                        </Text>
+                      </View>
+                    ) : (
+                      <Text style={stiliModaleRichiesta.testoSegnapostoDocumento}>
+                        {documento
+                          ? documento.name
+                          : modificaDocumentoAbilitata
+                            ? "Seleziona un PDF"
+                            : "Documento non modificabile"}
+                      </Text>
+                    )}
                   </TouchableOpacity>
                   {documento && (
                     <View

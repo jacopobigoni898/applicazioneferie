@@ -3,6 +3,9 @@ import { http } from "../../../api/httpClient";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
 import { mappaRispostaFerie } from "../mappers/holidayMapper";
 import { formatoAnnoMeseGiorno } from "./serializzazioneDate";
+import { File as FSFile, Paths } from "expo-file-system";
+import { storageAuth } from "../../../core/auth/authStorage";
+import { URL_BASE_API } from "../../../config/env";
 import {
   TipoRichiestaDTO,
   AddRichiestaPayload,
@@ -14,6 +17,7 @@ import {
   ENDPOINT_AGGIORNA_RICHIESTA,
   ENDPOINT_ELIMINA_RICHIESTA,
   ENDPOINT_TUTTI_TIPO_RICHIESTA,
+  ENDPOINT_GETDOCUMENTI,
 } from "./tipiRichieste";
 
 // Recupera tutte le tipologie di richiesta dal backend
@@ -100,4 +104,27 @@ export const aggiornaRichiesta = async (
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
+};
+
+// Recupera il documento allegato a una richiesta (per ID richiesta)
+export const recuperaDocumento = async (
+  idRichiesta: number,
+): Promise<{ uri: string; name: string; type: string } | null> => {
+  try {
+    const token = await storageAuth.recuperaTokenAccesso();
+    const url = `${URL_BASE_API}${ENDPOINT_GETDOCUMENTI}?id=${idRichiesta}`;
+
+    const file = await FSFile.downloadFileAsync(url, Paths.cache, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      idempotent: true,
+    });
+
+    return {
+      uri: file.uri,
+      name: file.uri.split("/").pop() || `documento_${idRichiesta}.pdf`,
+      type: file.type || "application/pdf",
+    };
+  } catch {
+    return null;
+  }
 };
