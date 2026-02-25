@@ -9,8 +9,10 @@ import {
   recuperaTutteRichieste,
   recuperaTutteRichiesteAdmin,
   InputAggiornamentoRichiesta,
+  autorizzaRichiesta,
 } from "../services/requestsService";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
+import { StatoRichiesta } from "../../../domain/entities/RequestStatus";
 import { formattaStringaData } from "../utils/formattaData";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -30,7 +32,6 @@ const estraiMessaggio = (err: unknown, fallback: string): string => {
   }
   return fallback;
 };
-
 export function useRichieste(
   tipo: TipoScheda = "inviate",
   abilitato: boolean = true,
@@ -74,6 +75,28 @@ export function useRichieste(
       fineFormattata: formattaStringaData(el.data_fine as any),
     }));
   }, [elementi]);
+
+  const autorizza = useCallback(async (id: number) => {
+    impostaErrore(null);
+    let precedenti: RichiestaFerie[] = [];
+
+    impostaElementi((correnti: RichiestaFerie[]) => {
+      precedenti = correnti;
+      return correnti.map((el) =>
+        el.id_richiesta === id
+          ? { ...el, stato_approvazione: StatoRichiesta.APPROVATO }
+          : el,
+      );
+    });
+
+    try {
+      await autorizzaRichiesta([id]);
+    } catch (err: unknown) {
+      impostaErrore(estraiMessaggio(err, "Errore autorizzazione"));
+      impostaElementi(precedenti);
+      throw err;
+    }
+  }, []);
 
   // Elimina una richiesta con conferma, aggiornamento ottimistico e rollback
   const rimuovi = useCallback((id: number) => {
@@ -143,5 +166,6 @@ export function useRichieste(
     ricarica: caricaDati,
     rimuovi,
     aggiorna,
+    autorizza,
   } as const;
 }

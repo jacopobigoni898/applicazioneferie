@@ -25,4 +25,5 @@ export {
   eliminaRichiesta,
   aggiornaRichiesta,
   recuperaDocumento,
+  autorizzaRichiesta,
 } from "./apiRichieste";

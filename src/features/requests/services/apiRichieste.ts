@@ -17,6 +17,7 @@ import {
   ENDPOINT_TUTTI_TIPO_RICHIESTA,
   ENDPOINT_GETDOCUMENTI,
   ENDPOINT_ADMIN_TUTTE_RICHIESTE,
+  ENDPOINT_ADMIN_AUTORIZZA_RICHIESTA,
 } from "./tipiRichieste";
 
 // Recupera tutte le tipologie di richiesta dal backend
@@ -121,6 +122,13 @@ export const aggiornaRichiesta = async (
   return data;
 };
 
+// src/features/requests/services/apiRichieste.ts
+export const autorizzaRichiesta = async (ids: number[]) => {
+  const { data } = await http.put(ENDPOINT_ADMIN_AUTORIZZA_RICHIESTA, ids, {
+    headers: { "Content-Type": "application/json" },
+  });
+  return data;
+};
 // Recupera il documento allegato a una richiesta (per ID richiesta).
 // Usa il client http (axios) per sfruttare l'interceptor di autenticazione.
 export const recuperaDocumento = async (
@@ -132,8 +140,7 @@ export const recuperaDocumento = async (
       responseType: "arraybuffer",
     });
 
-    const contentDisposition =
-      risposta.headers["content-disposition"] ?? "";
+    const contentDisposition = risposta.headers["content-disposition"] ?? "";
     const match = /filename=([^;]+)/.exec(contentDisposition);
     const nomeFile = match
       ? match[1].trim().replace(/^["']|["']$/g, "")

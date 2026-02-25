@@ -22,6 +22,7 @@ import ListaRichiesteAdmin from "../../src/features/requests/components/ListaRic
 import ModaleModificaRichiesta from "../../src/features/requests/components/ModaleModificaRichiesta";
 import { useAuth } from "../_providers/AuthProvider";
 import { RuoloUtente } from "../../src/domain/entities/User";
+import { StatoRichiesta } from "../../src/domain/entities/RequestStatus";
 
 const PERCORSO_INVIATE = {
   key: "inviate" as TipoScheda,
@@ -78,6 +79,7 @@ export default function SchermataRichieste() {
                 inCaricamento={ricevute.inCaricamento}
                 errore={ricevute.errore}
                 suRicarica={ricevute.ricarica}
+                suAutorizza={(id: number) => ricevute.autorizza(id)}
               />
             );
           }
