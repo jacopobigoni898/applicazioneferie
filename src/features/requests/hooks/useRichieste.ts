@@ -31,7 +31,10 @@ const estraiMessaggio = (err: unknown, fallback: string): string => {
   return fallback;
 };
 
-export function useRichieste(tipo: TipoScheda = "inviate", abilitato: boolean = true) {
+export function useRichieste(
+  tipo: TipoScheda = "inviate",
+  abilitato: boolean = true,
+) {
   const [elementi, impostaElementi] = useState<RichiestaFerie[]>([]);
   const [inCaricamento, impostaInCaricamento] = useState(false);
   const [errore, impostaErrore] = useState<string | null>(null);

@@ -23,8 +23,14 @@ import ModaleModificaRichiesta from "../../src/features/requests/components/Moda
 import { useAuth } from "../_providers/AuthProvider";
 import { RuoloUtente } from "../../src/domain/entities/User";
 
-const PERCORSO_INVIATE = { key: "inviate" as TipoScheda, title: "Richieste inviate" };
-const PERCORSO_RICEVUTE = { key: "ricevute" as TipoScheda, title: "Richieste ricevute" };
+const PERCORSO_INVIATE = {
+  key: "inviate" as TipoScheda,
+  title: "Richieste inviate",
+};
+const PERCORSO_RICEVUTE = {
+  key: "ricevute" as TipoScheda,
+  title: "Richieste ricevute",
+};
 
 export default function SchermataRichieste() {
   const dimensioni = useWindowDimensions();
