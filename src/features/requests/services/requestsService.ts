@@ -20,8 +20,10 @@ export {
 export {
   recuperaTipiRichiesta,
   recuperaTutteRichieste,
+  recuperaTutteRichiesteAdmin,
   aggiungiRichiesta,
   eliminaRichiesta,
   aggiornaRichiesta,
   recuperaDocumento,
+  autorizzaRichiesta,
 } from "./apiRichieste";

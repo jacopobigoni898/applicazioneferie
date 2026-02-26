@@ -33,5 +33,6 @@ export const mappaRispostaFerie = (grezzo: any): RichiestaFerie => {
       grezzo?.Tipo ??
       grezzo?.tipo_permesso ??
       grezzo?.TipoPermesso,
+    nomeUtente: grezzo?.nomeUtente ?? grezzo?.NomeUtente,
   };
 };

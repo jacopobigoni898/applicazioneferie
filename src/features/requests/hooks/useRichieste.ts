@@ -7,9 +7,12 @@ import {
   eliminaRichiesta,
   aggiornaRichiesta,
   recuperaTutteRichieste,
+  recuperaTutteRichiesteAdmin,
   InputAggiornamentoRichiesta,
+  autorizzaRichiesta,
 } from "../services/requestsService";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
+import { StatoRichiesta } from "../../../domain/entities/RequestStatus";
 import { formattaStringaData } from "../utils/formattaData";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -29,18 +32,24 @@ const estraiMessaggio = (err: unknown, fallback: string): string => {
   }
   return fallback;
 };
-
-export function useRichieste(tipo: TipoScheda = "inviate") {
+export function useRichieste(
+  tipo: TipoScheda = "inviate",
+  abilitato: boolean = true,
+) {
   const [elementi, impostaElementi] = useState<RichiestaFerie[]>([]);
   const [inCaricamento, impostaInCaricamento] = useState(false);
   const [errore, impostaErrore] = useState<string | null>(null);
 
   // Carica le richieste dal backend
   const caricaDati = useCallback(async () => {
+    if (!abilitato) return;
     impostaInCaricamento(true);
     impostaErrore(null);
     try {
-      const dati = await recuperaTutteRichieste();
+      const dati =
+        tipo === "ricevute"
+          ? await recuperaTutteRichiesteAdmin()
+          : await recuperaTutteRichieste();
       impostaElementi(dati);
     } catch (err: unknown) {
       impostaErrore(estraiMessaggio(err, "Errore di caricamento"));
@@ -48,7 +57,7 @@ export function useRichieste(tipo: TipoScheda = "inviate") {
       impostaInCaricamento(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tipo]);
+  }, [tipo, abilitato]);
 
   // Carica al montaggio e al cambio di tipo
 
@@ -66,6 +75,28 @@ export function useRichieste(tipo: TipoScheda = "inviate") {
       fineFormattata: formattaStringaData(el.data_fine as any),
     }));
   }, [elementi]);
+
+  const autorizza = useCallback(async (id: number) => {
+    impostaErrore(null);
+    let precedenti: RichiestaFerie[] = [];
+
+    impostaElementi((correnti: RichiestaFerie[]) => {
+      precedenti = correnti;
+      return correnti.map((el) =>
+        el.id_richiesta === id
+          ? { ...el, stato_approvazione: StatoRichiesta.APPROVATO }
+          : el,
+      );
+    });
+
+    try {
+      await autorizzaRichiesta([id]);
+    } catch (err: unknown) {
+      impostaErrore(estraiMessaggio(err, "Errore autorizzazione"));
+      impostaElementi(precedenti);
+      throw err;
+    }
+  }, []);
 
   // Elimina una richiesta con conferma, aggiornamento ottimistico e rollback
   const rimuovi = useCallback((id: number) => {
@@ -135,5 +166,6 @@ export function useRichieste(tipo: TipoScheda = "inviate") {
     ricarica: caricaDati,
     rimuovi,
     aggiorna,
+    autorizza,
   } as const;
 }

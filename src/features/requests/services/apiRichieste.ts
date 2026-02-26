@@ -16,6 +16,8 @@ import {
   ENDPOINT_ELIMINA_RICHIESTA,
   ENDPOINT_TUTTI_TIPO_RICHIESTA,
   ENDPOINT_GETDOCUMENTI,
+  ENDPOINT_ADMIN_TUTTE_RICHIESTE,
+  ENDPOINT_ADMIN_AUTORIZZA_RICHIESTA,
 } from "./tipiRichieste";
 
 // Recupera tutte le tipologie di richiesta dal backend
@@ -37,6 +39,22 @@ export const recuperaTutteRichieste = async (
       : formatoAnnoMeseGiorno(oggi);
   const query = `?data=${encodeURIComponent(filtro)}`;
   const { data } = await http.get<any[]>(`${ENDPOINT_TUTTE_RICHIESTE}${query}`);
+  return (data || []).map(mappaRispostaFerie);
+};
+
+// Recupera tutte le richieste degli utenti (solo admin), passando la data odierna come parametro
+export const recuperaTutteRichiesteAdmin = async (
+  filtroData?: string,
+): Promise<RichiestaFerie[]> => {
+  const oggi = new Date();
+  const filtro =
+    filtroData && filtroData.trim() !== ""
+      ? filtroData
+      : formatoAnnoMeseGiorno(oggi);
+  const query = `?data=${encodeURIComponent(filtro)}`;
+  const { data } = await http.get<any[]>(
+    `${ENDPOINT_ADMIN_TUTTE_RICHIESTE}${query}`,
+  );
   return (data || []).map(mappaRispostaFerie);
 };
 
@@ -104,6 +122,13 @@ export const aggiornaRichiesta = async (
   return data;
 };
 
+// src/features/requests/services/apiRichieste.ts
+export const autorizzaRichiesta = async (ids: number[]) => {
+  const { data } = await http.put(ENDPOINT_ADMIN_AUTORIZZA_RICHIESTA, ids, {
+    headers: { "Content-Type": "application/json" },
+  });
+  return data;
+};
 // Recupera il documento allegato a una richiesta (per ID richiesta).
 // Usa il client http (axios) per sfruttare l'interceptor di autenticazione.
 export const recuperaDocumento = async (
@@ -115,8 +140,7 @@ export const recuperaDocumento = async (
       responseType: "arraybuffer",
     });
 
-    const contentDisposition =
-      risposta.headers["content-disposition"] ?? "";
+    const contentDisposition = risposta.headers["content-disposition"] ?? "";
     const match = /filename=([^;]+)/.exec(contentDisposition);
     const nomeFile = match
       ? match[1].trim().replace(/^["']|["']$/g, "")

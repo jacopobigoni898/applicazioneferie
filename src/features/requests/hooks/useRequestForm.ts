@@ -306,7 +306,10 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
       annulla = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visibile, parametri.modalita === "modifica" ? parametri.idRichiesta : null]);
+  }, [
+    visibile,
+    parametri.modalita === "modifica" ? parametri.idRichiesta : null,
+  ]);
 
   // Valida e costruisce il payload per la creazione
   const gestisciInvioCreazione = () => {
