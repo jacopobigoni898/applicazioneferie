@@ -86,6 +86,7 @@ const ModaleModificaRichiesta = ({
     statoIniziale: elemento?.stato_approvazione as StatoRichiesta,
     suInvio: suConferma,
   });
+  // caricaDocumento espone la fetch on-demand del documento
 
   // Date temporanee per iOS (conferma esplicita)
   const [dataInizioTemp, impostaDataInizioTemp] = useState<Date | null>(null);
@@ -489,6 +490,23 @@ const ModaleModificaRichiesta = ({
                           />
                         </TouchableOpacity>
                       )}
+                    </View>
+                  )}
+                  {/* Se non abbiamo documento nel client ma l'elemento esiste,
+                      offriamo un pulsante per scaricarlo esplicitamente. */}
+                  {!documento && elemento && !documentoInCaricamento && (
+                    <View style={{ marginTop: sh(6), flexDirection: "row", gap: sw(8) }}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          // caricaDocumento è fornito dal hook e fa la fetch on-demand
+                          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                          // @ts-ignore
+                          caricaDocumento?.();
+                        }}
+                        style={{ paddingVertical: sh(8), paddingHorizontal: sw(12), backgroundColor: Colori.primario, borderRadius: 8 }}
+                      >
+                        <Text style={{ color: "#fff" }}>Scarica documento</Text>
+                      </TouchableOpacity>
                     </View>
                   )}
                   {!modificaDocumentoAbilitata && (
