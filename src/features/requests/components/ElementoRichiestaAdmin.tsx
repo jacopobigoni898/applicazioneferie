@@ -29,6 +29,7 @@ interface PropsElementoRichiestaAdmin {
   fineFormattata?: string;
   suAutorizza?: (id: number) => void;
   suNonAutorizza?: (id: number) => void;
+  suApri?: () => void;
 }
 
 function calcolaColoreBadge(stato: string): string {
@@ -48,6 +49,7 @@ export default function ElementoRichiestaAdmin({
   fineFormattata,
   suAutorizza,
   suNonAutorizza,
+  suApri,
 }: PropsElementoRichiestaAdmin) {
   const coloreBadge = calcolaColoreBadge(
     String(elemento.stato_approvazione || ""),
@@ -59,66 +61,74 @@ export default function ElementoRichiestaAdmin({
     fineFormattata ?? elemento.data_fine.toLocaleString("it-IT");
 
   return (
-    <View style={stiliElementoRichiesta.scheda}>
-      {/* Riga superiore: icona + titolo + badge */}
-      <View style={stiliElementoRichiesta.intestazione}>
-        <View
-          style={[
-            stiliElementoRichiesta.accentoSinistra,
-            { backgroundColor: getColoreTipo(normalizzaTipo(elemento.tipo_permesso)) },
-          ]}
-        />
-        <Text style={stiliElementoRichiesta.titolo} numberOfLines={1}>
-          {capitalizza(elemento.tipo_permesso)}
-        </Text>
-        <View
-          style={[
-            stiliElementoRichiesta.badge,
-            { backgroundColor: coloreBadge },
-          ]}
-        >
-          <Text style={stiliElementoRichiesta.testoBadge}>
-            {capitalizza(String(elemento.stato_approvazione || ""))}
+    <TouchableOpacity onPress={() => suApri?.()} activeOpacity={0.8}>
+      <View style={stiliElementoRichiesta.scheda}>
+        {/* Riga superiore: icona + titolo + badge */}
+        <View style={stiliElementoRichiesta.intestazione}>
+          <View
+            style={[
+              stiliElementoRichiesta.accentoSinistra,
+              {
+                backgroundColor: getColoreTipo(
+                  normalizzaTipo(elemento.tipo_permesso),
+                ),
+              },
+            ]}
+          />
+          <Text style={stiliElementoRichiesta.titolo} numberOfLines={1}>
+            {capitalizza(elemento.tipo_permesso)}
           </Text>
+          <View
+            style={[
+              stiliElementoRichiesta.badge,
+              { backgroundColor: coloreBadge },
+            ]}
+          >
+            <Text style={stiliElementoRichiesta.testoBadge}>
+              {capitalizza(String(elemento.stato_approvazione || ""))}
+            </Text>
+          </View>
         </View>
-      </View>
 
-      {/* Nome utente */}
-      {elemento.nomeUtente ? (
+        {/* Nome utente */}
+        {elemento.nomeUtente ? (
+          <View style={stiliElementoRichiesta.sezioneDate}>
+            <Text style={stiliElementoRichiesta.testoRiga}>
+              Utente: {elemento.nomeUtente}
+            </Text>
+          </View>
+        ) : null}
+
+        {/* Date */}
         <View style={stiliElementoRichiesta.sezioneDate}>
           <Text style={stiliElementoRichiesta.testoRiga}>
-            Utente: {elemento.nomeUtente}
+            Dal: {inizioFallback}
+          </Text>
+          <Text style={stiliElementoRichiesta.testoRiga}>
+            Al: {fineFallback}
           </Text>
         </View>
-      ) : null}
 
-      {/* Date */}
-      <View style={stiliElementoRichiesta.sezioneDate}>
-        <Text style={stiliElementoRichiesta.testoRiga}>
-          Dal: {inizioFallback}
-        </Text>
-        <Text style={stiliElementoRichiesta.testoRiga}>Al: {fineFallback}</Text>
+        {/* Azioni admin */}
+        <View style={stiliElementoRichiesta.azioniContenitore}>
+          <TouchableOpacity
+            onPress={() => suAutorizza?.(elemento.id_richiesta)}
+            style={stiliElementoRichiesta.azioneAutorizza}
+            activeOpacity={0.7}
+          >
+            <Text style={stiliElementoRichiesta.testoAutorizza}>Autorizza</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => suNonAutorizza?.(elemento.id_richiesta)}
+            style={stiliElementoRichiesta.azioneNonAutorizza}
+            activeOpacity={0.7}
+          >
+            <Text style={stiliElementoRichiesta.testoNonAutorizza}>
+              Non autorizza
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
-
-      {/* Azioni admin */}
-      <View style={stiliElementoRichiesta.azioniContenitore}>
-        <TouchableOpacity
-          onPress={() => suAutorizza?.(elemento.id_richiesta)}
-          style={stiliElementoRichiesta.azioneAutorizza}
-          activeOpacity={0.7}
-        >
-          <Text style={stiliElementoRichiesta.testoAutorizza}>Autorizza</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => suNonAutorizza?.(elemento.id_richiesta)}
-          style={stiliElementoRichiesta.azioneNonAutorizza}
-          activeOpacity={0.7}
-        >
-          <Text style={stiliElementoRichiesta.testoNonAutorizza}>
-            Non autorizza
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    </TouchableOpacity>
   );
 }

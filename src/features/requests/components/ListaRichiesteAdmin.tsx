@@ -1,5 +1,5 @@
 // Componente lista richieste ricevute (admin) con FlatList e pull-to-refresh.
-import React from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import ElementoRichiestaAdmin from "./ElementoRichiestaAdmin";
+import ModaleAutorizzaRichiesta from "./ModaleAutorizzaRichiesta";
 import { RichiestaFormattata } from "../hooks/useRichieste";
 import { Colori } from "../../../core/theme/theme";
 
@@ -19,6 +20,7 @@ interface PropsListaRichiesteAdmin {
   suRicarica: () => void;
   suAutorizza?: (id: number) => void;
   suNonAutorizza?: (id: number) => void;
+  suValida?: (id: number) => void;
 }
 
 function ListaVuota({ inCaricamento }: { inCaricamento: boolean }) {
@@ -33,7 +35,12 @@ export default function ListaRichiesteAdmin({
   suRicarica,
   suAutorizza,
   suNonAutorizza,
+  suValida,
 }: PropsListaRichiesteAdmin) {
+  const [selezionata, setSelezionata] = useState<RichiestaFormattata | null>(
+    null,
+  );
+  const [modalVisibile, setModalVisibile] = useState(false);
   return (
     <View style={stili.contenitore}>
       {errore ? <Text style={stili.testoErrore}>{errore}</Text> : null}
@@ -50,6 +57,10 @@ export default function ListaRichiesteAdmin({
             fineFormattata={item.fineFormattata}
             suAutorizza={suAutorizza}
             suNonAutorizza={suNonAutorizza}
+            suApri={() => {
+              setSelezionata(item);
+              setModalVisibile(true);
+            }}
           />
         )}
         refreshControl={
@@ -60,6 +71,23 @@ export default function ListaRichiesteAdmin({
           inCaricamento && dati.length > 0 ? <ActivityIndicator /> : null
         }
         contentContainerStyle={stili.contenutoLista}
+      />
+      <ModaleAutorizzaRichiesta
+        visibile={modalVisibile}
+        elemento={selezionata}
+        suChiudi={() => setModalVisibile(false)}
+        suAutorizza={(id) => {
+          setModalVisibile(false);
+          suAutorizza?.(id);
+        }}
+        suNonAutorizza={(id) => {
+          setModalVisibile(false);
+          suNonAutorizza?.(id);
+        }}
+        suValida={(id) => {
+          // placeholder: chiamata API ancora non pronta
+          suValida?.(id);
+        }}
       />
     </View>
   );
