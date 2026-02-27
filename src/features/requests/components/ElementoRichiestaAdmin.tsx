@@ -34,7 +34,7 @@ interface PropsElementoRichiestaAdmin {
 
 function calcolaColoreBadge(stato: string): string {
   const statoMinuscolo = (stato || "").toLowerCase();
-  if (statoMinuscolo.includes("approv") || statoMinuscolo === "approvato") {
+  if (statoMinuscolo.includes("approv") || statoMinuscolo === "validata") {
     return COLORE_APPROVATO;
   }
   if (statoMinuscolo.includes("rifiut") || statoMinuscolo === "rifiutato") {
@@ -111,22 +111,39 @@ export default function ElementoRichiestaAdmin({
 
         {/* Azioni admin */}
         <View style={stiliElementoRichiesta.azioniContenitore}>
-          <TouchableOpacity
-            onPress={() => suAutorizza?.(elemento.id_richiesta)}
-            style={stiliElementoRichiesta.azioneAutorizza}
-            activeOpacity={0.7}
-          >
-            <Text style={stiliElementoRichiesta.testoAutorizza}>Autorizza</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => suNonAutorizza?.(elemento.id_richiesta)}
-            style={stiliElementoRichiesta.azioneNonAutorizza}
-            activeOpacity={0.7}
-          >
-            <Text style={stiliElementoRichiesta.testoNonAutorizza}>
-              Non autorizza
-            </Text>
-          </TouchableOpacity>
+          {(() => {
+            const stato = String(
+              elemento.stato_approvazione || "",
+            ).toLowerCase();
+            // Nascondi i pulsanti se lo stato è già validato (es. "validata", "validato", "approvato")
+            const isValidated = /valid|approv/i.test(stato);
+            if (!isValidated) {
+              return (
+                <>
+                  <TouchableOpacity
+                    onPress={() => suAutorizza?.(elemento.id_richiesta)}
+                    style={stiliElementoRichiesta.azioneAutorizza}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={stiliElementoRichiesta.testoAutorizza}>
+                      Autorizza
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => suNonAutorizza?.(elemento.id_richiesta)}
+                    style={stiliElementoRichiesta.azioneNonAutorizza}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={stiliElementoRichiesta.testoNonAutorizza}>
+                      Non autorizza
+                    </Text>
+                  </TouchableOpacity>
+                </>
+              );
+            }
+            return null;
+          })()}
         </View>
       </View>
     </TouchableOpacity>
