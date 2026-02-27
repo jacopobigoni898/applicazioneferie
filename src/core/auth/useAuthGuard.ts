@@ -1,26 +1,28 @@
 import { useEffect } from "react";
 import { useRouter, useSegments } from "expo-router";
 
-export const useAuthGuard = (
-  accessToken: string | null,
-  isLoading: boolean,
-  isUserLoading: boolean,
+// Hook per la protezione delle rotte autenticate
+// Reindirizza gli utenti non autenticati alla schermata di login
+export const useGuardiaAuth = (
+  tokenAccesso: string | null,
+  inCaricamento: boolean,
+  inCaricamentoUtente: boolean,
 ) => {
   const router = useRouter();
-  const segments = useSegments();
+  const segmenti = useSegments();
 
   useEffect(() => {
-    if (isLoading || isUserLoading) return;
+    if (inCaricamento || inCaricamentoUtente) return;
 
-    const inTabs = segments[0] === "(tabs)";
-    const atLogin = segments[0] === "login";
+    const nelleTab = segmenti[0] === "(tabs)";
+    const alLogin = segmenti[0] === "login";
 
-    if (!accessToken && inTabs) {
+    if (!tokenAccesso && nelleTab) {
       router.replace("/login");
     }
 
-    if (accessToken && atLogin) {
+    if (tokenAccesso && alLogin) {
       router.replace("/(tabs)");
     }
-  }, [accessToken, isLoading, isUserLoading, router, segments]);
+  }, [tokenAccesso, inCaricamento, inCaricamentoUtente, router, segmenti]);
 };

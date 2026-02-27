@@ -1,28 +1,38 @@
-import { HolidayRequest } from "../../../domain/entities/HolidayRequest";
-import { RequestStatus } from "../../../domain/entities/RequestStatus";
+import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
+import { StatoRichiesta } from "../../../domain/entities/RequestStatus";
 
-const parseDate = (value: any): Date => {
-  const d = value ? new Date(value) : new Date();
+// Parsing difensivo delle date dall'API
+const parsaData = (valore: any): Date => {
+  const d = valore ? new Date(valore) : new Date();
   return Number.isNaN(d.getTime()) ? new Date() : d;
 };
 
-export const mapHolidayResponse = (raw: any): HolidayRequest => {
-  const idNum = Number(
-    raw?.idRichiesta ?? raw?.id_richiesta ?? raw?.IdRichiesta ?? 0,
+// Mappa la risposta del backend nell'entità RichiestaFerie
+export const mappaRispostaFerie = (grezzo: any): RichiestaFerie => {
+  const idNumero = Number(
+    grezzo?.idRichiesta ?? grezzo?.id_richiesta ?? grezzo?.IdRichiesta ?? 0,
   );
   return {
-    id_richiesta: idNum,
-    id_utente: Number(raw?.id_utente ?? raw?.IdUtente ?? raw?.userId ?? 0),
-    data_inizio: parseDate(
-      raw?.dataInizio ?? raw?.data_inizio ?? raw?.DataInizio,
+    id_richiesta: idNumero,
+    id_utente: Number(
+      grezzo?.id_utente ?? grezzo?.IdUtente ?? grezzo?.userId ?? 0,
     ),
-    data_fine: parseDate(raw?.dataFine ?? raw?.data_fine ?? raw?.DataFine),
+    data_inizio: parsaData(
+      grezzo?.dataInizio ?? grezzo?.data_inizio ?? grezzo?.DataInizio,
+    ),
+    data_fine: parsaData(
+      grezzo?.dataFine ?? grezzo?.data_fine ?? grezzo?.DataFine,
+    ),
     stato_approvazione:
-      raw?.StatoApprovazione ??
-      raw?.stato_approvazione ??
-      raw?.statoApprovazione ??
-      RequestStatus.PENDING,
+      grezzo?.StatoApprovazione ??
+      grezzo?.stato_approvazione ??
+      grezzo?.statoApprovazione ??
+      StatoRichiesta.IN_ATTESA,
     tipo_permesso:
-      raw?.tipo ?? raw?.Tipo ?? raw?.tipo_permesso ?? raw?.TipoPermesso,
+      grezzo?.tipo ??
+      grezzo?.Tipo ??
+      grezzo?.tipo_permesso ??
+      grezzo?.TipoPermesso,
+    nomeUtente: grezzo?.nomeUtente ?? grezzo?.NomeUtente,
   };
 };

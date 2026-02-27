@@ -1,19 +1,24 @@
 import { Stack } from "expo-router";
 import { AuthProvider } from "./_providers/AuthProvider";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
-function RootNavigator() {
-    return (
-        <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="login" />
-        </Stack>
-    );
+// Navigatore principale dell'applicazione
+function NavigatorePrincipale() {
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="login" />
+    </Stack>
+  );
 }
 
-export default function RootLayout() {
-    return (
-        <AuthProvider>
-            <RootNavigator />
-        </AuthProvider>
-    );
+// Layout radice dell'applicazione
+export default function LayoutRadice() {
+  return (
+    <SafeAreaProvider>
+      <AuthProvider>
+        <NavigatorePrincipale />
+      </AuthProvider>
+    </SafeAreaProvider>
+  );
 }

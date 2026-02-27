@@ -2,346 +2,490 @@
 import { useEffect, useMemo, useState } from "react";
 import { Platform } from "react-native";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
+import { StatoRichiesta } from "../../../domain/entities/RequestStatus";
 import {
-  ABSENCE_OPTIONS,
-  OVERTIME_OPTIONS,
-  RequestType,
-} from "../../../domain/entities/TypeRequest";
-import { RequestStatus } from "../../../domain/entities/RequestStatus";
-import {
-  buildRequestPayload,
-  RequestPayload,
-  UpdateHolidayInput,
+  InputAggiornamentoRichiesta,
+  TipoRichiestaDTO,
+  AddRichiestaPayload,
 } from "../services/requestsService";
+import * as DocumentPicker from "expo-document-picker";
+import { aStringaIsoLocale } from "../services/serializzazioneDate";
+import { recuperaDocumento } from "../services/apiRichieste";
 
-export type FormMode = "create" | "edit";
+export type ModalitaForm = "crea" | "modifica";
 
-export type UseRequestFormParams =
+export type ParametriFormRichiesta =
   | {
-      mode: "create";
-      visible: boolean;
-      startDate: Date | null;
-      endDate: Date | null;
-      mainType: "assenza" | "straordinari";
-      userId: number | null;
-      onSubmit: (payload: RequestPayload) => void;
+      modalita: "crea";
+      visibile: boolean;
+      dataInizio: Date | null;
+      dataFine: Date | null;
+      tipoPrincipale: "assenza" | "straordinari";
+      tipiRichiesta: TipoRichiestaDTO[];
+      suInvio: (payload: AddRichiestaPayload) => void;
     }
   | {
-      mode: "edit";
-      visible: boolean;
-      // possibili Date o stringhe provenienti dall'item
-      startDate: Date | string | null;
-      endDate: Date | string | null;
-      requestId: number;
-      initialStatus?: RequestStatus;
-      onSubmit: (payload: UpdateHolidayInput) => void;
+      modalita: "modifica";
+      visibile: boolean;
+      dataInizio: Date | string | null;
+      dataFine: Date | string | null;
+      idRichiesta: number;
+      statoIniziale?: StatoRichiesta;
+      suInvio: (payload: InputAggiornamentoRichiesta) => void;
     };
 
-// Helpers condivisi
-const formatDate = (date: Date | null) =>
-  date ? date.toLocaleDateString("it-IT") : "--/--/----";
+// Helper: formatta una data per la visualizzazione
+const formattaData = (data: Date | null) =>
+  data ? data.toLocaleDateString("it-IT") : "--/--/----";
 
-const parseDate = (value?: string | Date | null) => {
-  if (!value) return new Date();
-  if (value instanceof Date) return value;
-  const parsed = new Date(value);
-  if (!Number.isNaN(parsed.getTime())) return parsed;
-  const parts = String(value).split("-");
-  if (parts.length === 3) {
-    const y = Number(parts[0]);
-    const m = Number(parts[1]) - 1;
-    const d = Number(parts[2]);
-    const safeDate = new Date(Date.UTC(y, m, d, 9, 0, 0, 0));
-    if (!Number.isNaN(safeDate.getTime())) return safeDate;
+// Helper: parsing difensivo di una data
+const parsaData = (valore?: string | Date | null) => {
+  if (!valore) return new Date();
+  if (valore instanceof Date) return valore;
+  const parsata = new Date(valore);
+  if (!Number.isNaN(parsata.getTime())) return parsata;
+  const parti = String(valore).split("-");
+  if (parti.length === 3) {
+    const a = Number(parti[0]);
+    const m = Number(parti[1]) - 1;
+    const g = Number(parti[2]);
+    const dataSicura = new Date(Date.UTC(a, m, g, 9, 0, 0, 0));
+    if (!Number.isNaN(dataSicura.getTime())) return dataSicura;
   }
   return new Date();
 };
 
-const parseTime = (value: string) => {
-  const match = /^(\d{1,2}):(\d{2})$/.exec(value.trim());
+// Helper: parsing orario "HH:MM"
+const parsaOrario = (valore: string) => {
+  const match = /^(\d{1,2}):(\d{2})$/.exec(valore.trim());
   if (!match) return null;
-  const hour = Number(match[1]);
-  const minute = Number(match[2]);
-  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
-  return { hour, minute };
+  const ora = Number(match[1]);
+  const minuto = Number(match[2]);
+  if (ora < 0 || ora > 23 || minuto < 0 || minuto > 59) return null;
+  return { ora, minuto };
 };
 
-const snapToHalfHour = (date: Date) => {
-  const snapped = new Date(date);
-  const minutes = snapped.getMinutes();
-  if (minutes < 15) {
-    snapped.setMinutes(0, 0, 0);
-  } else if (minutes < 45) {
-    snapped.setMinutes(30, 0, 0);
+// Helper: arrotonda ai 30 minuti più vicini
+const arrotondaAMezzora = (data: Date) => {
+  const arrotondata = new Date(data);
+  const minuti = arrotondata.getMinutes();
+  if (minuti < 15) {
+    arrotondata.setMinutes(0, 0, 0);
+  } else if (minuti < 45) {
+    arrotondata.setMinutes(30, 0, 0);
   } else {
-    snapped.setHours(snapped.getHours() + 1, 0, 0, 0);
+    arrotondata.setHours(arrotondata.getHours() + 1, 0, 0, 0);
   }
-  return snapped;
+  return arrotondata;
 };
 
-const applyTimeToDate = (date: Date, hour: number, minute: number) => {
-  const y = date.getFullYear();
-  const m = date.getMonth();
-  const d = date.getDate();
-  return new Date(Date.UTC(y, m, d, hour, minute, 0, 0));
+// Helper: applica orario a una data usando UTC
+const applicaOrarioAData = (data: Date, ora: number, minuto: number) => {
+  const a = data.getFullYear();
+  const m = data.getMonth();
+  const g = data.getDate();
+  return new Date(Date.UTC(a, m, g, ora, minuto, 0, 0));
 };
 
-export const useRequestForm = (params: UseRequestFormParams) => {
-  const { visible } = params;
+export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
+  const { visibile } = parametri;
 
-  // Stato locale delle date (gestito qui sia per create che per edit)
-  const [startDate, setStartDate] = useState<Date | null>(
-    params.startDate ? parseDate(params.startDate) : null,
+  // Stato locale delle date
+  const [dataInizio, impostaDataInizio] = useState<Date | null>(
+    parametri.dataInizio ? parsaData(parametri.dataInizio) : null,
   );
-  const [endDate, setEndDate] = useState<Date | null>(
-    params.endDate ? parseDate(params.endDate) : null,
+  const [dataFine, impostaDataFine] = useState<Date | null>(
+    parametri.dataFine ? parsaData(parametri.dataFine) : null,
   );
 
-  // Stato comune (riusato da create/edit)
-  const [status, setStatus] = useState<RequestStatus>(
-    params.mode === "edit"
-      ? (params.initialStatus ?? RequestStatus.PENDING)
-      : RequestStatus.PENDING,
+  // Stato comune
+  const [stato, impostaStato] = useState<StatoRichiesta>(
+    parametri.modalita === "modifica"
+      ? (parametri.statoIniziale ?? StatoRichiesta.IN_ATTESA)
+      : StatoRichiesta.IN_ATTESA,
   );
-  const [subType, setSubType] = useState<string | null>(null);
-  const [isFocus, setIsFocus] = useState(false);
-  const [startTime, setStartTime] = useState("09:00");
-  const [endTime, setEndTime] = useState("18:00");
-  const [showStartPicker, setShowStartPicker] = useState(false);
-  const [showEndPicker, setShowEndPicker] = useState(false);
-  const [isAllDay, setIsAllDay] = useState(false);
+  const [sottoTipo, impostaSottoTipo] = useState<string | null>(null);
+  const [idTipoRichiesta, impostaIdTipoRichiesta] = useState<number | null>(
+    null,
+  );
+  const [nota, impostaNota] = useState("");
+  const [codiceRichiesta, impostaCodiceRichiesta] = useState("");
+  const [documento, impostaDocumento] = useState<{
+    uri: string;
+    name: string;
+    type: string;
+  } | null>(null);
+  const [documentoInCaricamento, impostaDocumentoInCaricamento] =
+    useState(false);
+  const [inFocus, impostaInFocus] = useState(false);
+  const [orarioInizio, impostaOrarioInizio] = useState("09:00");
+  const [orarioFine, impostaOrarioFine] = useState("18:00");
+  const [mostraSelettoreInizio, impostaMostraSelettoreInizio] = useState(false);
+  const [mostraSelettoreFine, impostaMostraSelettoreFine] = useState(false);
+  const [tuttoIlGiorno, impostaTuttoIlGiorno] = useState(false);
 
-  const isSingleDaySelection =
-    startDate && endDate && startDate.toDateString() === endDate.toDateString();
+  const eSelezioneGiornoSingolo =
+    dataInizio &&
+    dataFine &&
+    dataInizio.toDateString() === dataFine.toDateString();
 
-  const isSickRequest = useMemo(() => {
-    return subType === RequestType.MALATTIA;
-  }, [subType]);
+  // Tipi di richiesta dal backend (solo in modalità crea)
+  const tipiRichiestaBackend =
+    parametri.modalita === "crea" ? parametri.tipiRichiesta : undefined;
 
-  const currentOptions = useMemo(() => {
-    if (params.mode !== "create") return [];
-    return params.mainType === "straordinari"
-      ? OVERTIME_OPTIONS
-      : ABSENCE_OPTIONS;
-  }, [params]);
+  const opzioniCorrente = useMemo(() => {
+    if (parametri.modalita !== "crea") return [];
+    return (tipiRichiestaBackend || []).map((t) => ({
+      label: t.tipoRichiesta,
+      value: String(t.idTipoRichiesta),
+    }));
+  }, [parametri, tipiRichiestaBackend]);
 
-  // Utility per chiudere entrambi i picker
-  const closePickers = () => {
-    setShowStartPicker(false);
-    setShowEndPicker(false);
+  // Determina se il tipo selezionato richiede codice o documenti
+  const tipoSelezionato = useMemo(() => {
+    if (parametri.modalita !== "crea" || idTipoRichiesta == null) return null;
+    return (
+      (tipiRichiestaBackend || []).find(
+        (t) => t.idTipoRichiesta === idTipoRichiesta,
+      ) ?? null
+    );
+  }, [parametri, tipiRichiestaBackend, idTipoRichiesta]);
+
+  const richiedeCodice = tipoSelezionato?.richiedeCodice ?? false;
+  const richiedeDocumenti = tipoSelezionato?.richiedeDocumenti ?? false;
+
+  // Chiudi tutti i picker
+  const chiudiSelettori = () => {
+    impostaMostraSelettoreInizio(false);
+    impostaMostraSelettoreFine(false);
   };
 
-  const handleAllDayToggle = (value: boolean) => {
-    if (isSickRequest) return; // malattia sempre all-day
-    setIsAllDay(value);
-    if (value) {
-      setStartTime("09:00");
-      setEndTime("18:00");
+  // Selettore documento (PDF)
+  const pickDocumento = async () => {
+    try {
+      const risultato = await DocumentPicker.getDocumentAsync({
+        type: "application/pdf",
+        copyToCacheDirectory: true,
+      });
+      if (
+        !risultato.canceled &&
+        risultato.assets &&
+        risultato.assets.length > 0
+      ) {
+        const asset = risultato.assets[0];
+        impostaDocumento({
+          uri: asset.uri,
+          name: asset.name || "documento.pdf",
+          type: asset.mimeType || "application/pdf",
+        });
+      }
+    } catch (e) {
+      // ignore
     }
   };
 
-  const handleTimeChange = (
-    type: "start" | "end",
-    event: any,
-    selectedDate?: Date,
+  const rimuoviDocumento = () => impostaDocumento(null);
+
+  const gestisciCambioOrario = (
+    tipo: "inizio" | "fine",
+    evento: any,
+    dataSelezionata?: Date,
   ) => {
-    if (params.mode !== "create") return;
+    if (Platform.OS === "ios" && evento?.type === "dismissed") return;
+    const dataPresa = dataSelezionata || new Date();
+    const arrotondata = arrotondaAMezzora(dataPresa);
+    const ore = String(arrotondata.getHours()).padStart(2, "0");
+    const minuti = String(arrotondata.getMinutes()).padStart(2, "0");
+    const formattato = `${ore}:${minuti}`;
 
-    if (Platform.OS === "ios" && event?.type === "dismissed") return;
-    const pickedDate = selectedDate || new Date();
-    const snapped = snapToHalfHour(pickedDate);
-    const hours = String(snapped.getHours()).padStart(2, "0");
-    const minutes = String(snapped.getMinutes()).padStart(2, "0");
-    const formatted = `${hours}:${minutes}`;
-
-    if (type === "start") setStartTime(formatted);
-    else setEndTime(formatted);
+    if (tipo === "inizio") impostaOrarioInizio(formattato);
+    else impostaOrarioFine(formattato);
   };
 
-  const openTimePicker = (type: "start" | "end") => {
-    if (params.mode !== "create") return;
-
+  const apriSelettoreOrario = (tipo: "inizio" | "fine") => {
     if (Platform.OS === "android") {
       DateTimePickerAndroid.open({
         value:
-          type === "start" ? startDate || new Date() : endDate || new Date(),
+          tipo === "inizio" ? dataInizio || new Date() : dataFine || new Date(),
         mode: "time",
         is24Hour: true,
-        onChange: (event, date) =>
-          handleTimeChange(type, event, date || new Date()),
+        onChange: (evento, data) =>
+          gestisciCambioOrario(tipo, evento, data || new Date()),
       });
       return;
     }
 
-    type === "start" ? setShowStartPicker(true) : setShowEndPicker(true);
+    tipo === "inizio"
+      ? impostaMostraSelettoreInizio(true)
+      : impostaMostraSelettoreFine(true);
   };
 
-  // Reset stato quando la modale cambia visibilità o cambia il range esterno (create)
-  // o quando cambia l'item (edit). Evitiamo dipendenza da oggetti non stabili.
+  // Reset stato quando la modale cambia visibilità
   useEffect(() => {
-    if (visible) {
-      setStatus(
-        params.mode === "edit"
-          ? (params.initialStatus ?? RequestStatus.PENDING)
-          : RequestStatus.PENDING,
+    if (visibile) {
+      impostaStato(
+        parametri.modalita === "modifica"
+          ? (parametri.statoIniziale ?? StatoRichiesta.IN_ATTESA)
+          : StatoRichiesta.IN_ATTESA,
       );
-      setSubType(null);
-      setStartTime("09:00");
-      setEndTime("18:00");
-      setIsAllDay(false);
-      closePickers();
+      impostaSottoTipo(null);
+      impostaIdTipoRichiesta(null);
+      impostaNota("");
+      impostaCodiceRichiesta("");
+      impostaTuttoIlGiorno(false);
+      chiudiSelettori();
 
-      // Allineiamo le date allo stato esterno/nuovo item
-      setStartDate(params.startDate ? parseDate(params.startDate) : null);
-      setEndDate(params.endDate ? parseDate(params.endDate) : null);
+      const dataInizioParsata = parametri.dataInizio
+        ? parsaData(parametri.dataInizio)
+        : null;
+      const dataFineParsata = parametri.dataFine
+        ? parsaData(parametri.dataFine)
+        : null;
+
+      if (parametri.modalita === "modifica") {
+        // Estrai orario dalle date esistenti della richiesta
+        const oreInizio = dataInizioParsata
+          ? String(dataInizioParsata.getHours()).padStart(2, "0")
+          : "09";
+        const minInizio = dataInizioParsata
+          ? String(dataInizioParsata.getMinutes()).padStart(2, "0")
+          : "00";
+        const oreFine = dataFineParsata
+          ? String(dataFineParsata.getHours()).padStart(2, "0")
+          : "18";
+        const minFine = dataFineParsata
+          ? String(dataFineParsata.getMinutes()).padStart(2, "0")
+          : "00";
+        // Se entrambi gli orari sono 00:00, usa valori di default (dati legacy senza orario)
+        const inizioEZero = oreInizio === "00" && minInizio === "00";
+        const fineEZero = oreFine === "00" && minFine === "00";
+        impostaOrarioInizio(
+          inizioEZero && fineEZero ? "09:00" : `${oreInizio}:${minInizio}`,
+        );
+        impostaOrarioFine(
+          inizioEZero && fineEZero ? "18:00" : `${oreFine}:${minFine}`,
+        );
+      } else {
+        impostaOrarioInizio("09:00");
+        impostaOrarioFine("18:00");
+      }
+
+      impostaDataInizio(dataInizioParsata);
+      impostaDataFine(dataFineParsata);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    visible,
-    params.mode,
-    params.mode === "edit" ? params.initialStatus : null,
-    params.startDate,
-    params.endDate,
+    visibile,
+    parametri.modalita,
+    parametri.modalita === "modifica" ? parametri.statoIniziale : null,
+    parametri.dataInizio,
+    parametri.dataFine,
   ]);
 
-  // Valida input e costruisce il payload per create
-  const handleSubmitCreate = () => {
-    if (params.mode !== "create") return;
-    const { mainType, userId, onSubmit } = params;
+  // Carica il documento esistente quando la modale di modifica si apre
+  useEffect(() => {
+    let annulla = false;
+    if (
+      visibile &&
+      parametri.modalita === "modifica" &&
+      parametri.idRichiesta
+    ) {
+      impostaDocumentoInCaricamento(true);
+      recuperaDocumento(parametri.idRichiesta)
+        .then((doc) => {
+          if (!annulla) impostaDocumento(doc);
+        })
+        .finally(() => {
+          if (!annulla) impostaDocumentoInCaricamento(false);
+        });
+    } else {
+      impostaDocumento(null);
+      impostaDocumentoInCaricamento(false);
+    }
+    return () => {
+      annulla = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    visibile,
+    parametri.modalita === "modifica" ? parametri.idRichiesta : null,
+  ]);
 
-    if (!subType) {
+  // Valida e costruisce il payload per la creazione
+  const gestisciInvioCreazione = () => {
+    if (parametri.modalita !== "crea") return;
+    const { suInvio } = parametri;
+
+    if (!sottoTipo) {
       alert("Seleziona una motivazione!");
       return;
     }
-    if (!startDate || !endDate) {
+    if (!dataInizio || !dataFine) {
       alert("Date non valide!");
       return;
     }
-    if (userId == null || Number.isNaN(userId)) {
-      alert("Impossibile inviare la richiesta: utente non disponibile");
+    if (idTipoRichiesta == null) {
+      alert("Seleziona un tipo di richiesta!");
       return;
     }
 
-    let finalStartDate = startDate;
-    let finalEndDate = endDate;
+    let dataInizioFinale = dataInizio;
+    let dataFineFinale = dataFine;
 
-    if (isSickRequest) {
-      finalStartDate = applyTimeToDate(new Date(startDate.getTime()), 9, 0);
-      finalEndDate = applyTimeToDate(new Date(endDate.getTime()), 18, 0);
-    } else {
-      const parsedStart = parseTime(startTime);
-      const parsedEnd = parseTime(endTime);
-      if (!parsedStart || !parsedEnd) {
-        alert("Inserisci orari validi nel formato HH:MM");
-        return;
-      }
-      if (isSingleDaySelection) {
-        const shouldApplyTime = !isAllDay;
-        if (shouldApplyTime) {
-          finalStartDate = applyTimeToDate(
-            new Date(startDate.getTime()),
-            parsedStart.hour,
-            parsedStart.minute,
-          );
-          finalEndDate = applyTimeToDate(
-            new Date(endDate.getTime()),
-            parsedEnd.hour,
-            parsedEnd.minute,
-          );
-          if (finalEndDate < finalStartDate) {
-            alert("L'orario di fine deve essere successivo a quello di inizio");
-            return;
-          }
-        } else {
-          finalStartDate = applyTimeToDate(new Date(startDate.getTime()), 9, 0);
-          finalEndDate = applyTimeToDate(new Date(endDate.getTime()), 18, 0);
+    const inizioParsato = parsaOrario(orarioInizio);
+    const fineParsata = parsaOrario(orarioFine);
+    if (!inizioParsato || !fineParsata) {
+      alert("Inserisci orari validi nel formato HH:MM");
+      return;
+    }
+    if (eSelezioneGiornoSingolo) {
+      if (!tuttoIlGiorno) {
+        dataInizioFinale = applicaOrarioAData(
+          new Date(dataInizio.getTime()),
+          inizioParsato.ora,
+          inizioParsato.minuto,
+        );
+        dataFineFinale = applicaOrarioAData(
+          new Date(dataFine.getTime()),
+          fineParsata.ora,
+          fineParsata.minuto,
+        );
+        if (dataFineFinale < dataInizioFinale) {
+          alert("L'orario di fine deve essere successivo a quello di inizio");
+          return;
         }
       } else {
-        finalStartDate = applyTimeToDate(
-          new Date(startDate.getTime()),
-          parsedStart.hour,
-          parsedStart.minute,
+        dataInizioFinale = applicaOrarioAData(
+          new Date(dataInizio.getTime()),
+          9,
+          0,
         );
-        finalEndDate = applyTimeToDate(
-          new Date(endDate.getTime()),
-          parsedEnd.hour,
-          parsedEnd.minute,
+        dataFineFinale = applicaOrarioAData(
+          new Date(dataFine.getTime()),
+          18,
+          0,
         );
       }
+    } else {
+      dataInizioFinale = applicaOrarioAData(
+        new Date(dataInizio.getTime()),
+        inizioParsato.ora,
+        inizioParsato.minuto,
+      );
+      dataFineFinale = applicaOrarioAData(
+        new Date(dataFine.getTime()),
+        fineParsata.ora,
+        fineParsata.minuto,
+      );
     }
 
-    const requestPayload = buildRequestPayload({
-      mainType,
-      subType,
-      startDate: finalStartDate,
-      endDate: finalEndDate,
-      userId,
-      status: RequestStatus.PENDING,
-    });
-
-    onSubmit(requestPayload);
+    const payload: AddRichiestaPayload = {
+      dataInizio: aStringaIsoLocale(dataInizioFinale),
+      dataFine: aStringaIsoLocale(dataFineFinale),
+      idTipoRichiesta,
+      nota,
+    };
+    if (richiedeCodice && codiceRichiesta.trim() !== "") {
+      payload.codiceRichiesta = codiceRichiesta.trim();
+    }
+    if (documento) {
+      payload.documento = documento;
+    }
+    suInvio(payload);
   };
 
-  // Valida input e costruisce payload per edit
-  const handleSubmitEdit = () => {
-    if (params.mode !== "edit") return;
-    if (!startDate || !endDate) {
+  // Valida e costruisce payload per la modifica
+  const gestisciInvioModifica = () => {
+    if (parametri.modalita !== "modifica") return;
+    if (!dataInizio || !dataFine) {
       alert("Date non valide!");
       return;
     }
-    if (endDate < startDate) {
+
+    const inizioParsato = parsaOrario(orarioInizio);
+    const fineParsata = parsaOrario(orarioFine);
+    if (!inizioParsato || !fineParsata) {
+      alert("Inserisci orari validi nel formato HH:MM");
+      return;
+    }
+
+    const dataInizioFinale = applicaOrarioAData(
+      new Date(dataInizio.getTime()),
+      inizioParsato.ora,
+      inizioParsato.minuto,
+    );
+    const dataFineFinale = applicaOrarioAData(
+      new Date(dataFine.getTime()),
+      fineParsata.ora,
+      fineParsata.minuto,
+    );
+
+    if (dataFineFinale < dataInizioFinale) {
       alert(
-        "La data di fine deve essere successiva o uguale a quella di inizio",
+        "La data/ora di fine deve essere successiva o uguale a quella di inizio",
       );
       return;
     }
 
-    const payload: UpdateHolidayInput = {
-      IdRichiesta: params.requestId,
-      DataInizio: startDate.toISOString().slice(0, 10),
-      DataFine: endDate.toISOString().slice(0, 10),
-      StatoApprovazione: status,
+    const payload: InputAggiornamentoRichiesta = {
+      IdRichiesta: parametri.idRichiesta,
+      DataInizio: aStringaIsoLocale(dataInizioFinale),
+      DataFine: aStringaIsoLocale(dataFineFinale),
+      StatoApprovazione: stato,
     };
+    if (documento) {
+      payload.Documento = documento;
+    }
 
-    params.onSubmit(payload);
+    parametri.suInvio(payload);
   };
 
   return {
-    // common
-    formatDate,
-    status,
-    setStatus,
-    isSingleDaySelection,
-    isSickRequest,
+    // Comuni
+    formattaData,
+    stato,
+    impostaStato,
+    eSelezioneGiornoSingolo,
 
-    // subtype (create only)
-    subType,
-    setSubType,
-    isFocus,
-    setIsFocus,
-    currentOptions,
+    // Sotto-tipo (solo creazione)
+    sottoTipo,
+    impostaSottoTipo,
+    idTipoRichiesta,
+    impostaIdTipoRichiesta,
+    nota,
+    impostaNota,
+    codiceRichiesta,
+    impostaCodiceRichiesta,
+    richiedeCodice,
+    richiedeDocumenti,
+    inFocus,
+    impostaInFocus,
+    opzioniCorrente,
 
-    // date management
-    startDate,
-    endDate,
-    setStartDate,
-    setEndDate,
+    // Gestione date
+    dataInizio,
+    dataFine,
+    impostaDataInizio,
+    impostaDataFine,
 
-    // time (create only)
-    startTime,
-    endTime,
-    setStartTime,
-    setEndTime,
-    showStartPicker,
-    showEndPicker,
-    isAllDay,
-    setIsAllDay: handleAllDayToggle,
-    openTimePicker,
-    handleTimeChange,
-    closePickers,
+    // Orari
+    orarioInizio,
+    orarioFine,
+    mostraSelettoreInizio,
+    mostraSelettoreFine,
+    tuttoIlGiorno,
+    impostaTuttoIlGiorno,
+    apriSelettoreOrario,
+    gestisciCambioOrario,
+    chiudiSelettori,
 
-    // submitters
-    handleSubmitCreate,
-    handleSubmitEdit,
+    // Funzioni di invio
+    gestisciInvioCreazione,
+    gestisciInvioModifica,
+    // Documento
+    documento,
+    documentoInCaricamento,
+    pickDocumento,
+    rimuoviDocumento,
   };
 };

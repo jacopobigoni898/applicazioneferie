@@ -2,44 +2,54 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
-  SafeAreaView,
   StyleSheet,
   Text,
   View,
+  StatusBar,
+  Platform,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "./_providers/AuthProvider";
 
-export default function LoginScreen() {
-  const { signIn, isLoading } = useAuth(); //uso il context di authprovider
-  const [isSigningIn, setIsSigningIn] = useState(false);
+// Schermata di accesso
+export default function SchermataAccesso() {
+  const { accedi, inCaricamento } = useAuth();
+  const [inAccesso, impostaInAccesso] = useState(false);
 
-  const handleSignIn = async () => {
-    setIsSigningIn(true);
+  const gestisciAccesso = async () => {
+    impostaInAccesso(true);
     try {
-      await signIn();
+      await accedi();
     } finally {
-      setIsSigningIn(false);
+      impostaInAccesso(false);
     }
   };
 
-  const busy = isLoading || isSigningIn; // se is loading o signi
+  const occupato = inCaricamento || inAccesso;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.title}>Accesso all'account</Text>
-        <Text style={styles.subtitle}>
+    <SafeAreaView
+      style={stili.contenitore}
+      edges={["top", "bottom", "left", "right"]}
+    >
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={Platform.OS === "android" ? "#0e1a2b" : undefined}
+      />
+      <View style={stili.scheda}>
+        <Text style={stili.titolo}>Accesso all'account</Text>
+        <Text style={stili.sottotitolo}>
           Accedi con le credenziali Microsoft per continuare.
         </Text>
         <Pressable
-          onPress={handleSignIn}
-          style={[styles.button, busy && styles.buttonDisabled]}
-          disabled={busy}
+          onPress={gestisciAccesso}
+          style={[stili.pulsante, occupato && stili.pulsanteDisabilitato]}
+          disabled={occupato}
         >
-          {busy ? (
+          {occupato ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonLabel}>Accedi</Text>
+            <Text style={stili.etichettaPulsante}>Accedi</Text>
           )}
         </Pressable>
       </View>
@@ -47,41 +57,41 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
+const stili = StyleSheet.create({
+  contenitore: {
     flex: 1,
     backgroundColor: "#0e1a2b",
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,
   },
-  card: {
+  scheda: {
     width: "100%",
     backgroundColor: "#13233a",
     borderRadius: 18,
     padding: 24,
     gap: 16,
   },
-  title: {
+  titolo: {
     fontSize: 22,
     fontWeight: "700",
     color: "#fff",
   },
-  subtitle: {
+  sottotitolo: {
     fontSize: 15,
     color: "#c7d2e5",
     lineHeight: 20,
   },
-  button: {
+  pulsante: {
     backgroundColor: "#2f7cf6",
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: "center",
   },
-  buttonDisabled: {
+  pulsanteDisabilitato: {
     opacity: 0.6,
   },
-  buttonLabel: {
+  etichettaPulsante: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",

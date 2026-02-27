@@ -1,5 +1,5 @@
 // DTO restituito da /Auth/microsoft-login
-export type AuthResponse = {
+export type RispostaAuth = {
   idUtente: number;
   email: string;
   nome: string;

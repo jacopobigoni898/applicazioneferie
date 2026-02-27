@@ -1,13 +1,15 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
-import { Colors } from "../../src/core/theme/theme";
-export default function TabLayout() {
+import { Colori } from "../../src/core/theme/theme";
+
+// Layout delle tab dell'applicazione
+export default function LayoutTab() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false, //rimuove il titolo su tutte le pagine
-        tabBarActiveTintColor: Colors.primary, // icone/testo attivo
+        headerShown: false, // nasconde l'intestazione su tutte le pagine
+        tabBarActiveTintColor: Colori.primario, // colore icone/testo attivo
       }}
     >
       <Tabs.Screen

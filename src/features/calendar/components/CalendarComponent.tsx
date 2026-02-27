@@ -1,187 +1,141 @@
-import React, { useCallback, useState } from "react";
-import { Alert, Platform, Text, TouchableOpacity, View } from "react-native";
+import React from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 import { Calendar } from "react-native-calendars";
-import { Dropdown } from "react-native-element-dropdown";
-import { calendarTheme } from "../../../core/theme/calendarTheme";
-import { calendarStyles } from "../../../core/style/commonStyles";
-import { useRangeSelection } from "../hooks/useRangeSelection";
-import { IOSPullDown } from "./IOSPullDown";
-import { configureCalendarLocale } from "../utils/calendarConfig";
-import RequestModal from "../../../features/requests/components/RequestModal";
-import {
-  CALENDAR_VIEW_OPTIONS,
-  CalendarMode,
-} from "../../../domain/entities/TypeRequest";
-import {
-  RequestPayload,
-  submitHolidayByToken,
-  submitRequest,
-  addRichiestaPermessi,
-} from "../../../features/requests/services/requestsService";
-import { useAuth } from "../../../../app/_providers/AuthProvider";
+import { temaCalendario } from "../../../core/theme/calendarTheme";
+import { stiliCalendario } from "../../../core/style/commonStyles";
+import { useSelezioneIntervallo } from "../hooks/useSelezioneIntervallo";
+import { useTipoCalendario } from "../hooks/useTipoCalendario";
+import { useInvioRichiestaCalendario } from "../hooks/useInvioRichiestaCalendario";
+import { usePanoramicaGenerale } from "../hooks/usePanoramicaGenerale";
+import SelettoreTipoCalendario from "./SelettoreTipoCalendario";
+import { configuraLocaleCalendario } from "../utils/calendarConfig";
+import ModaleRichiesta from "../../requests/components/RequestModal";
+import { ModalitaCalendario } from "../../../domain/entities/TypeRequest";
+import DayDetailModal from "./DayDetailModal";
 
 // Configura localizzazione calendario (nomi mesi/giorni in italiano)
-configureCalendarLocale();
+configuraLocaleCalendario();
 
-export default function CalendarComp() {
-  //prendo l id del utente
-  const { user } = useAuth();
-  const parsedUserId = user ? Number(user.id) : null; // verifico che non sia null
-  const userId =
-    parsedUserId != null && !Number.isNaN(parsedUserId) ? parsedUserId : null;
+// Componente principale del calendario.
+// Compone tre hook separati:
+// - useSelezioneIntervallo: gestione selezione date
+// - useTipoCalendario: gestione tipo/dropdown calendario
+// - useInvioRichiestaCalendario: gestione invio richiesta e stato modale
+export default function ComponenteCalendario() {
+  // Hook per la selezione dell'intervallo di date
+  const {
+    dataInizio,
+    dataFine,
+    dateMarcate,
+    suPressioneGiorno,
+    resettaIntervallo,
+  } = useSelezioneIntervallo();
 
-  const { startDate, endDate, markedDates, onDayPress, resetRange } =
-    useRangeSelection(); // hooks per capire come e quali giorni colorare
-  const [calendarType, setCalendarType] = useState<string>(
-    CalendarMode.ABSENCE,
-  );
-  const [isFocus, setIsFocus] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false); //use state per la modale
+  // Hook per la gestione del tipo di calendario
+  const {
+    tipoCalendario,
+    inFocus,
+    impostaInFocus,
+    opzioneSelezionata,
+    gestisciSelezioneOpzione,
+    opzioniVista,
+    testoSegnaposto,
+    tipiRichiesta,
+  } = useTipoCalendario();
 
-  const isIOS = Platform.OS === "ios";
-  const selectedOption = CALENDAR_VIEW_OPTIONS.find(
-    (option) => option.value === calendarType,
-  );
-  const placeholderText = "Scegli il tipo di calendario";
+  // Hook per l'invio della richiesta e la gestione della modale
+  const { modaleVisibile, chiudiModale, gestisciConferma, gestisciInvio } =
+    useInvioRichiestaCalendario(tipoCalendario, resettaIntervallo);
 
-  const handleOptionSelect = useCallback((value: string) => {
-    setCalendarType(value);
-    setIsFocus(false);
-  }, []);
-  //button 'procedi con la richiesta' e attivo quindi la modale
-  const handleConfirm = () => {
-    if (startDate && endDate) {
-      if (calendarType === CalendarMode.ADMIN) {
-        Alert.alert("Admin", "Funzione admin non ancora implementata");
-        return;
-      }
-      setModalVisible(true); //modale visibile
-    }
-  };
-  //button  finale della modale che si occupa di fare la richiesta
-  const handleSubmission = async (data: RequestPayload) => {
-    try {
-      const isSick = (data as any).certificato_medico !== undefined;
-      const isPermit = (data as any).tipo_permesso !== undefined;
-      //console.log(data)
-      const isHoliday =
-        calendarType === CalendarMode.ABSENCE && !isPermit && !isSick;
+  // Hook per la panoramica utente generale
+  const {
+    marcazioniPanoramica,
+    richiesteCaricate,
+    giornoSelezionato,
+    modaleDettaglioVisibile,
+    apriDettaglioGiorno,
+    chiudiDettaglioGiorno,
+  } = usePanoramicaGenerale(tipoCalendario);
 
-      if (isPermit) {
-        const result = await addRichiestaPermessi(
-          data.data_inizio,
-          data.data_fine,
-          (data as any).tipo_permesso,
-        );
-        const esitoOk = (result.Esito || "").toLowerCase().includes("riusc");
-        if (!esitoOk) {
-          Alert.alert(
-            "Errore",
-            result.Motivazione || result.Esito || "Invio non riuscito",
-          );
-          return;
-        }
-      } else if (isHoliday) {
-        const result = await submitHolidayByToken(
-          data.data_inizio,
-          data.data_fine,
-        );
-        const esitoOk = (result.Esito || "").toLowerCase().includes("riusc");
-        if (!esitoOk) {
-          Alert.alert(
-            "Errore",
-            result.Motivazione || result.Esito || "Invio non riuscito",
-          );
-          return;
-        }
-      } else {
-        // malattia, straordinari o altri tipi gestiti dal generic endpoint
-        await submitRequest(data);
-      }
+  // In panoramica usiamo le marcature a pallino (multi-dot),
+  // nelle altre modalità usiamo la selezione intervallo (period)
+  const markedForCalendar =
+    tipoCalendario === ModalitaCalendario.PANORAMICA_GENERALE
+      ? marcazioniPanoramica
+      : dateMarcate;
 
-      setModalVisible(false);
-      Alert.alert("Successo", "Richiesta inviata!");
-      resetRange();
-    } catch (error: any) {
-      const msg =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Errore durante l'invio";
-      Alert.alert("Errore", msg);
+  // Gestisce il click su un giorno
+  const gestisciClickGiorno = (day: any) => {
+    if (tipoCalendario === ModalitaCalendario.PANORAMICA_GENERALE) {
+      apriDettaglioGiorno(day.dateString);
+    } else {
+      suPressioneGiorno(day);
     }
   };
 
   return (
-    <View style={calendarStyles.container}>
-      <View>
-        <Text style={calendarStyles.subtitle}>
-          Scegli il calendario da visualizzare
-        </Text>
-      </View>
+    <View style={stiliCalendario.contenitore}>
+      <SelettoreTipoCalendario
+        opzioni={opzioniVista}
+        valore={tipoCalendario}
+        etichettaSelezionata={opzioneSelezionata?.label}
+        testoSegnaposto={testoSegnaposto}
+        inFocus={inFocus}
+        suFocus={impostaInFocus}
+        suSelezione={gestisciSelezioneOpzione}
+      />
 
-      {isIOS ? (
-        <IOSPullDown
-          options={CALENDAR_VIEW_OPTIONS}
-          selectedLabel={selectedOption?.label}
-          placeholder={placeholderText}
-          onSelect={handleOptionSelect}
-          triggerStyle={[calendarStyles.dropdown, calendarStyles.iosPicker]}
-          selectedTextStyle={calendarStyles.selectedTextStyle}
-          placeholderStyle={calendarStyles.placeholderStyle}
+      <View style={stiliCalendario.contenitoreCalendario}>
+        <Calendar
+          firstDay={1}
+          markingType={
+            tipoCalendario === ModalitaCalendario.PANORAMICA_GENERALE
+              ? "multi-dot"
+              : "period"
+          }
+          markedDates={markedForCalendar}
+          onDayPress={gestisciClickGiorno}
+          theme={temaCalendario}
         />
-      ) : (
-        <Dropdown
-          style={[
-            calendarStyles.dropdown,
-            isFocus && calendarStyles.dropdownFocus,
-          ]}
-          placeholderStyle={calendarStyles.placeholderStyle}
-          selectedTextStyle={calendarStyles.selectedTextStyle}
-          inputSearchStyle={calendarStyles.inputSearchStyle}
-          iconStyle={calendarStyles.iconStyle}
-          data={CALENDAR_VIEW_OPTIONS}
-          maxHeight={300}
-          labelField="label"
-          valueField="value"
-          placeholder={!isFocus ? placeholderText : "..."}
-          value={calendarType}
-          onFocus={() => setIsFocus(true)}
-          onBlur={() => setIsFocus(false)}
-          onChange={(item) => handleOptionSelect(item.value)}
-        />
+      </View>
+      {(tipoCalendario === ModalitaCalendario.ASSENZA ||
+        tipoCalendario === ModalitaCalendario.STRAORDINARI) && (
+        <>
+          <TouchableOpacity
+            style={[
+              stiliCalendario.pulsante,
+              (!dataInizio || !dataFine) &&
+                stiliCalendario.pulsanteDisabilitato,
+            ]}
+            onPress={() => gestisciConferma(dataInizio, dataFine)}
+            disabled={!dataInizio || !dataFine}
+          >
+            <Text style={stiliCalendario.testoPulsante}>
+              Procedi con la richiesta
+            </Text>
+          </TouchableOpacity>
+
+          <ModaleRichiesta
+            visibile={modaleVisibile}
+            suChiusura={chiudiModale}
+            dataInizio={dataInizio ? new Date(dataInizio) : null}
+            dataFine={dataFine ? new Date(dataFine) : null}
+            tipoPrincipale={
+              tipoCalendario === ModalitaCalendario.STRAORDINARI
+                ? "straordinari"
+                : "assenza"
+            }
+            tipiRichiesta={tipiRichiesta}
+            suInvio={gestisciInvio}
+          />
+        </>
       )}
 
-      <View style={calendarStyles.calendarWrapper}>
-        <Calendar
-          firstDay={1} // fa iniziare la settimana da lunedi
-          markingType="period"
-          markedDates={markedDates}
-          onDayPress={onDayPress}
-          theme={calendarTheme}
-        />
-      </View>
-
-      <TouchableOpacity
-        style={[
-          calendarStyles.button,
-          (!startDate || !endDate) && calendarStyles.buttonDisabled,
-        ]}
-        onPress={handleConfirm}
-        disabled={!startDate || !endDate}
-      >
-        <Text style={calendarStyles.buttonText}>Procedi con la richiesta</Text>
-      </TouchableOpacity>
-
-      <RequestModal
-        visible={modalVisible} // booleano per fare aprire la modale
-        onClose={() => setModalVisible(false)}
-        startDate={startDate ? new Date(startDate) : null}
-        endDate={endDate ? new Date(endDate) : null}
-        mainType={
-          calendarType === CalendarMode.OVERTIME ? "straordinari" : "assenza"
-        }
-        userId={userId}
-        onSubmit={handleSubmission}
+      <DayDetailModal
+        visibile={modaleDettaglioVisibile}
+        giorno={giornoSelezionato || ""}
+        richieste={richiesteCaricate}
+        suChiusura={chiudiDettaglioGiorno}
       />
     </View>
   );

@@ -8,75 +8,84 @@ import {
   TextStyle,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Colors } from "../../../core/theme/theme";
-import { pullDownStyles } from "../../../core/style/commonStyles";
+import { Colori } from "../../../core/theme/theme";
+import { stiliMenuATendinaIOS } from "../../../core/style/commonStyles";
 
-export type PullDownOption = {
+// Tipo per una singola opzione del menu a tendina
+export type OpzioneMenuATendina = {
   label: string;
   value: string;
 };
 
 type Props = {
-  options: PullDownOption[];
-  selectedLabel?: string;
-  placeholder: string;
-  onSelect: (value: string) => void;
-  triggerStyle: ViewStyle | ViewStyle[];
-  selectedTextStyle: TextStyle;
-  placeholderStyle: TextStyle;
-  chevronColor?: string;
+  opzioni: OpzioneMenuATendina[];
+  etichettaSelezionata?: string;
+  segnaposto: string;
+  suSelezione: (valore: string) => void;
+  stileTrigger: ViewStyle | ViewStyle[];
+  stileTestoSelezionato: TextStyle;
+  stileSegnaposto: TextStyle;
+  coloreChevron?: string;
 };
 
-export function IOSPullDown({
-  options,
-  selectedLabel,
-  placeholder,
-  onSelect,
-  triggerStyle,
-  selectedTextStyle,
-  placeholderStyle,
-  chevronColor,
+// Componente menu a tendina stile iOS con chevron e lista espandibile
+export function MenuATendinaIOS({
+  opzioni,
+  etichettaSelezionata,
+  segnaposto,
+  suSelezione,
+  stileTrigger,
+  stileTestoSelezionato,
+  stileSegnaposto,
+  coloreChevron,
 }: Props) {
-  const [open, setOpen] = useState(false);
+  const [aperto, impostaAperto] = useState(false);
 
   return (
-    <View style={pullDownStyles.container}>
+    <View style={stiliMenuATendinaIOS.contenitore}>
       <TouchableOpacity
-        style={triggerStyle}
-        onPress={() => setOpen((prev) => !prev)}
+        style={stileTrigger}
+        onPress={() => impostaAperto((prev) => !prev)}
         activeOpacity={0.85}
       >
-        <Text style={selectedLabel ? selectedTextStyle : placeholderStyle}>
-          {selectedLabel || placeholder}
+        <Text
+          style={
+            etichettaSelezionata ? stileTestoSelezionato : stileSegnaposto
+          }
+        >
+          {etichettaSelezionata || segnaposto}
         </Text>
         <Ionicons
-          name={open ? "chevron-up" : "chevron-down"}
+          name={aperto ? "chevron-up" : "chevron-down"}
           size={18}
-          color={chevronColor || Colors.textSecondary}
+          color={coloreChevron || Colori.testoSecondario}
         />
       </TouchableOpacity>
 
-      {open && (
-        <View style={pullDownStyles.overlay}>
+      {aperto && (
+        <View style={stiliMenuATendinaIOS.sovrapposizione}>
           <Pressable
-            style={pullDownStyles.overlay}
-            onPress={() => setOpen(false)}
+            style={stiliMenuATendinaIOS.sovrapposizione}
+            onPress={() => impostaAperto(false)}
           />
-          <View style={pullDownStyles.menu}>
-            {options.map((option, index) => (
+          <View style={stiliMenuATendinaIOS.menu}>
+            {opzioni.map((opzione, indice) => (
               <Pressable
-                key={option.value}
+                key={opzione.value}
                 style={({ pressed }) => [
-                  pullDownStyles.menuItem,
-                  pressed && pullDownStyles.menuItemPressed,
-                  index === options.length - 1 && pullDownStyles.menuItemLast,
+                  stiliMenuATendinaIOS.voceMenu,
+                  pressed && stiliMenuATendinaIOS.voceMenuPremuta,
+                  indice === opzioni.length - 1 &&
+                    stiliMenuATendinaIOS.voceMenuUltima,
                 ]}
                 onPress={() => {
-                  onSelect(option.value);
-                  setOpen(false);
+                  suSelezione(opzione.value);
+                  impostaAperto(false);
                 }}
               >
-                <Text style={pullDownStyles.menuItemText}>{option.label}</Text>
+                <Text style={stiliMenuATendinaIOS.testoVoceMenu}>
+                  {opzione.label}
+                </Text>
               </Pressable>
             ))}
           </View>

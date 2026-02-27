@@ -1,144 +1,138 @@
-import { StyleSheet } from "react-native";
-import { Colors, Spacing, Typography } from "../theme/theme";
+import { Platform, StyleSheet } from "react-native";
+import { Colori, Spaziatura, Tipografia } from "../theme/theme";
+import { sw, sh, ms } from "./responsive";
 
-// Stili riutilizzabili di base
-export const commonStyles = StyleSheet.create({
-  screenPadding: {
-    paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.md,
+// Stili comuni riutilizzabili
+export const stiliComuni = StyleSheet.create({
+  paddingSchermata: {
+    paddingHorizontal: Spaziatura.md,
+    paddingTop: Spaziatura.md,
   },
-  rowCenter: {
+  rigaCentrata: {
     flexDirection: "row",
     alignItems: "center",
   },
-  card: {
-    backgroundColor: Colors.surface,
+  scheda: {
+    backgroundColor: Colori.superficie,
     borderRadius: 12,
-    padding: Spacing.md,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  shadowLight: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    padding: Spaziatura.md,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.12,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 6,
+      },
+    }),
   },
 });
 
-// Stili del calendario centralizzati
-export const calendarStyles = StyleSheet.create({
-  container: {
+// Stili per le schermate
+export const stiliSchermata = StyleSheet.create({
+  contenitore: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colori.intestazione,
+  },
+  titolo: {
+    fontSize: Tipografia.dimensione.xl,
+    fontWeight: Tipografia.peso.medio,
+    borderBottomWidth: 4,
+    borderBottomColor: Colori.primario,
+    paddingBottom: Spaziatura.xs,
+  },
+  bloccoTitolo: {
+    alignSelf: "flex-start",
+    alignItems: "flex-start",
+    marginLeft: Spaziatura.titoloSinistra,
+    paddingTop: Spaziatura.titolo,
+  },
+  intestazione: {
+    backgroundColor: Colori.intestazione,
+  },
+  superiore: {
+    flex: 1,
+  },
+});
+
+// Stili del calendario
+export const stiliCalendario = StyleSheet.create({
+  contenitore: {
+    flex: 1,
+    backgroundColor: Colori.sfondo,
     paddingTop: 54,
     paddingHorizontal: 10,
   },
-  subtitle: {
-    fontSize: Typography.size.md,
-    fontWeight: Typography.weight.light,
+  sottotitolo: {
+    fontSize: Tipografia.dimensione.md,
+    fontWeight: Tipografia.peso.leggero,
     textAlign: "left",
-    color: Colors.textSecondary,
+    color: Colori.testoSecondario,
     paddingBottom: 10,
     paddingLeft: 5,
   },
-  dropdown: {
-    marginBottom: Spacing.xl,
+  menuATendina: {
+    marginBottom: Spaziatura.xl,
     height: 50,
-    borderColor: Colors.border,
+    borderColor: Colori.bordo,
     borderWidth: 1.25,
     borderRadius: 12,
     paddingHorizontal: 16,
-    backgroundColor: Colors.surface,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 6,
+    backgroundColor: Colori.superficie,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.12,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 6,
+      },
+    }),
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  iosPicker: {
+  selettoreIOS: {
     paddingHorizontal: 16,
   },
-  dropdownFocus: {
-    borderColor: Colors.primary,
+  menuATendinaFocus: {
+    borderColor: Colori.primario,
     shadowOpacity: 0.18,
     shadowRadius: 10,
     elevation: 8,
   },
-  placeholderStyle: { fontSize: 16, color: "#999" },
-  selectedTextStyle: {
+  stileSegnaposto: { fontSize: 16, color: "#999" },
+  stileTestoSelezionato: {
     fontSize: 16,
-    color: Colors.textPrimary || "#000",
-    fontWeight: Typography.weight.medium,
+    color: Colori.testoPrimario || "#000",
+    fontWeight: Tipografia.peso.medio,
   },
-  iconStyle: { width: 20, height: 20 },
-  inputSearchStyle: { height: 40, fontSize: 16 },
-  pullDownContainer: {
-    position: "relative",
-    zIndex: 20,
-  },
-  menuOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  pullDownMenu: {
-    position: "absolute",
-    top: 52,
-    left: 0,
-    right: 0,
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
-    borderColor: Colors.border,
-    borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.14,
-    shadowRadius: 10,
-    elevation: 10,
-    overflow: "hidden",
-  },
-  menuItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: Colors.surface,
-    borderBottomColor: Colors.border,
-    borderBottomWidth: 1,
-  },
-  menuItemPressed: { backgroundColor: Colors.primary },
-  menuItemText: {
-    fontSize: 16,
-    color: Colors.textPrimary,
-  },
-  calendarWrapper: { flex: 1 },
-  button: {
-    backgroundColor: Colors.primary,
+  stileIcona: { width: 20, height: 20 },
+  stileRicerca: { height: 40, fontSize: 16 },
+  contenitoreCalendario: { flex: 1 },
+  pulsante: {
+    backgroundColor: Colori.primario,
     paddingVertical: 15,
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 24,
   },
-  buttonDisabled: { backgroundColor: "#CCCCCC" },
-  buttonText: { color: "#fff", fontSize: 16, fontWeight: "regular" },
+  pulsanteDisabilitato: { backgroundColor: "#CCCCCC" },
+  testoPulsante: { color: "#fff", fontSize: 16, fontWeight: "regular" },
 });
 
-// Stili condivisi per il pull-down iOS
-export const pullDownStyles = StyleSheet.create({
-  container: {
+// Stili condivisi per il menu a tendina iOS
+export const stiliMenuATendinaIOS = StyleSheet.create({
+  contenitore: {
     position: "relative",
     zIndex: 20,
   },
-  overlay: {
+  sovrapposizione: {
     position: "absolute",
     top: 0,
     left: 0,
@@ -150,365 +144,434 @@ export const pullDownStyles = StyleSheet.create({
     top: 52,
     left: 0,
     right: 0,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colori.superficie,
     borderRadius: 16,
-    borderColor: Colors.border,
+    borderColor: Colori.bordo,
     borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.14,
-    shadowRadius: 10,
-    elevation: 10,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.14,
+        shadowRadius: 10,
+      },
+      android: {
+        elevation: 10,
+      },
+    }),
     overflow: "hidden",
   },
-  menuItem: {
+  voceMenu: {
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: Colors.surface,
-    borderBottomColor: Colors.border,
+    backgroundColor: Colori.superficie,
+    borderBottomColor: Colori.bordo,
     borderBottomWidth: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  menuItemLast: {
+  voceMenuUltima: {
     borderBottomWidth: 0,
   },
-  menuItemPressed: { backgroundColor: Colors.primary },
-  menuItemText: {
+  voceMenuPremuta: { backgroundColor: Colori.primario },
+  testoVoceMenu: {
     fontSize: 16,
-    color: Colors.textPrimary,
+    color: Colori.testoPrimario,
   },
 });
 
 // Stili condivisi per la modale di richiesta
-export const requestModalStyles = StyleSheet.create({
-  overlay: {
+export const stiliModaleRichiesta = StyleSheet.create({
+  sovrapposizione: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
-    alignItems: "center",
+    backgroundColor: Colori.superficie,
   },
-  modalContainer: {
+  contenitoreModale: {
+    flex: 1,
     width: "100%",
-    maxHeight: "85%",
-    justifyContent: "flex-end",
   },
-  content: {
-    backgroundColor: Colors.surface,
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    padding: Spacing.md + 4,
-    paddingBottom: 24,
-    maxHeight: "100%",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5,
+  contenuto: {
+    flexGrow: 1,
+    backgroundColor: Colori.superficie,
+    paddingHorizontal: sw(20),
+    paddingBottom: sh(16),
   },
-  handleIndicator: {
-    width: 40,
-    height: 5,
-    backgroundColor: "#E0E0E0",
-    borderRadius: 3,
-    alignSelf: "center",
-    marginBottom: 15,
+  intestazionePagina: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingBottom: sh(10),
+    paddingHorizontal: sw(Spaziatura.md),
+    backgroundColor: Colori.superficie,
   },
-  headerTitle: {
-    fontSize: 20,
+  pulsanteIndietro: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: sh(4),
+    paddingRight: sw(12),
+  },
+  testoIndietro: {
+    fontSize: ms(16),
+    color: Colori.primario,
+    marginLeft: sw(4),
+  },
+  titoloIntestazione: {
+    fontSize: ms(20),
     fontWeight: "bold",
     textAlign: "center",
-    color: Colors.textPrimary,
+    color: Colori.testoPrimario,
   },
-  subHeader: {
-    fontSize: 14,
-    color: Colors.textSecondary,
+  sottointestazione: {
+    fontSize: ms(13),
+    color: Colori.testoSecondario,
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: sh(16),
     textTransform: "uppercase",
   },
-  dateRow: {
+  rigaDate: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 20,
+    marginBottom: sh(16),
     backgroundColor: "#F5F5F5",
-    padding: 15,
-    borderRadius: 12,
+    padding: sw(14),
+    borderRadius: sw(12),
   },
-  dateBox: { alignItems: "center", width: "45%" },
-  dateLabel: { fontSize: 12, color: "#888" },
-  dateValue: { fontSize: 16, fontWeight: "bold", color: Colors.textPrimary },
-  timeRow: {
+  casellaData: { alignItems: "center", width: "45%" },
+  etichettaData: { fontSize: ms(12), color: "#888" },
+  valoreData: {
+    fontSize: ms(15),
+    fontWeight: "bold",
+    color: Colori.testoPrimario,
+  },
+  rigaOrario: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 16,
+    marginBottom: sh(14),
   },
-  timeBox: { width: "48%" },
-  timeInput: {
-    height: 48,
+  casellaOrario: { width: "48%" },
+  inputOrario: {
+    height: sh(48),
     borderColor: "#E0E0E0",
     borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    marginTop: 6,
-    fontSize: 16,
-    color: Colors.textPrimary,
+    borderRadius: sw(10),
+    paddingHorizontal: sw(12),
+    marginTop: sh(6),
+    fontSize: ms(15),
+    color: Colori.testoPrimario,
     backgroundColor: "#fff",
     justifyContent: "center",
   },
-  timeText: { fontSize: 16, color: Colors.textPrimary },
-  toggleRow: {
+  testoOrario: { fontSize: ms(15), color: Colori.testoPrimario },
+  rigaInterruttore: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 12,
+    marginBottom: sh(10),
   },
-  toggleLabel: { fontSize: 16, color: Colors.textPrimary, fontWeight: "500" },
-  label: { marginBottom: 8, fontWeight: "500", color: Colors.textPrimary },
-  dropdown: {
-    height: 50,
+  etichettaInterruttore: {
+    fontSize: ms(15),
+    color: Colori.testoPrimario,
+    fontWeight: "500",
+  },
+  etichetta: {
+    marginBottom: sh(6),
+    fontSize: ms(14),
+    fontWeight: "500",
+    color: Colori.testoPrimario,
+  },
+  menuATendina: {
+    height: sh(48),
     borderColor: "#E0E0E0",
     borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    marginBottom: 140, // spazio per far aprire il menu senza coprire i bottoni
+    borderRadius: sw(10),
+    paddingHorizontal: sw(12),
+    marginBottom: sh(20),
   },
-  placeholderStyle: { fontSize: 16, color: "#999" },
-  selectedTextStyle: { fontSize: 16, color: Colors.textPrimary },
-  buttonRow: { flexDirection: "row", marginTop: 10 },
-  cancelButton: {
+  stileSegnaposto: { fontSize: ms(15), color: "#999" },
+  stileTestoSelezionato: { fontSize: ms(15), color: Colori.testoPrimario },
+  rigaPulsanti: {
+    flexDirection: "row",
+    paddingHorizontal: sw(20),
+    paddingTop: sh(10),
+    gap: sw(12),
+  },
+  pulsanteAnnulla: {
     flex: 1,
-    padding: 15,
-    marginRight: 10,
-    borderRadius: 10,
+    paddingVertical: sh(14),
+    borderRadius: sw(10),
     backgroundColor: "#F0F0F0",
     alignItems: "center",
   },
-  cancelButtonText: { color: "#666", fontWeight: "bold" },
-  confirmButton: {
+  testoPulsanteAnnulla: { color: "#666", fontWeight: "bold", fontSize: ms(14) },
+  pulsanteConferma: {
     flex: 1,
-    padding: 15,
-    marginLeft: 10,
-    borderRadius: 10,
-    backgroundColor: Colors.primary,
+    paddingVertical: sh(14),
+    borderRadius: sw(10),
+    backgroundColor: Colori.primario,
     alignItems: "center",
   },
-  confirmButtonText: { color: "white", fontWeight: "bold" },
-  disabledButton: { backgroundColor: "#CCC" },
-  pickerOverlay: {
+  testoPulsanteConferma: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: ms(14),
+  },
+  pulsanteDisabilitato: { backgroundColor: "#CCC" },
+  sovrapposizioneSelettore: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.35)",
     justifyContent: "flex-end",
   },
-  pickerSheet: {
-    backgroundColor: Colors.surface,
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 20,
-    borderTopLeftRadius: 18,
-    borderTopRightRadius: 18,
+  foglioSelettore: {
+    backgroundColor: Colori.superficie,
+    paddingHorizontal: sw(16),
+    paddingTop: sh(12),
+    paddingBottom: sh(20),
+    borderTopLeftRadius: sw(18),
+    borderTopRightRadius: sw(18),
   },
-  pickerHeader: {
+  intestazioneSelettore: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 12,
+    marginBottom: sh(10),
   },
-  pickerTitle: {
-    fontSize: 16,
+  titoloSelettore: {
+    fontSize: ms(16),
     fontWeight: "600",
-    color: Colors.textPrimary,
+    color: Colori.testoPrimario,
   },
-  pickerClose: {
-    color: Colors.primary,
+  chiudiSelettore: {
+    color: Colori.primario,
     fontWeight: "600",
+    fontSize: ms(14),
   },
-  pickerConfirm: {
-    marginTop: 10,
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
+  confermaSelettore: {
+    marginTop: sh(8),
+    backgroundColor: Colori.primario,
+    borderRadius: sw(12),
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: sh(12),
   },
-  pickerConfirmText: {
+  testoConfermaSelettore: {
     color: "#fff",
     fontWeight: "700",
+    fontSize: ms(14),
   },
-  pickerIOS: {
-    backgroundColor: Colors.surface,
+  selettoreIOS: {
+    backgroundColor: Colori.superficie,
   },
-});
-
-// Stili per la schermata
-export const screenStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.top,
-  },
-  title: {
-    fontSize: Typography.size.xl,
-    fontWeight: Typography.weight.medium,
-    borderBottomWidth: 4,
-    borderBottomColor: Colors.primary,
-    paddingBottom: Spacing.xs,
-  },
-  titleBlock: {
-    alignSelf: "flex-start",
-    alignItems: "flex-start",
-    marginLeft: Spacing.titleleft,
-    paddingTop: Spacing.title,
-  },
-  header: {
-    backgroundColor: Colors.top,
-  },
-  top: {
-    flex: 1,
+  testoSegnapostoDocumento: {
+    color: "#999",
+    fontSize: ms(13),
   },
 });
 
-export const profileScreen = StyleSheet.create({
-  informationProfileStyle: {
-    fontSize: Typography.size.lg,
-    fontWeight: Typography.weight.medium,
-    textAlign: "left",
-    color: Colors.textPrimary,
-    paddingBottom: 2,
-    paddingLeft: 0,
+// Stili per il singolo elemento richiesta nella lista
+export const stiliElementoRichiesta = StyleSheet.create({
+  scheda: {
+    marginHorizontal: 16,
+    backgroundColor: Colori.superficiecard,
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 14,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
   },
-  cardProfile: {
-    backgroundColor: Colors.background,
-    paddingTop: 10,
-    paddingHorizontal: 10,
-  },
-  profilePill: {
+  intestazione: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 999,
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#e1e3e8",
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-  },
-  profileAvatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 999,
-    backgroundColor: Colors.secondary,
-    borderWidth: 1,
-    borderColor: "#d6d8dd",
-  },
-  profileNameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  profileRole: {
-    fontSize: 12,
-    color: Colors.primary,
-  },
-  profileEmail: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-  },
-  profiletop: {
-    paddingHorizontal: 10,
-    paddingTop: 54,
-    flex: 1,
-  },
-});
-
-export const itemStyles = StyleSheet.create({
-  card: {
-    marginLeft: 16,
-    marginRight: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#ffffff",
-    borderRadius: 42,
-    padding: 12,
     marginBottom: 12,
-    paddingHorizontal: 34,
-    // shadow iOS
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    // elevation Android
-    elevation: 3,
   },
-  leftAccent: {
-    width: 40,
-    height: 40,
-    borderRadius: 90,
-    backgroundColor: Colors.primary,
-    marginRight: 12,
+  accentoSinistra: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colori.primario,
+    marginRight: 10,
   },
-  content: { flex: 1 },
-  title: {
-    fontWeight: Typography.weight.bold,
-    fontSize: 15,
-    marginBottom: 6,
+  titolo: {
+    flex: 1,
+    fontWeight: Tipografia.peso.medio,
+    fontSize: 16,
+    color: Colori.testoPrimario,
   },
-  rowText: {
-    color: "#000000",
-    fontWeight: Typography.weight.regular,
+  sezioneDate: {
+    marginLeft: 46,
+    marginBottom: 14,
+  },
+  testoRiga: {
+    color: "#6b7280",
+    fontWeight: Tipografia.peso.regolare,
     fontSize: 13,
-    marginBottom: 2,
+    marginBottom: 3,
   },
-  right: { marginLeft: 8, alignItems: "flex-end" },
   badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 12,
     minWidth: 90,
     alignItems: "center",
     justifyContent: "center",
   },
-  badgeText: {
+  testoBadge: {
     color: "#fff",
-    fontWeight: Typography.weight.regular,
+    fontWeight: Tipografia.peso.medio,
     fontSize: 12,
+  },
+  azioniContenitore: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#f0f0f0",
+    paddingTop: 12,
+  },
+  azioneModifica: {
+    backgroundColor: "#eff6ff",
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  testoModifica: {
+    color: "#2563eb",
+    fontWeight: "700",
+    fontSize: 13,
+  },
+  azioneElimina: {
+    backgroundColor: "#fef2f2",
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  testoElimina: {
+    color: "#dc2626",
+    fontWeight: "700",
+    fontSize: 13,
+  },
+  azioneAutorizza: {
+    backgroundColor: "#f0fdf4",
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  testoAutorizza: {
+    color: "#16a34a",
+    fontWeight: "700",
+    fontSize: 13,
+  },
+  azioneNonAutorizza: {
+    backgroundColor: "#fef2f2",
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  testoNonAutorizza: {
+    color: "#dc2626",
+    fontWeight: "700",
+    fontSize: 13,
   },
 });
 
-export const tabStyles = StyleSheet.create({
-  tabBar: {
-    flexDirection: "row",
-    gap: 8,
-    marginTop: 12,
-  },
-  tabButton: {
-    flex: 1,
-    backgroundColor: "#ae513e",
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.12,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  tabButtonActive: {
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#395174",
-    fontWeight: Typography.weight.bold,
-  },
-  tabLabel: {
+// Stili per le tab nella schermata richieste
+export const stiliTab = StyleSheet.create({
+  etichetta: {
     textAlign: "center",
-    fontWeight: Typography.weight.bold,
+    fontWeight: Tipografia.peso.grassetto,
     fontSize: 16,
   },
-  tabLabelActive: {
-    color: "#cda0a0",
+});
+
+export const ModaleDettagliostyle = StyleSheet.create({
+  titolo: {
+    fontSize: ms(20),
+    fontWeight: Tipografia.peso.grassetto,
+    color: Colori.testoPrimario,
+    textTransform: "capitalize",
+    paddingHorizontal: sw(20),
+    paddingVertical: sh(16),
+  },
+  vuoto: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: sw(32),
+  },
+  testoVuoto: {
+    color: Colori.testoSecondario,
+    fontSize: ms(15),
+    textAlign: "center",
+  },
+  lista: {
+    flex: 1,
+  },
+  listaContenuto: {
+    paddingHorizontal: sw(20),
+    paddingBottom: sh(32),
+  },
+  card: {
+    backgroundColor: "#F5F5F5",
+    borderRadius: sw(12),
+    padding: sw(14),
+    marginBottom: sh(12),
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: sh(12),
+  },
+  dot: {
+    width: sw(12),
+    height: sw(12),
+    borderRadius: sw(6),
+    marginRight: sw(8),
+  },
+  tipoLabel: {
+    flex: 1,
+    fontSize: ms(15),
+    fontWeight: Tipografia.peso.grassetto,
+    color: Colori.testoPrimario,
+  },
+  badge: {
+    paddingHorizontal: sw(10),
+    paddingVertical: sh(4),
+    borderRadius: sw(8),
+    backgroundColor: "#FEF3C7",
+  },
+  badgeApprovata: {
+    backgroundColor: "#D1FAE5",
+  },
+  badgeAutorizzata: {
+    backgroundColor: "#DBEAFE",
+  },
+  badgeRifiutata: {
+    backgroundColor: "#FEE2E2",
+  },
+  badgeTesto: {
+    fontSize: ms(12),
+    fontWeight: Tipografia.peso.medio,
+    color: Colori.testoPrimario,
+  },
+  riga: {
+    flexDirection: "row",
+    marginBottom: sh(4),
+  },
+  etichetta: {
+    width: sw(40),
+    color: Colori.testoSecondario,
+    fontSize: ms(13),
+  },
+  valore: {
+    flex: 1,
+    color: Colori.testoPrimario,
+    fontSize: ms(13),
   },
 });

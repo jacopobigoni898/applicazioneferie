@@ -1,18 +1,14 @@
- /*
- Enumeration che permette di definire i ruoli al interno del applicazione
- */
-
-export enum UserRole {
-    ADMIN = "admin",
-    USER = 'Utente',
+// Ruoli dell'utente nell'applicazione
+export enum RuoloUtente {
+  ADMIN = "Admin",
+  UTENTE = "Utente",
 }
-/*
-    Interfaccia che definisce la struttura di un utente
-*/
-export interface User {
-    id: string;
-    name: string;
-    surname: string;
-    email: string;
-    role: UserRole;
+
+// Entità Utente
+export interface Utente {
+  id: string;
+  nome: string;
+  cognome: string;
+  email: string;
+  ruolo: RuoloUtente;
 }

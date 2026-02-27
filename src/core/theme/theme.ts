@@ -1,48 +1,46 @@
-export const Colors = {
-  // Brand colors
-  primary: "#F7B458", // Il colore del tuo calendario
-  secondary: "#f0f0f0",
-  accent: "#ff6b6b",
-  evidence: "#deba67",
-  top: "#ffffff", //colore per il titolo
-  // UI colors
-  background: "#ffffff",
-  surface: "#f9f9f9", // Per card o modali
-  textPrimary: "#000000",
-  textSecondary: "#808080",
-
-  // Feedback
-  error: "#d32f2f",
-  success: "#388e3c",
-
-  // Bordi
-  border: "#e0e0e0",
+// Colori del brand e dell'interfaccia
+export const Colori = {
+  primario: "#F7B458",
+  secondario: "#f0f0f0",
+  accento: "#ff6b6b",
+  evidenza: "#deba67",
+  intestazione: "#ffffff",
+  sfondo: "#ffffff",
+  superficie: "#f9f9f9",
+  superficiecard: "#ffefd9",
+  testoPrimario: "#000000",
+  testoSecondario: "#808080",
+  errore: "#d32f2f",
+  successo: "#388e3c",
+  bordo: "#e0e0e0",
 };
 
-export const Typography = {
-  size: {
+// Tipografia dell'applicazione
+export const Tipografia = {
+  dimensione: {
     sm: 12,
-    md: 16, // Body standard
+    md: 16,
     lg: 20,
-    xl: 24, // Titoli
+    xl: 24,
     xxl: 32,
   },
-  weight: {
-    regular: "400" as const, // "as const" serve a TypeScript
-    bold: "700" as const,
-    thin: "110" as const,
-    light: "300" as const,
-    medium: "500" as const,
+  peso: {
+    regolare: "400" as const,
+    grassetto: "700" as const,
+    sottile: "110" as const,
+    leggero: "300" as const,
+    medio: "500" as const,
   },
 };
 
-export const Spacing = {
+// Spaziatura dell'interfaccia
+export const Spaziatura = {
   xs: 4,
   sm: 8,
-  md: 16, // Standard padding
+  md: 16,
   lg: 24,
   xl: 32,
-  title: 28, //titolo paddingo top
-  titleleft: 16, //margin left per il titolo della pagina
-  marginbottomtitle: 30,
+  titolo: 28,
+  titoloSinistra: 16,
+  margineFondoTitolo: 30,
 };

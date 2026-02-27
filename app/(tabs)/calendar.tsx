@@ -1,19 +1,24 @@
-import { View, Text } from "react-native";
+import { View, Text, StatusBar, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React from "react";
-import CalendarComp from "../../src/features/calendar/components/CalendarComponent"; //import componente calendario
-import { screenStyles } from "../../src/core/style/commonStyles";
+import ComponenteCalendario from "../../src/features/calendar/components/CalendarComponent";
+import { stiliSchermata } from "../../src/core/style/commonStyles";
 
-export default function CalendarScreen() {
+// Schermata del calendario
+export default function SchermataCalendario() {
   return (
-    <SafeAreaView style={screenStyles.container} edges={["top"]}>
-      <View style={screenStyles.header}>
-        <View style={screenStyles.titleBlock}>
-          <Text style={screenStyles.title}>Calendario</Text>
+    <SafeAreaView style={stiliSchermata.contenitore} edges={["top"]}>
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor={Platform.OS === "android" ? "#f5f5f5" : undefined}
+      />
+      <View style={stiliSchermata.intestazione}>
+        <View style={stiliSchermata.bloccoTitolo}>
+          <Text style={stiliSchermata.titolo}>Calendario</Text>
         </View>
       </View>
-      <View style={screenStyles.top}>
-        <CalendarComp></CalendarComp>
+      <View style={stiliSchermata.superiore}>
+        <ComponenteCalendario />
       </View>
     </SafeAreaView>
   );

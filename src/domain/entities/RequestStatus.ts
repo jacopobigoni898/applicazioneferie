@@ -1,5 +1,7 @@
-export enum RequestStatus {
-    PENDING = "non validato",
-    APPROVED = "validato",
-    REJECTED = 'annullato',
+// Enum degli stati delle richieste
+export enum StatoRichiesta {
+  IN_ATTESA = "non validato",
+  APPROVATO = "validato",
+  RIFIUTATO = "annullato",
+  AUTORIZZATO = "autorizzato",
 }

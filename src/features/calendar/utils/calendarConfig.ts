@@ -1,6 +1,8 @@
 import { LocaleConfig } from "react-native-calendars";
 
-export const configureCalendarLocale = () => {
+// Configura la localizzazione italiana per il calendario
+// (nomi mesi, giorni della settimana in italiano)
+export const configuraLocaleCalendario = () => {
   LocaleConfig.locales["it"] = {
     monthNames: [
       "Gennaio",

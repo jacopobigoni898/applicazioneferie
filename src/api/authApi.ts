@@ -1,10 +1,10 @@
 import { http } from "./httpClient";
-import { AuthResponse } from "./types";
-import { mapAuthResponseToUser } from "../domain/mappers/authMapper";
-import type { User } from "../domain/entities/User";
+import { RispostaAuth } from "./types";
+import { mappaRispostaAuthAUtente } from "../domain/mappers/authMapper";
+import type { Utente } from "../domain/entities/User";
 
-// Chiamata di login Microsoft: ritorna l'entità User mappata dal DTO API
-export const fetchMicrosoftLogin = async (): Promise<User> => {
-  const { data } = await http.get<AuthResponse>("/Auth/microsoft-login");
-  return mapAuthResponseToUser(data);
+// Chiamata di login Microsoft: ritorna l'entità Utente mappata dal DTO API
+export const recuperaLoginMicrosoft = async (): Promise<Utente> => {
+  const { data } = await http.get<RispostaAuth>("/Auth/microsoft-login");
+  return mappaRispostaAuthAUtente(data);
 };

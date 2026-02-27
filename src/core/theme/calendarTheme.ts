@@ -1,10 +1,12 @@
-import { Colors, Typography } from "./theme";
+import { Colori, Tipografia } from "./theme";
 
-export const calendarTheme = {
-  arrowColor: Colors.textPrimary,
-  todayTextColor: Colors.primary,
-  monthTextColor: Colors.textPrimary,
-  textDayFontWeight: Typography.weight.regular,
-  textMonthFontWeight: Typography.weight.medium,
-  textDayHeaderFontWeight: Typography.weight.medium,
+// Tema personalizzato per il componente react-native-calendars
+// Le chiavi devono corrispondere a quelle attese dalla libreria
+export const temaCalendario = {
+  arrowColor: Colori.testoPrimario,
+  todayTextColor: Colori.primario,
+  monthTextColor: Colori.testoPrimario,
+  textDayFontWeight: Tipografia.peso.regolare,
+  textMonthFontWeight: Tipografia.peso.medio,
+  textDayHeaderFontWeight: Tipografia.peso.medio,
 };

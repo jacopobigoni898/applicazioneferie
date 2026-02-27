@@ -1,56 +1,60 @@
 import * as SecureStore from "expo-secure-store";
 
-// Modello della sessione MSAL che persistiamo su SecureStore
-export type AuthSessionData = {
-  accessToken: string;
-  refreshToken?: string | null;
-  expiresAt?: number; // epoch ms
+// Modello della sessione MSAL persistita su SecureStore
+export type DatiSessioneAuth = {
+  tokenAccesso: string;
+  tokenAggiornamento?: string | null;
+  scadenzaA?: number; // epoch ms
 };
 
 // Chiave isolata per evitare collisioni con versioni precedenti
-const ACCESS_TOKEN_KEY = "msal_access_token_v2";
+const CHIAVE_TOKEN_ACCESSO = "msal_access_token_v2";
 
 // Parsing difensivo per gestire record corrotti in SecureStore
-const safeParse = (raw: string | null): AuthSessionData | null => {
-  if (!raw) return null;
+const parseSicuro = (grezzo: string | null): DatiSessioneAuth | null => {
+  if (!grezzo) return null;
   try {
-    return JSON.parse(raw) as AuthSessionData;
-  } catch (error) {
-    console.warn("Impossibile parsare il token da SecureStore", error);
+    return JSON.parse(grezzo) as DatiSessioneAuth;
+  } catch (errore) {
+    console.warn("Impossibile parsare il token da SecureStore", errore);
     return null;
   }
 };
 
-export const authStorage = {
-  getSession: async (): Promise<AuthSessionData | null> => {
+export const storageAuth = {
+  recuperaSessione: async (): Promise<DatiSessioneAuth | null> => {
     try {
-      const raw = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
-      return safeParse(raw);
-    } catch (error) {
-      console.warn("Impossibile leggere il token da SecureStore", error);
+      const grezzo = await SecureStore.getItemAsync(CHIAVE_TOKEN_ACCESSO);
+      return parseSicuro(grezzo);
+      console.log(grezzo);
+    } catch (errore) {
+      console.warn("Impossibile leggere il token da SecureStore", errore);
       return null;
     }
   },
 
-  setSession: async (session: AuthSessionData): Promise<void> => {
+  salvaSessione: async (sessione: DatiSessioneAuth): Promise<void> => {
     try {
-      await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, JSON.stringify(session));
-    } catch (error) {
-      console.warn("Impossibile salvare il token su SecureStore", error);
+      await SecureStore.setItemAsync(
+        CHIAVE_TOKEN_ACCESSO,
+        JSON.stringify(sessione),
+      );
+    } catch (errore) {
+      console.warn("Impossibile salvare il token su SecureStore", errore);
     }
   },
 
-  deleteSession: async (): Promise<void> => {
+  cancellaSessione: async (): Promise<void> => {
     try {
-      await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
-    } catch (error) {
-      console.warn("Impossibile cancellare il token da SecureStore", error);
+      await SecureStore.deleteItemAsync(CHIAVE_TOKEN_ACCESSO);
+    } catch (errore) {
+      console.warn("Impossibile cancellare il token da SecureStore", errore);
     }
   },
 
-  // helper per l'interceptor
-  getAccessToken: async (): Promise<string | null> => {
-    const session = await authStorage.getSession();
-    return session?.accessToken ?? null;
+  // Helper per l'interceptor
+  recuperaTokenAccesso: async (): Promise<string | null> => {
+    const sessione = await storageAuth.recuperaSessione();
+    return sessione?.tokenAccesso ?? null;
   },
 };
