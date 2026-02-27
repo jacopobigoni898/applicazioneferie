@@ -1,9 +1,10 @@
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, useContext, useMemo, useEffect } from "react";
 import { useGuardiaAuth } from "../../src/core/auth/useAuthGuard";
 import { useSessioneAuth } from "./useSessioneAuth";
 import { useProfiloUtente } from "./useProfiloUtente";
 import { useHandlerNonAutorizzato } from "./useHandlerNonAutorizzato";
 import type { Utente } from "../../src/domain/entities/User";
+import { http } from "../../src/api/httpClient";
 
 // Definisce la forma dell'oggetto di autenticazione fornito da AuthProvider
 type TipoContestoAuth = {
@@ -58,6 +59,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       esci,
     ],
   );
+
+  useEffect(() => {
+    if (tokenAccesso) {
+      http.defaults.headers.common.Authorization = `Bearer ${tokenAccesso}`;
+    } else {
+      // rimuove l'header quando non siamo autenticati
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      delete http.defaults.headers.common.Authorization;
+    }
+  }, [tokenAccesso]);
 
   return (
     <ContestoAuth.Provider value={valoreContesto}>
