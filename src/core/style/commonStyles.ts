@@ -280,15 +280,46 @@ export const stiliModaleRichiesta = StyleSheet.create({
     color: Colori.testoPrimario,
   },
   menuATendina: {
-    height: sh(48),
-    borderColor: "#E0E0E0",
+    minHeight: sh(48),
+    borderColor: Colori.bordo,
     borderWidth: 1,
-    borderRadius: sw(10),
-    paddingHorizontal: sw(12),
+    borderRadius: sw(12),
+    paddingHorizontal: sw(14),
     marginBottom: sh(20),
+    // Layout improvements
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: Colori.superficie,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 6,
+      },
+    }),
   },
-  stileSegnaposto: { fontSize: ms(15), color: "#999" },
-  stileTestoSelezionato: { fontSize: ms(15), color: Colori.testoPrimario },
+  stileSegnaposto: { fontSize: ms(15), color: "#666", fontStyle: "italic" },
+  stileTestoSelezionato: {
+    fontSize: ms(15),
+    color: Colori.testoPrimario,
+    fontWeight: "600",
+  },
+  // Selettore voci
+  voceSelettore: {
+    paddingVertical: sh(12),
+    paddingHorizontal: sw(12),
+    borderBottomColor: Colori.bordo,
+    borderBottomWidth: 1,
+  },
+  voceSelettoreTesto: {
+    fontSize: ms(15),
+    color: Colori.testoPrimario,
+  },
   rigaPulsanti: {
     flexDirection: "row",
     paddingHorizontal: sw(20),

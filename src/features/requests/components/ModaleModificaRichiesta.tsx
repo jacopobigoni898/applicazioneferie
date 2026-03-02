@@ -17,7 +17,6 @@ import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import { Dropdown } from "react-native-element-dropdown";
 import { stiliModaleRichiesta } from "../../../core/style/commonStyles";
 import { sw, sh } from "../../../core/style/responsive";
 import { Colori } from "../../../core/theme/theme";
@@ -435,7 +434,9 @@ const ModaleModificaRichiesta = ({
             {renderizzaSelettoreData("fine")}
             {renderizzaSelettoreOrario()}
 
-            {(modificaDocumentoAbilitata || documento || documentoInCaricamento) && (
+            {(modificaDocumentoAbilitata ||
+              documento ||
+              documentoInCaricamento) && (
               <>
                 <Text style={stiliModaleRichiesta.etichetta}>
                   Documento (opzionale):
@@ -445,22 +446,37 @@ const ModaleModificaRichiesta = ({
                     style={[
                       stiliModaleRichiesta.menuATendina,
                       { paddingVertical: sh(12), paddingHorizontal: sw(12) },
-                      (!modificaDocumentoAbilitata || documentoInCaricamento) && { opacity: 0.6 },
+                      (!modificaDocumentoAbilitata ||
+                        documentoInCaricamento) && { opacity: 0.6 },
                     ]}
                     onPress={
-                      modificaDocumentoAbilitata && !documentoInCaricamento ? pickDocumento : undefined
+                      modificaDocumentoAbilitata && !documentoInCaricamento
+                        ? pickDocumento
+                        : undefined
                     }
-                    disabled={!modificaDocumentoAbilitata || documentoInCaricamento}
+                    disabled={
+                      !modificaDocumentoAbilitata || documentoInCaricamento
+                    }
                   >
                     {documentoInCaricamento ? (
-                      <View style={{ flexDirection: "row", alignItems: "center" }}>
-                        <ActivityIndicator size="small" color={Colori.primario} style={{ marginRight: sw(8) }} />
-                        <Text style={stiliModaleRichiesta.testoSegnapostoDocumento}>
+                      <View
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                      >
+                        <ActivityIndicator
+                          size="small"
+                          color={Colori.primario}
+                          style={{ marginRight: sw(8) }}
+                        />
+                        <Text
+                          style={stiliModaleRichiesta.testoSegnapostoDocumento}
+                        >
                           Caricamento documento...
                         </Text>
                       </View>
                     ) : (
-                      <Text style={stiliModaleRichiesta.testoSegnapostoDocumento}>
+                      <Text
+                        style={stiliModaleRichiesta.testoSegnapostoDocumento}
+                      >
                         {documento
                           ? documento.name
                           : modificaDocumentoAbilitata
@@ -495,7 +511,13 @@ const ModaleModificaRichiesta = ({
                   {/* Se non abbiamo documento nel client ma l'elemento esiste,
                       offriamo un pulsante per scaricarlo esplicitamente. */}
                   {!documento && elemento && !documentoInCaricamento && (
-                    <View style={{ marginTop: sh(6), flexDirection: "row", gap: sw(8) }}>
+                    <View
+                      style={{
+                        marginTop: sh(6),
+                        flexDirection: "row",
+                        gap: sw(8),
+                      }}
+                    >
                       <TouchableOpacity
                         onPress={() => {
                           // caricaDocumento è fornito dal hook e fa la fetch on-demand
@@ -503,7 +525,12 @@ const ModaleModificaRichiesta = ({
                           // @ts-ignore
                           caricaDocumento?.();
                         }}
-                        style={{ paddingVertical: sh(8), paddingHorizontal: sw(12), backgroundColor: Colori.primario, borderRadius: 8 }}
+                        style={{
+                          paddingVertical: sh(8),
+                          paddingHorizontal: sw(12),
+                          backgroundColor: Colori.primario,
+                          borderRadius: 8,
+                        }}
                       >
                         <Text style={{ color: "#fff" }}>Scarica documento</Text>
                       </TouchableOpacity>

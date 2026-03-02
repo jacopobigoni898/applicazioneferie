@@ -22,7 +22,7 @@ import {
   TipoRichiestaDTO,
   AddRichiestaPayload,
 } from "../services/requestsService";
-import TipoRichiestaModal from './TipoRichiestaModal';
+import TipoRichiestaModal from "./TipoRichiestaModal";
 
 interface PropsModaleRichiesta {
   visibile: boolean; //visibilità modale
@@ -315,6 +315,8 @@ const ModaleRichiesta = ({
               activeOpacity={0.8}
             >
               <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
                 style={
                   sottoTipo
                     ? stiliModaleRichiesta.stileTestoSelezionato

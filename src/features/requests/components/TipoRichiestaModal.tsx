@@ -1,6 +1,13 @@
-import React from 'react';
-import { Modal, TouchableWithoutFeedback, View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { stiliModaleRichiesta } from '../../../core/style/commonStyles';
+import React from "react";
+import {
+  Modal,
+  TouchableWithoutFeedback,
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
+import { stiliModaleRichiesta } from "../../../core/style/commonStyles";
 
 type Option = {
   label: string;
@@ -15,9 +22,20 @@ interface Props {
   title?: string;
 }
 
-export default function TipoRichiestaModal({ visible, options, onClose, onSelect, title = 'Seleziona tipo' }: Props) {
+export default function TipoRichiestaModal({
+  visible,
+  options,
+  onClose,
+  onSelect,
+  title = "Seleziona tipo",
+}: Props) {
   return (
-    <Modal transparent animationType="fade" visible={visible} onRequestClose={onClose}>
+    <Modal
+      transparent
+      animationType="fade"
+      visible={visible}
+      onRequestClose={onClose}
+    >
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={stiliModaleRichiesta.sovrapposizioneSelettore} />
       </TouchableWithoutFeedback>
@@ -32,12 +50,18 @@ export default function TipoRichiestaModal({ visible, options, onClose, onSelect
           {options.map((opt) => (
             <TouchableOpacity
               key={opt.value}
-              style={{ padding: 12 }}
+              style={stiliModaleRichiesta.voceSelettore}
               onPress={() => {
                 onSelect(opt);
               }}
             >
-              <Text style={{ paddingVertical: 6 }}>{opt.label}</Text>
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={stiliModaleRichiesta.voceSelettoreTesto}
+              >
+                {opt.label}
+              </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
