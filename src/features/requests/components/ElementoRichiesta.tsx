@@ -3,6 +3,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
+import { StatoRichiesta } from "../../../domain/entities/RequestStatus";
 import { stiliElementoRichiesta } from "../../../core/style/commonStyles";
 import {
   normalizzaTipo,
@@ -54,6 +55,10 @@ export default function ElementoRichiesta({
     String(elemento.stato_approvazione || ""),
   );
 
+  const azioniAbilitate =
+    elemento.stato_approvazione !== StatoRichiesta.APPROVATO &&
+    elemento.stato_approvazione !== StatoRichiesta.AUTORIZZATO;
+
   const inizioFallback =
     inizioFormattato ?? elemento.data_inizio.toLocaleString("it-IT");
   const fineFallback =
@@ -93,23 +98,25 @@ export default function ElementoRichiesta({
         <Text style={stiliElementoRichiesta.testoRiga}>Al: {fineFallback}</Text>
       </View>
 
-      {/* Azioni */}
-      <View style={stiliElementoRichiesta.azioniContenitore}>
-        <TouchableOpacity
-          onPress={() => suModifica?.(elemento)}
-          style={stiliElementoRichiesta.azioneModifica}
-          activeOpacity={0.7}
-        >
-          <Text style={stiliElementoRichiesta.testoModifica}>Modifica</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => suEliminazione?.(elemento.id_richiesta)}
-          style={stiliElementoRichiesta.azioneElimina}
-          activeOpacity={0.7}
-        >
-          <Text style={stiliElementoRichiesta.testoElimina}>Elimina</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Azioni: nascoste se la richiesta è validata o autorizzata */}
+      {azioniAbilitate && (
+        <View style={stiliElementoRichiesta.azioniContenitore}>
+          <TouchableOpacity
+            onPress={() => suModifica?.(elemento)}
+            style={stiliElementoRichiesta.azioneModifica}
+            activeOpacity={0.7}
+          >
+            <Text style={stiliElementoRichiesta.testoModifica}>Modifica</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => suEliminazione?.(elemento.id_richiesta)}
+            style={stiliElementoRichiesta.azioneElimina}
+            activeOpacity={0.7}
+          >
+            <Text style={stiliElementoRichiesta.testoElimina}>Elimina</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
