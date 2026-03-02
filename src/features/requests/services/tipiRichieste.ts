@@ -16,6 +16,8 @@ export const ENDPOINT_ADMIN_TUTTE_RICHIESTE =
 
 export const ENDPOINT_ADMIN_AUTORIZZA_RICHIESTA =
   "/Richieste/admin/AutorizzaRichiesta";
+export const ENDPOINT_ADMIN_RIFIUTA_RICHIESTA =
+  "/Richieste/admin/RifiutaRichiesta";
 // --- Modello TipoRichiesta dal backend ---
 
 export interface TipoRichiestaDTO {

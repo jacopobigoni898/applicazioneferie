@@ -26,4 +26,5 @@ export {
   aggiornaRichiesta,
   recuperaDocumento,
   autorizzaRichiesta,
+  rifiutaRichiesta,
 } from "./apiRichieste";
