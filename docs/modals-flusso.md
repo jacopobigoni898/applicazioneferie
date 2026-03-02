@@ -6,10 +6,10 @@ Questo documento descrive, passo per passo, come funzionano le due modali di ric
 
 - Calendario: `src/features/calendar/components/CalendarComponent.tsx`
 - Modale creazione: `src/features/requests/components/RequestModal.tsx`
-- Modale modifica: `src/features/requests/components/EditRequestModal.tsx`
+- Modale modifica: `src/features/requests/components/ModaleModificaRichiesta.tsx`
 - Hook form condiviso: `src/features/requests/hooks/useRequestForm.ts`
 - Lista richieste + trigger modale edit: `app/(tabs)/richieste.tsx`
-- Item di lista: `src/features/requests/components/RequestItem.tsx`
+- Item di lista: `src/features/requests/components/ElementoRichiesta.tsx`
 - Servizi di submit/update/delete: `src/features/requests/services/requestsService.ts`
 
 ## Flusso modale di **creazione**
@@ -43,61 +43,58 @@ Questo documento descrive, passo per passo, come funzionano le due modali di ric
 ## Flusso modale di **modifica**
 
 1) **Trigger dalla lista richieste**
-   - Schermata `app/(tabs)/richieste.tsx` usa `useRequests` per caricare e gestire la lista.
-   - Ogni `RequestItem` espone i bottoni "Modifica" e "Elimina". Il click su "Modifica" passa l'item a `setEditContext`.
-   - `editContext` contiene `{ item, updateFn }` dove `updateFn` è `sent.update` o `received.update` (provenienti da `useRequests`).
+   - Schermata `app/(tabs)/richieste.tsx` usa `useRichieste` per caricare e gestire la lista.
+   - Ogni `ElementoRichiesta` espone i bottoni "Modifica" e "Elimina". Il click su "Modifica" passa l'item a `apriModifica`.
+   - `useModificaRichiesta` gestisce il contesto `{ elemento, funzioneAggiornamento }` dove `funzioneAggiornamento` è `inviate.aggiorna` (provenienti da `useRichieste`).
 
 2) **Apertura modale**
-   - `EditRequestModal` riceve: `visible`, `item`, `onClose`, `onConfirm`, `saving`.
-   - Inizializza `useRequestForm` in modalità `edit` con: `startDate`, `endDate`, `requestId`, `initialStatus` derivati da `item`, e `onSubmit` collegato a `onConfirm` del parent.
+   - `ModaleModificaRichiesta` riceve: `visibile`, `elemento`, `suChiusura`, `suConferma`, `inSalvataggio`.
+   - Inizializza `useFormRichiesta` in modalità `modifica` con: `dataInizio`, `dataFine`, `idRichiesta`, `statoIniziale` derivati da `elemento`, e `suInvio` collegato a `suConferma` del parent.
 
-3) **Stati interni gestiti da `useRequestForm` (mode edit)**
-   - Date: `startDate`, `endDate` (parse da stringa o Date); setter `setStartDate`, `setEndDate`.
-   - Stato approvazione: `status`, `setStatus`, inizializzato da `item.stato_approvazione`.
-   - Picker data: flag `showStartPicker`, `showEndPicker` gestiti localmente in `EditRequestModal` con conferma su iOS.
-   - Funzioni comuni: `formatDate`, `handleSubmitEdit` (valida date e prepara payload).
-   - Nota: in edit non si usano orari, motivazione o all-day; il hook li mantiene ma non sono esposti/necessari nella UI.
+3) **Stati interni gestiti da `useFormRichiesta` (modalita modifica)**
+   - Date: `dataInizio`, `dataFine` (parse da stringa o Date); setter `impostaDataInizio`, `impostaDataFine`.
+   - Stato approvazione: `stato`, `impostaStato`, inizializzato da `elemento.stato_approvazione`.
+   - Picker data: flag `mostraSelettoreInizio`, `mostraSelettoreFine` gestiti localmente in `ModaleModificaRichiesta` con conferma su iOS.
+   - Funzioni comuni: `formattaData`, `gestisciInvioModifica` (valida date e prepara payload).
+   - Nota: in modifica non si usano orari, motivazione o tutto-il-giorno per le date; il hook li mantiene ma non sono esposti/necessari nella UI.
 
 4) **UI della modale**
    - Mostra periodo Dal/Al con bottoni che aprono i date picker.
-   - Dropdown per stato approvazione (`APPROVED`, `PENDING`, `REJECTED`).
-   - Pulsante "Salva" chiama `handleSubmitEdit` → che crea `UpdateHolidayInput` con `IdRichiesta`, `DataInizio`, `DataFine`, `StatoApprovazione`.
+   - Dropdown per stato approvazione (`APPROVATO`, `IN_ATTESA`, `RIFIUTATO`).
+   - Pulsante "Salva" chiama `gestisciInvioModifica` → che crea `InputAggiornamentoRichiesta` con `IdRichiesta`, `DataInizio`, `DataFine`, `StatoApprovazione`.
 
 5) **Submit**
-   - `onConfirm` fornito da `richieste.tsx` chiama `editContext.updateFn` (cioè `useRequests.update`).
-   - `useRequests.update` fa optimistic update nello stato locale, determina il tipo (ferie vs permesso) e invoca `updateRequest` del service.
-   - `updateRequest` smista: ferie → `updateHoliday`; permessi → `buildUpdatePermessoDto` → `updatePermits` (endpoint dedicato). Errori fanno rollback dell'optimistic update e propagano.
+   - `suConferma` fornito da `richieste.tsx` chiama `contesto.funzioneAggiornamento` (cioè `useRichieste.aggiorna`).
+   - `useRichieste.aggiorna` fa optimistic update nello stato locale, poi invoca `aggiornaRichiesta` del service. Errori fanno rollback dell'optimistic update e propagano.
 
-6) **Chiusura e stato saving**
-   - `saving` blocca i bottoni e cambia etichetta "Salvataggio...".
-   - Su successo, `richieste.tsx` chiude la modale (`setEditContext(null)`); su errore mostra alert.
+6) **Chiusura e stato salvataggio**
+   - `inSalvataggio` blocca i bottoni e cambia etichetta "Salvataggio...".
+   - Su successo, `useModificaRichiesta` chiude la modale (`impostaContesto(null)`); su errore mostra alert.
 
 ## Flusso delete (per completezza)
 
-- `RequestItem` chiama `onDelete` con l'id.
-- `richieste.tsx` usa `useRequests.remove`: fa optimistic update, recupera `tipo_permesso` per decidere endpoint, poi chiama `deleteHolidayById`.
-- `deleteHolidayById` smista: ferie → endpoint ferie; permessi → endpoint permessi; altri tipi lanciano errore per rollback.
+- `ElementoRichiesta` chiama `suEliminazione` con l'id.
+- `richieste.tsx` usa `useRichieste.rimuovi`: fa optimistic update, recupera `tipo_permesso` per decidere endpoint, poi chiama `eliminaRichiesta`.
 
 ## Riassunto props chiave
 
 - `RequestModal`
-  - `visible`, `onClose`: controllo apertura/chiusura.
-  - `startDate`, `endDate`: range iniziale precompilato.
-  - `mainType`: decide set opzioni (assenza vs straordinari).
-  - `userId`: necessario per costruire il payload.
-  - `onSubmit(payload: RequestPayload)`: chiamato dal hook al termine validazione.
+  - `visibile`, `suChiusura`: controllo apertura/chiusura.
+  - `dataInizio`, `dataFine`: range iniziale precompilato.
+  - `tipoPrincipale`: decide set opzioni (assenza vs straordinari).
+  - `suInvio(payload: AddRichiestaPayload)`: chiamato dal hook al termine validazione.
 
-- `EditRequestModal`
-  - `visible`, `onClose`: controllo apertura/chiusura.
-  - `item`: richiesta da modificare (date, tipo, stato).
-  - `onConfirm(payload: UpdateHolidayInput)`: chiamato dopo validazione; gestito dal parent (`useRequests.update`).
-  - `saving`: disabilita azioni durante la chiamata API.
+- `ModaleModificaRichiesta`
+  - `visibile`, `suChiusura`: controllo apertura/chiusura.
+  - `elemento`: richiesta da modificare (date, tipo, stato).
+  - `suConferma(payload: InputAggiornamentoRichiesta)`: chiamato dopo validazione; gestito dal parent (`useRichieste.aggiorna`).
+  - `inSalvataggio`: disabilita azioni durante la chiamata API.
 
 ## Dove toccare se serve
 
 - Logica form condivisa: `src/features/requests/hooks/useRequestForm.ts` (aggiungere campi, validazioni, default).
 - Invio API: `src/features/requests/services/requestsService.ts` (endpoint, mapping DTO, smistamento per tipo).
-- Lista e apertura modale edit: `app/(tabs)/richieste.tsx` + `RequestItem` per i bottoni.
+- Lista e apertura modale edit: `app/(tabs)/richieste.tsx` + `ElementoRichiesta` per i bottoni.
 - Apertura modale create: `src/features/calendar/components/CalendarComponent.tsx` (bottone "Procedi con la richiesta").
 
 Questo schema dovrebbe chiarire come gli stati e le props si propagano tra modali, hook e servizi, e come avviene la comunicazione con l'API per creare, modificare o cancellare le richieste.

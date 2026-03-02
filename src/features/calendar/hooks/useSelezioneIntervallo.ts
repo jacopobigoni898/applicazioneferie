@@ -28,7 +28,7 @@ const generaSegnalaturaWeekend = (): DateMarcateType => {
     while (giorno <= fine) {
       const giornoSettimana = giorno.getDay();
       // 0 = Domenica, 6 = Sabato
-      if (giornoSettimana === 0 || giornoSettimana === 1) {
+      if (giornoSettimana === 0 || giornoSettimana === 6) {
         const stringaData = giorno.toISOString().split("T")[0];
         segni[stringaData] = { textColor: Colori.accento };
       }

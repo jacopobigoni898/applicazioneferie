@@ -157,9 +157,9 @@ interface PropsModaleModifica {
 
 ```typescript
 const OPZIONI_STATO = [
-  { etichetta: "Approvato", valore: StatoRichiesta.APPROVATO }, // "approvato"
-  { etichetta: "Non validato", valore: StatoRichiesta.IN_ATTESA }, // "in attesa"
-  { etichetta: "Annullato", valore: StatoRichiesta.RIFIUTATO }, // "rifiutato"
+  { etichetta: "Approvato", valore: StatoRichiesta.APPROVATO }, // "validato"
+  { etichetta: "Non validato", valore: StatoRichiesta.IN_ATTESA }, // "non validato"
+  { etichetta: "Annullato", valore: StatoRichiesta.RIFIUTATO }, // "annullato"
 ];
 ```
 
