@@ -35,10 +35,10 @@ interface PropsElementoRichiesta {
 // Determina il colore del badge in base allo stato
 function calcolaColoreBadge(stato: string): string {
   const statoMinuscolo = (stato || "").toLowerCase();
-  if (statoMinuscolo.includes("approv") || statoMinuscolo === "approvato") {
+  if (statoMinuscolo.includes("approv") || statoMinuscolo.includes("valid")) {
     return COLORE_APPROVATO;
   }
-  if (statoMinuscolo.includes("rifiut") || statoMinuscolo === "rifiutato") {
+  if (statoMinuscolo.includes("rifiut") || statoMinuscolo.includes("annull")) {
     return COLORE_RIFIUTATO;
   }
   return COLORE_IN_ATTESA;
@@ -68,7 +68,11 @@ export default function ElementoRichiesta({
         <View
           style={[
             stiliElementoRichiesta.accentoSinistra,
-            { backgroundColor: getColoreTipo(normalizzaTipo(elemento.tipo_permesso)) },
+            {
+              backgroundColor: getColoreTipo(
+                normalizzaTipo(elemento.tipo_permesso),
+              ),
+            },
           ]}
         />
         <Text style={stiliElementoRichiesta.titolo} numberOfLines={1}>
@@ -94,9 +98,23 @@ export default function ElementoRichiesta({
         <Text style={stiliElementoRichiesta.testoRiga}>Al: {fineFallback}</Text>
       </View>
 
-      {/* Azioni: nascoste se la richiesta è validata o autorizzata */}
-      {String(elemento.stato_approvazione || "") !== StatoRichiesta.APPROVATO &&
-       String(elemento.stato_approvazione || "") !== StatoRichiesta.AUTORIZZATO && (
+      {/* Azioni: nascoste se la richiesta è validata o annullata */}
+      {(() => {
+        const statoRaw = String(
+          elemento.stato_approvazione || "",
+        ).toLowerCase();
+        const valoriEnum = [
+          StatoRichiesta.APPROVATO,
+          StatoRichiesta.AUTORIZZATO,
+          StatoRichiesta.RIFIUTATO,
+        ].map((s) => String(s).toLowerCase());
+        const corrispondenzaEsatta = valoriEnum.includes(statoRaw);
+        // Copri possibili varianti testuali dal backend (es. "approvato", "validato")
+        const corrispondenzaSottostringa =
+          /approv|valid|autoriz|rifiut|annull/.test(statoRaw);
+        const nascondi = corrispondenzaEsatta || corrispondenzaSottostringa;
+        return !nascondi;
+      })() && (
         <View style={stiliElementoRichiesta.azioniContenitore}>
           <TouchableOpacity
             onPress={() => suModifica?.(elemento)}
