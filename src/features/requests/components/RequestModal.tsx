@@ -226,11 +226,11 @@ const ModaleRichiesta = ({
                     value={tuttoIlGiorno}
                     onValueChange={impostaTuttoIlGiorno}
                     trackColor={{
-                      false: "#d3d6dc",
+                      false: Colori.interruttoreOff,
                       true: Colori.primario,
                     }}
-                    thumbColor={tuttoIlGiorno ? Colori.superficie : "#f4f4f4"}
-                    ios_backgroundColor="#d3d6dc"
+                    thumbColor={tuttoIlGiorno ? Colori.superficie : Colori.interruttoreThumb}
+                    ios_backgroundColor={Colori.interruttoreOff}
                   />
                 </View>
 
@@ -351,7 +351,7 @@ const ModaleRichiesta = ({
                     { paddingHorizontal: sw(12), paddingVertical: sh(10) },
                   ]}
                   placeholder="Inserisci il codice"
-                  placeholderTextColor="#999"
+                  placeholderTextColor={Colori.testoDisabilitato}
                   value={codiceRichiesta}
                   onChangeText={impostaCodiceRichiesta}
                 />
@@ -389,7 +389,7 @@ const ModaleRichiesta = ({
                         <Ionicons
                           name="close-circle"
                           size={sw(20)}
-                          color="#999"
+                          color={Colori.testoDisabilitato}
                         />
                       </TouchableOpacity>
                     </View>
@@ -409,7 +409,7 @@ const ModaleRichiesta = ({
                 },
               ]}
               placeholder="Inserisci una nota (opzionale)"
-              placeholderTextColor="#999"
+              placeholderTextColor={Colori.testoDisabilitato}
               value={nota}
               onChangeText={impostaNota}
               multiline

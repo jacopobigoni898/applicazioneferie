@@ -502,7 +502,7 @@ const ModaleModificaRichiesta = ({
                           <Ionicons
                             name="close-circle"
                             size={sw(20)}
-                            color="#999"
+                            color={Colori.testoDisabilitato}
                           />
                         </TouchableOpacity>
                       )}
@@ -532,7 +532,7 @@ const ModaleModificaRichiesta = ({
                           borderRadius: 8,
                         }}
                       >
-                        <Text style={{ color: "#fff" }}>Scarica documento</Text>
+                        <Text style={{ color: Colori.bianco }}>Scarica documento</Text>
                       </TouchableOpacity>
                     </View>
                   )}

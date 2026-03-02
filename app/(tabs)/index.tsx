@@ -1,8 +1,9 @@
 import React from "react";
-import { Button, Text, View, StatusBar, Platform } from "react-native";
+import { Button, Text, View, StatusBar, Platform, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../_providers/AuthProvider";
 import { stiliSchermata } from "../../src/core/style/commonStyles";
+import { Colori, Tipografia, Spaziatura } from "../../src/core/theme/theme";
 import { useRichieste } from "../../src/features/requests/hooks/useRichieste";
 import GraficoAssenze from "../../src/features/requests/components/GraficoAssenze";
 
@@ -15,7 +16,7 @@ export default function SchermataProfilo() {
     <SafeAreaView style={stiliSchermata.contenitore} edges={["top"]}>
       <StatusBar
         barStyle="dark-content"
-        backgroundColor={Platform.OS === "android" ? "#f5f5f5" : undefined}
+        backgroundColor={Platform.OS === "android" ? Colori.secondario : undefined}
       />
       <View style={stiliSchermata.intestazione}>
         <View style={stiliSchermata.bloccoTitolo}>
@@ -25,20 +26,20 @@ export default function SchermataProfilo() {
 
       <View style={stiliSchermata.superiore}>
         {inCaricamentoUtente ? (
-          <Text style={{ padding: 16, color: "#808080" }}>
+          <Text style={stiliProfilo.testoSecondario}>
             Carico il profilo...
           </Text>
         ) : utente ? (
-          <View style={{ padding: 16, gap: 4 }}>
-            <Text style={{ fontSize: 18, fontWeight: "700" }}>
+          <View style={stiliProfilo.contenitoreInfo}>
+            <Text style={stiliProfilo.nomeUtente}>
               {utente.nome} {utente.cognome}
             </Text>
-            <Text style={{ fontSize: 14, color: "#808080" }}>
+            <Text style={stiliProfilo.emailUtente}>
               {utente.email}
             </Text>
           </View>
         ) : (
-          <Text style={{ padding: 16, color: "#808080" }}>
+          <Text style={stiliProfilo.testoSecondario}>
             Nessun profilo disponibile
           </Text>
         )}
@@ -46,10 +47,33 @@ export default function SchermataProfilo() {
           richieste={inviate.elementi}
           inCaricamento={inviate.inCaricamento}
         />
-        <View style={{ paddingHorizontal: 16 }}>
+        <View style={stiliProfilo.contenitorePulsante}>
           <Button title="Esci" onPress={esci} />
         </View>
       </View>
     </SafeAreaView>
   );
 }
+
+const stiliProfilo = StyleSheet.create({
+  testoSecondario: {
+    padding: Spaziatura.md,
+    color: Colori.testoSecondario,
+  },
+  contenitoreInfo: {
+    padding: Spaziatura.md,
+    gap: 4,
+  },
+  nomeUtente: {
+    fontSize: Tipografia.dimensione.lg - 2,
+    fontWeight: Tipografia.peso.grassetto,
+    color: Colori.testoPrimario,
+  },
+  emailUtente: {
+    fontSize: Tipografia.dimensione.md - 2,
+    color: Colori.testoSecondario,
+  },
+  contenitorePulsante: {
+    paddingHorizontal: Spaziatura.md,
+  },
+});

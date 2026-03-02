@@ -1,7 +1,7 @@
 import React from "react";
 import { Alert, Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { stiliElementoRichiesta } from "../../../core/style/commonStyles";
-import { Colori } from "../../../core/theme/theme";
+import { Colori, Tipografia } from "../../../core/theme/theme";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
 
 interface Props {
@@ -119,13 +119,13 @@ const styles = StyleSheet.create({
   },
   foglio: {
     width: "100%",
-    backgroundColor: "#fff",
+    backgroundColor: Colori.bianco,
     borderRadius: 8,
     padding: 16,
   },
   titolo: {
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: Tipografia.dimensione.lg - 2,
+    fontWeight: Tipografia.peso.medio,
     marginBottom: 8,
   },
   riga: {
@@ -143,9 +143,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginHorizontal: 4,
   },
-  btnAutorizza: { backgroundColor: "#16a34a" },
-  btnNonAutorizza: { backgroundColor: "#dc2626" },
-  btnValida: { backgroundColor: "#3b82f6" },
-  testoBtn: { color: "#fff", fontWeight: "600" },
+  btnAutorizza: { backgroundColor: Colori.badgeApprovato },
+  btnNonAutorizza: { backgroundColor: Colori.badgeRifiutato },
+  btnValida: { backgroundColor: Colori.azioneValidaSfondo },
+  testoBtn: { color: Colori.bianco, fontWeight: Tipografia.peso.medio },
   chiudi: { alignItems: "center", paddingVertical: 6 },
 });

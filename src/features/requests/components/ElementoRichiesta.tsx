@@ -9,20 +9,8 @@ import {
   normalizzaTipo,
   getColoreTipo,
 } from "../../../shared/utils/coloriTipoRichiesta";
-
-// Colori per il badge stato
-const COLORE_APPROVATO = "#16a34a";
-const COLORE_RIFIUTATO = "#dc2626";
-const COLORE_IN_ATTESA = "#f59e0b";
-
-function capitalizza(testo?: string): string {
-  if (!testo) return "";
-  return testo
-    .toLowerCase()
-    .split(" ")
-    .map((parola) => parola.charAt(0).toUpperCase() + parola.slice(1))
-    .join(" ");
-}
+import { capitalizza } from "../../../shared/utils/stringUtils";
+import { calcolaColoreBadge } from "../../../shared/utils/badgeUtils";
 
 interface PropsElementoRichiesta {
   elemento: RichiestaFerie;
@@ -33,17 +21,6 @@ interface PropsElementoRichiesta {
 }
 
 // Determina il colore del badge in base allo stato
-function calcolaColoreBadge(stato: string): string {
-  const statoMinuscolo = (stato || "").toLowerCase();
-  if (statoMinuscolo.includes("approv") || statoMinuscolo.includes("valid")) {
-    return COLORE_APPROVATO;
-  }
-  if (statoMinuscolo.includes("rifiut") || statoMinuscolo.includes("annull")) {
-    return COLORE_RIFIUTATO;
-  }
-  return COLORE_IN_ATTESA;
-}
-
 export default function ElementoRichiesta({
   elemento,
   inizioFormattato,

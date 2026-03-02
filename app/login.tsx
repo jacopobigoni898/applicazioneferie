@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "./_providers/AuthProvider";
+import { Colori, Tipografia } from "../src/core/theme/theme";
 
 // Schermata di accesso
 export default function SchermataAccesso() {
@@ -34,7 +35,7 @@ export default function SchermataAccesso() {
     >
       <StatusBar
         barStyle="light-content"
-        backgroundColor={Platform.OS === "android" ? "#0e1a2b" : undefined}
+        backgroundColor={Platform.OS === "android" ? Colori.loginSfondo : undefined}
       />
       <View style={stili.scheda}>
         <Text style={stili.titolo}>Accesso all'account</Text>
@@ -47,7 +48,7 @@ export default function SchermataAccesso() {
           disabled={occupato}
         >
           {occupato ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={Colori.bianco} />
           ) : (
             <Text style={stili.etichettaPulsante}>Accedi</Text>
           )}
@@ -60,30 +61,30 @@ export default function SchermataAccesso() {
 const stili = StyleSheet.create({
   contenitore: {
     flex: 1,
-    backgroundColor: "#0e1a2b",
+    backgroundColor: Colori.loginSfondo,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,
   },
   scheda: {
     width: "100%",
-    backgroundColor: "#13233a",
+    backgroundColor: Colori.loginScheda,
     borderRadius: 18,
     padding: 24,
     gap: 16,
   },
   titolo: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#fff",
+    fontSize: Tipografia.dimensione.xl - 2,
+    fontWeight: Tipografia.peso.grassetto,
+    color: Colori.bianco,
   },
   sottotitolo: {
     fontSize: 15,
-    color: "#c7d2e5",
+    color: Colori.loginTesto,
     lineHeight: 20,
   },
   pulsante: {
-    backgroundColor: "#2f7cf6",
+    backgroundColor: Colori.loginPulsante,
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: "center",
@@ -92,8 +93,8 @@ const stili = StyleSheet.create({
     opacity: 0.6,
   },
   etichettaPulsante: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+    color: Colori.bianco,
+    fontSize: Tipografia.dimensione.md,
+    fontWeight: Tipografia.peso.medio,
   },
 });
