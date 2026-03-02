@@ -31,6 +31,7 @@ export default function ModaleAutorizzaRichiesta({
     try {
       const doc = await recuperaDocumento(elemento.id_richiesta);
       if (!doc) {
+        impostaDocumentoInCaricamento(false);
         Alert.alert("Documento non disponibile", "Nessun documento allegato a questa richiesta.");
         return;
       }
