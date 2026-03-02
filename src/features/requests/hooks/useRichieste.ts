@@ -10,6 +10,7 @@ import {
   recuperaTutteRichiesteAdmin,
   InputAggiornamentoRichiesta,
   autorizzaRichiesta,
+  rifiutaRichiesta,
 } from "../services/requestsService";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
 import { StatoRichiesta } from "../../../domain/entities/RequestStatus";
@@ -98,6 +99,28 @@ export function useRichieste(
     }
   }, []);
 
+  const rifiuta = useCallback(async (id: number) => {
+    impostaErrore(null);
+    let precedenti: RichiestaFerie[] = [];
+
+    impostaElementi((correnti: RichiestaFerie[]) => {
+      precedenti = correnti;
+      return correnti.map((el) =>
+        el.id_richiesta === id
+          ? { ...el, stato_approvazione: StatoRichiesta.RIFIUTATO }
+          : el,
+      );
+    });
+
+    try {
+      await rifiutaRichiesta([id]);
+    } catch (err: unknown) {
+      impostaErrore(estraiMessaggio(err, "Errore rifiuto richiesta"));
+      impostaElementi(precedenti);
+      throw err;
+    }
+  }, []);
+
   // Elimina una richiesta con conferma, aggiornamento ottimistico e rollback
   const rimuovi = useCallback((id: number) => {
     Alert.alert(
@@ -167,5 +190,6 @@ export function useRichieste(
     rimuovi,
     aggiorna,
     autorizza,
+    rifiuta,
   } as const;
 }

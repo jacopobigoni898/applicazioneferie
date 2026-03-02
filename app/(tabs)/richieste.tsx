@@ -80,6 +80,7 @@ export default function SchermataRichieste() {
                 errore={ricevute.errore}
                 suRicarica={ricevute.ricarica}
                 suAutorizza={(id: number) => ricevute.autorizza(id)}
+                suNonAutorizza={(id: number) => ricevute.rifiuta(id)}
               />
             );
           }
