@@ -1,7 +1,7 @@
 // Componente singola richiesta nella lista admin (richieste ricevute).
 // Mostra tipo, nome utente, date, badge stato e azioni (autorizza/non autorizza).
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { Alert, View, Text, TouchableOpacity } from "react-native";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
 import { stiliElementoRichiesta } from "../../../core/style/commonStyles";
 import {
@@ -115,13 +115,25 @@ export default function ElementoRichiestaAdmin({
             const stato = String(
               elemento.stato_approvazione || "",
             ).toLowerCase();
-            // Nascondi i pulsanti se lo stato è già validato (es. "validata", "validato", "approvato")
             const isValidated = /valid|approv/i.test(stato);
-            if (!isValidated) {
-              return (
-                <>
+            return (
+              <>
+                {!isValidated && (
                   <TouchableOpacity
-                    onPress={() => suAutorizza?.(elemento.id_richiesta)}
+                    onPress={() =>
+                      Alert.alert(
+                        "Conferma autorizzazione",
+                        "Sei sicuro di voler autorizzare questa richiesta?",
+                        [
+                          { text: "Annulla", style: "cancel" },
+                          {
+                            text: "Autorizza",
+                            onPress: () =>
+                              suAutorizza?.(elemento.id_richiesta),
+                          },
+                        ],
+                      )
+                    }
                     style={stiliElementoRichiesta.azioneAutorizza}
                     activeOpacity={0.7}
                   >
@@ -129,20 +141,33 @@ export default function ElementoRichiestaAdmin({
                       Autorizza
                     </Text>
                   </TouchableOpacity>
+                )}
 
-                  <TouchableOpacity
-                    onPress={() => suNonAutorizza?.(elemento.id_richiesta)}
-                    style={stiliElementoRichiesta.azioneNonAutorizza}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={stiliElementoRichiesta.testoNonAutorizza}>
-                      Non autorizza
-                    </Text>
-                  </TouchableOpacity>
-                </>
-              );
-            }
-            return null;
+                <TouchableOpacity
+                  onPress={() =>
+                    Alert.alert(
+                      "Conferma non autorizzazione",
+                      "Sei sicuro di voler non autorizzare questa richiesta?",
+                      [
+                        { text: "Annulla", style: "cancel" },
+                        {
+                          text: "Non autorizza",
+                          style: "destructive",
+                          onPress: () =>
+                            suNonAutorizza?.(elemento.id_richiesta),
+                        },
+                      ],
+                    )
+                  }
+                  style={stiliElementoRichiesta.azioneNonAutorizza}
+                  activeOpacity={0.7}
+                >
+                  <Text style={stiliElementoRichiesta.testoNonAutorizza}>
+                    Non autorizza
+                  </Text>
+                </TouchableOpacity>
+              </>
+            );
           })()}
         </View>
       </View>

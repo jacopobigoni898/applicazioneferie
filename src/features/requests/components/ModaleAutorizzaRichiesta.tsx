@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Alert, Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { stiliElementoRichiesta } from "../../../core/style/commonStyles";
 import { Colori } from "../../../core/theme/theme";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
@@ -42,20 +42,45 @@ export default function ModaleAutorizzaRichiesta({
           <View style={styles.bottoni}>
             <TouchableOpacity
               style={[styles.btn, styles.btnAutorizza]}
-              onPress={() => {
-                suAutorizza?.(elemento.id_richiesta);
-                suChiudi();
-              }}
+              onPress={() =>
+                Alert.alert(
+                  "Conferma autorizzazione",
+                  "Sei sicuro di voler autorizzare questa richiesta?",
+                  [
+                    { text: "Annulla", style: "cancel" },
+                    {
+                      text: "Autorizza",
+                      onPress: () => {
+                        suAutorizza?.(elemento.id_richiesta);
+                        suChiudi();
+                      },
+                    },
+                  ],
+                )
+              }
             >
               <Text style={styles.testoBtn}>Autorizza</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[styles.btn, styles.btnNonAutorizza]}
-              onPress={() => {
-                suNonAutorizza?.(elemento.id_richiesta);
-                suChiudi();
-              }}
+              onPress={() =>
+                Alert.alert(
+                  "Conferma non autorizzazione",
+                  "Sei sicuro di voler non autorizzare questa richiesta?",
+                  [
+                    { text: "Annulla", style: "cancel" },
+                    {
+                      text: "Non autorizza",
+                      style: "destructive",
+                      onPress: () => {
+                        suNonAutorizza?.(elemento.id_richiesta);
+                        suChiudi();
+                      },
+                    },
+                  ],
+                )
+              }
             >
               <Text style={styles.testoBtn}>Non autorizza</Text>
             </TouchableOpacity>
