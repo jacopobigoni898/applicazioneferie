@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Colori, Tipografia } from "../../../core/theme/theme";
 import { ms } from "../../../core/style/responsive";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
-import { recuperaDocumento } from "../services/apiRichieste";
+import { recuperaDocumento, recuperaTipiRichiesta } from "../services/apiRichieste";
+import { normalizzaTipo } from "../../../shared/utils/coloriTipoRichiesta";
 import { shareAsync } from "expo-sharing";
 
 interface Props {
@@ -24,6 +25,36 @@ export default function ModaleAutorizzaRichiesta({
   suValida,
 }: Props) {
   const [documentoInCaricamento, impostaDocumentoInCaricamento] = useState(false);
+  const [richiedeDocumento, impostaRichiedeDocumento] = useState(false);
+
+  useEffect(() => {
+    let annulla = false;
+    const valuta = async () => {
+      if (!visibile || !elemento) {
+        impostaRichiedeDocumento(false);
+        return;
+      }
+      try {
+        const tipi = await recuperaTipiRichiesta();
+        const tipoNorm = normalizzaTipo(elemento.tipo_permesso);
+        const trovato = tipi.find(
+          (t) =>
+            normalizzaTipo(t.tipoRichiesta) === tipoNorm ||
+            t.tipoRichiesta
+              ?.toLowerCase()
+              .includes((elemento.tipo_permesso || "").toLowerCase()),
+        );
+        if (!annulla)
+          impostaRichiedeDocumento(Boolean(trovato?.richiedeDocumenti));
+      } catch {
+        if (!annulla) impostaRichiedeDocumento(false);
+      }
+    };
+    valuta();
+    return () => {
+      annulla = true;
+    };
+  }, [visibile, elemento]);
 
   const scaricaECondividiDocumento = async () => {
     if (!elemento) return;
@@ -61,17 +92,19 @@ export default function ModaleAutorizzaRichiesta({
             Al: {elemento.data_fine.toLocaleString()}
           </Text>
 
-          <TouchableOpacity
-            style={[styles.btn, styles.btnDocumento]}
-            onPress={scaricaECondividiDocumento}
-            disabled={documentoInCaricamento}
-          >
-            {documentoInCaricamento ? (
-              <ActivityIndicator size="small" color={Colori.bianco} />
-            ) : (
-              <Text style={styles.testoBtn}>Scarica documento</Text>
-            )}
-          </TouchableOpacity>
+          {richiedeDocumento && (
+            <TouchableOpacity
+              style={[styles.btn, styles.btnDocumento]}
+              onPress={scaricaECondividiDocumento}
+              disabled={documentoInCaricamento}
+            >
+              {documentoInCaricamento ? (
+                <ActivityIndicator size="small" color={Colori.bianco} />
+              ) : (
+                <Text style={styles.testoBtn}>Scarica documento</Text>
+              )}
+            </TouchableOpacity>
+          )}
 
           <View style={styles.bottoni}>
             <TouchableOpacity
