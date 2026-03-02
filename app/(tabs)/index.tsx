@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../_providers/AuthProvider";
 import { stiliSchermata } from "../../src/core/style/commonStyles";
 import { Colori, Tipografia, Spaziatura } from "../../src/core/theme/theme";
+import { ms } from "../../src/core/style/responsive";
 import { useRichieste } from "../../src/features/requests/hooks/useRichieste";
 import GraficoAssenze from "../../src/features/requests/components/GraficoAssenze";
 
@@ -65,12 +66,12 @@ const stiliProfilo = StyleSheet.create({
     gap: 4,
   },
   nomeUtente: {
-    fontSize: Tipografia.dimensione.lg - 2,
+    fontSize: ms(18),
     fontWeight: Tipografia.peso.grassetto,
     color: Colori.testoPrimario,
   },
   emailUtente: {
-    fontSize: Tipografia.dimensione.md - 2,
+    fontSize: ms(14),
     color: Colori.testoSecondario,
   },
   contenitorePulsante: {

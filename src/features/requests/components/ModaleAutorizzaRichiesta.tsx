@@ -2,6 +2,7 @@ import React from "react";
 import { Alert, Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { stiliElementoRichiesta } from "../../../core/style/commonStyles";
 import { Colori, Tipografia } from "../../../core/theme/theme";
+import { ms } from "../../../core/style/responsive";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
 
 interface Props {
@@ -124,7 +125,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   titolo: {
-    fontSize: Tipografia.dimensione.lg - 2,
+    fontSize: ms(18),
     fontWeight: Tipografia.peso.medio,
     marginBottom: 8,
   },

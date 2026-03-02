@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "./_providers/AuthProvider";
 import { Colori, Tipografia } from "../src/core/theme/theme";
+import { ms } from "../src/core/style/responsive";
 
 // Schermata di accesso
 export default function SchermataAccesso() {
@@ -74,7 +75,7 @@ const stili = StyleSheet.create({
     gap: 16,
   },
   titolo: {
-    fontSize: Tipografia.dimensione.xl - 2,
+    fontSize: ms(22),
     fontWeight: Tipografia.peso.grassetto,
     color: Colori.bianco,
   },
