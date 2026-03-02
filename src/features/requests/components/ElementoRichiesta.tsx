@@ -95,13 +95,17 @@ export default function ElementoRichiesta({
 
       {/* Azioni */}
       <View style={stiliElementoRichiesta.azioniContenitore}>
-        <TouchableOpacity
-          onPress={() => suModifica?.(elemento)}
-          style={stiliElementoRichiesta.azioneModifica}
-          activeOpacity={0.7}
-        >
-          <Text style={stiliElementoRichiesta.testoModifica}>Modifica</Text>
-        </TouchableOpacity>
+        {!(/valid|approv/i.test(
+          String(elemento.stato_approvazione || "").toLowerCase(),
+        )) && (
+          <TouchableOpacity
+            onPress={() => suModifica?.(elemento)}
+            style={stiliElementoRichiesta.azioneModifica}
+            activeOpacity={0.7}
+          >
+            <Text style={stiliElementoRichiesta.testoModifica}>Modifica</Text>
+          </TouchableOpacity>
+        )}
         <TouchableOpacity
           onPress={() => suEliminazione?.(elemento.id_richiesta)}
           style={stiliElementoRichiesta.azioneElimina}
