@@ -18,6 +18,7 @@ import {
   ENDPOINT_GETDOCUMENTI,
   ENDPOINT_ADMIN_TUTTE_RICHIESTE,
   ENDPOINT_ADMIN_AUTORIZZA_RICHIESTA,
+  ENDPOINT_ADMIN_RIFIUTA_RICHIESTA,
 } from "./tipiRichieste";
 
 // Recupera tutte le tipologie di richiesta dal backend
@@ -125,6 +126,13 @@ export const aggiornaRichiesta = async (
 // src/features/requests/services/apiRichieste.ts
 export const autorizzaRichiesta = async (ids: number[]) => {
   const { data } = await http.put(ENDPOINT_ADMIN_AUTORIZZA_RICHIESTA, ids, {
+    headers: { "Content-Type": "application/json" },
+  });
+  return data;
+};
+
+export const rifiutaRichiesta = async (ids: number[]) => {
+  const { data } = await http.put(ENDPOINT_ADMIN_RIFIUTA_RICHIESTA, ids, {
     headers: { "Content-Type": "application/json" },
   });
   return data;

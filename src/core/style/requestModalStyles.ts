@@ -1,0 +1,225 @@
+import { Platform, StyleSheet } from "react-native";
+import { Colori, Spaziatura, Tipografia } from "../theme/theme";
+import { sw, sh, ms } from "./responsive";
+
+// Stili condivisi per la modale di richiesta
+export const stiliModaleRichiesta = StyleSheet.create({
+  sovrapposizione: {
+    flex: 1,
+    backgroundColor: Colori.superficie,
+  },
+  contenitoreModale: {
+    flex: 1,
+    width: "100%",
+  },
+  contenuto: {
+    flexGrow: 1,
+    backgroundColor: Colori.superficie,
+    paddingHorizontal: sw(20),
+    paddingBottom: sh(16),
+  },
+  intestazionePagina: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingBottom: sh(10),
+    paddingHorizontal: sw(Spaziatura.md),
+    backgroundColor: Colori.superficie,
+  },
+  pulsanteIndietro: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: sh(4),
+    paddingRight: sw(12),
+  },
+  testoIndietro: {
+    fontSize: ms(16),
+    color: Colori.primario,
+    marginLeft: sw(4),
+  },
+  titoloIntestazione: {
+    fontSize: ms(20),
+    fontWeight: Tipografia.peso.grassetto,
+    textAlign: "center",
+    color: Colori.testoPrimario,
+  },
+  sottointestazione: {
+    fontSize: ms(13),
+    color: Colori.testoSecondario,
+    textAlign: "center",
+    marginBottom: sh(16),
+    textTransform: "uppercase",
+  },
+  rigaDate: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: sh(16),
+    backgroundColor: Colori.sfondoInput,
+    padding: sw(14),
+    borderRadius: sw(12),
+  },
+  casellaData: { alignItems: "center", width: "45%" },
+  etichettaData: { fontSize: ms(12), color: Colori.testoSecondario },
+  valoreData: {
+    fontSize: ms(15),
+    fontWeight: Tipografia.peso.grassetto,
+    color: Colori.testoPrimario,
+  },
+  rigaOrario: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: sh(14),
+  },
+  casellaOrario: { width: "48%" },
+  inputOrario: {
+    height: sh(48),
+    borderColor: Colori.bordo,
+    borderWidth: 1,
+    borderRadius: sw(10),
+    paddingHorizontal: sw(12),
+    marginTop: sh(6),
+    fontSize: ms(15),
+    color: Colori.testoPrimario,
+    backgroundColor: Colori.bianco,
+    justifyContent: "center",
+  },
+  testoOrario: { fontSize: ms(15), color: Colori.testoPrimario },
+  rigaInterruttore: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: sh(10),
+  },
+  etichettaInterruttore: {
+    fontSize: ms(15),
+    color: Colori.testoPrimario,
+    fontWeight: Tipografia.peso.medio,
+  },
+  etichetta: {
+    marginBottom: sh(6),
+    fontSize: ms(14),
+    fontWeight: Tipografia.peso.medio,
+    color: Colori.testoPrimario,
+  },
+  menuATendina: {
+    minHeight: sh(48),
+    borderColor: Colori.bordo,
+    borderWidth: 1,
+    borderRadius: sw(12),
+    paddingHorizontal: sw(14),
+    marginBottom: sh(20),
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: Colori.superficie,
+    ...Platform.select({
+      ios: {
+        shadowColor: Colori.ombra,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 6,
+      },
+    }),
+  },
+  stileSegnaposto: {
+    fontSize: ms(15),
+    color: Colori.segnaposto,
+    fontStyle: "italic",
+  },
+  stileTestoSelezionato: {
+    fontSize: ms(15),
+    color: Colori.testoPrimario,
+    fontWeight: Tipografia.peso.medio,
+  },
+  voceSelettore: {
+    paddingVertical: sh(12),
+    paddingHorizontal: sw(12),
+    borderBottomColor: Colori.bordo,
+    borderBottomWidth: 1,
+  },
+  voceSelettoreTesto: {
+    fontSize: ms(15),
+    color: Colori.testoPrimario,
+  },
+  rigaPulsanti: {
+    flexDirection: "row",
+    paddingHorizontal: sw(20),
+    paddingTop: sh(10),
+    gap: sw(12),
+  },
+  pulsanteAnnulla: {
+    flex: 1,
+    paddingVertical: sh(14),
+    borderRadius: sw(10),
+    backgroundColor: Colori.secondario,
+    alignItems: "center",
+  },
+  testoPulsanteAnnulla: {
+    color: Colori.segnaposto,
+    fontWeight: Tipografia.peso.grassetto,
+    fontSize: ms(14),
+  },
+  pulsanteConferma: {
+    flex: 1,
+    paddingVertical: sh(14),
+    borderRadius: sw(10),
+    backgroundColor: Colori.primario,
+    alignItems: "center",
+  },
+  testoPulsanteConferma: {
+    color: Colori.bianco,
+    fontWeight: Tipografia.peso.grassetto,
+    fontSize: ms(14),
+  },
+  pulsanteDisabilitato: { backgroundColor: Colori.disabilitato },
+  sovrapposizioneSelettore: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.35)",
+    justifyContent: "flex-end",
+  },
+  foglioSelettore: {
+    backgroundColor: Colori.superficie,
+    paddingHorizontal: sw(16),
+    paddingTop: sh(12),
+    paddingBottom: sh(20),
+    borderTopLeftRadius: sw(18),
+    borderTopRightRadius: sw(18),
+  },
+  intestazioneSelettore: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: sh(10),
+  },
+  titoloSelettore: {
+    fontSize: ms(16),
+    fontWeight: Tipografia.peso.medio,
+    color: Colori.testoPrimario,
+  },
+  chiudiSelettore: {
+    color: Colori.primario,
+    fontWeight: Tipografia.peso.medio,
+    fontSize: ms(14),
+  },
+  confermaSelettore: {
+    marginTop: sh(8),
+    backgroundColor: Colori.primario,
+    borderRadius: sw(12),
+    alignItems: "center",
+    paddingVertical: sh(12),
+  },
+  testoConfermaSelettore: {
+    color: Colori.bianco,
+    fontWeight: Tipografia.peso.grassetto,
+    fontSize: ms(14),
+  },
+  selettoreIOS: {
+    backgroundColor: Colori.superficie,
+  },
+  testoSegnapostoDocumento: {
+    color: Colori.testoDisabilitato,
+    fontSize: ms(13),
+  },
+});

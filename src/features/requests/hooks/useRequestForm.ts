@@ -282,34 +282,27 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
     parametri.dataFine,
   ]);
 
-  // Carica il documento esistente quando la modale di modifica si apre
-  useEffect(() => {
-    let annulla = false;
-    if (
-      visibile &&
-      parametri.modalita === "modifica" &&
-      parametri.idRichiesta
-    ) {
-      impostaDocumentoInCaricamento(true);
-      recuperaDocumento(parametri.idRichiesta)
-        .then((doc) => {
-          if (!annulla) impostaDocumento(doc);
-        })
-        .finally(() => {
-          if (!annulla) impostaDocumentoInCaricamento(false);
-        });
-    } else {
+  // RIMOSSO: non carichiamo automaticamente il documento all'apertura della modale
+  // (evita chiamate non necessarie al backend quando la richiesta non ha documento).
+  // Forniamo invece una funzione esplicita `caricaDocumento` che l'interfaccia
+  // può chiamare su richiesta dell'utente (es. pulsante "Scarica documento").
+
+  const caricaDocumento = async () => {
+    if (parametri.modalita !== "modifica" || !parametri.idRichiesta)
+      return null;
+    impostaDocumentoInCaricamento(true);
+    try {
+      const doc = await recuperaDocumento(parametri.idRichiesta);
+      impostaDocumento(doc);
+      return doc;
+    } catch (e) {
+      // recuperaDocumento già gestisce errori e ritorna null in caso di problemi
       impostaDocumento(null);
+      return null;
+    } finally {
       impostaDocumentoInCaricamento(false);
     }
-    return () => {
-      annulla = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    visibile,
-    parametri.modalita === "modifica" ? parametri.idRichiesta : null,
-  ]);
+  };
 
   // Valida e costruisce il payload per la creazione
   const gestisciInvioCreazione = () => {
@@ -487,5 +480,6 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
     documentoInCaricamento,
     pickDocumento,
     rimuoviDocumento,
+    caricaDocumento,
   };
 };

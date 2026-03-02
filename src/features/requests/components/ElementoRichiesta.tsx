@@ -3,25 +3,14 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
+import { StatoRichiesta } from "../../../domain/entities/RequestStatus";
 import { stiliElementoRichiesta } from "../../../core/style/commonStyles";
 import {
   normalizzaTipo,
   getColoreTipo,
 } from "../../../shared/utils/coloriTipoRichiesta";
-
-// Colori per il badge stato
-const COLORE_APPROVATO = "#16a34a";
-const COLORE_RIFIUTATO = "#dc2626";
-const COLORE_IN_ATTESA = "#f59e0b";
-
-function capitalizza(testo?: string): string {
-  if (!testo) return "";
-  return testo
-    .toLowerCase()
-    .split(" ")
-    .map((parola) => parola.charAt(0).toUpperCase() + parola.slice(1))
-    .join(" ");
-}
+import { capitalizza } from "../../../shared/utils/stringUtils";
+import { calcolaColoreBadge } from "../../../shared/utils/badgeUtils";
 
 interface PropsElementoRichiesta {
   elemento: RichiestaFerie;
@@ -32,17 +21,6 @@ interface PropsElementoRichiesta {
 }
 
 // Determina il colore del badge in base allo stato
-function calcolaColoreBadge(stato: string): string {
-  const statoMinuscolo = (stato || "").toLowerCase();
-  if (statoMinuscolo.includes("approv") || statoMinuscolo === "approvato") {
-    return COLORE_APPROVATO;
-  }
-  if (statoMinuscolo.includes("rifiut") || statoMinuscolo === "rifiutato") {
-    return COLORE_RIFIUTATO;
-  }
-  return COLORE_IN_ATTESA;
-}
-
 export default function ElementoRichiesta({
   elemento,
   inizioFormattato,
@@ -67,7 +45,11 @@ export default function ElementoRichiesta({
         <View
           style={[
             stiliElementoRichiesta.accentoSinistra,
-            { backgroundColor: getColoreTipo(normalizzaTipo(elemento.tipo_permesso)) },
+            {
+              backgroundColor: getColoreTipo(
+                normalizzaTipo(elemento.tipo_permesso),
+              ),
+            },
           ]}
         />
         <Text style={stiliElementoRichiesta.titolo} numberOfLines={1}>
@@ -93,23 +75,40 @@ export default function ElementoRichiesta({
         <Text style={stiliElementoRichiesta.testoRiga}>Al: {fineFallback}</Text>
       </View>
 
-      {/* Azioni */}
-      <View style={stiliElementoRichiesta.azioniContenitore}>
-        <TouchableOpacity
-          onPress={() => suModifica?.(elemento)}
-          style={stiliElementoRichiesta.azioneModifica}
-          activeOpacity={0.7}
-        >
-          <Text style={stiliElementoRichiesta.testoModifica}>Modifica</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => suEliminazione?.(elemento.id_richiesta)}
-          style={stiliElementoRichiesta.azioneElimina}
-          activeOpacity={0.7}
-        >
-          <Text style={stiliElementoRichiesta.testoElimina}>Elimina</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Azioni: nascoste se la richiesta è validata o annullata */}
+      {(() => {
+        const statoRaw = String(
+          elemento.stato_approvazione || "",
+        ).toLowerCase();
+        const valoriEnum = [
+          StatoRichiesta.APPROVATO,
+          StatoRichiesta.AUTORIZZATO,
+          StatoRichiesta.RIFIUTATO,
+        ].map((s) => String(s).toLowerCase());
+        const corrispondenzaEsatta = valoriEnum.includes(statoRaw);
+        // Copri possibili varianti testuali dal backend (es. "approvato", "validato")
+        const corrispondenzaSottostringa =
+          /approv|valid|autoriz|rifiut|annull/.test(statoRaw);
+        const nascondi = corrispondenzaEsatta || corrispondenzaSottostringa;
+        return !nascondi;
+      })() && (
+        <View style={stiliElementoRichiesta.azioniContenitore}>
+          <TouchableOpacity
+            onPress={() => suModifica?.(elemento)}
+            style={stiliElementoRichiesta.azioneModifica}
+            activeOpacity={0.7}
+          >
+            <Text style={stiliElementoRichiesta.testoModifica}>Modifica</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => suEliminazione?.(elemento.id_richiesta)}
+            style={stiliElementoRichiesta.azioneElimina}
+            activeOpacity={0.7}
+          >
+            <Text style={stiliElementoRichiesta.testoElimina}>Elimina</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }

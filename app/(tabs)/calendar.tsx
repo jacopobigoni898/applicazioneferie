@@ -3,6 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import React from "react";
 import ComponenteCalendario from "../../src/features/calendar/components/CalendarComponent";
 import { stiliSchermata } from "../../src/core/style/commonStyles";
+import { Colori } from "../../src/core/theme/theme";
 
 // Schermata del calendario
 export default function SchermataCalendario() {
@@ -10,7 +11,7 @@ export default function SchermataCalendario() {
     <SafeAreaView style={stiliSchermata.contenitore} edges={["top"]}>
       <StatusBar
         barStyle="dark-content"
-        backgroundColor={Platform.OS === "android" ? "#f5f5f5" : undefined}
+        backgroundColor={Platform.OS === "android" ? Colori.secondario : undefined}
       />
       <View style={stiliSchermata.intestazione}>
         <View style={stiliSchermata.bloccoTitolo}>

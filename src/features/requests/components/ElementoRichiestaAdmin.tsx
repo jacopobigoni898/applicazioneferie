@@ -1,27 +1,15 @@
 // Componente singola richiesta nella lista admin (richieste ricevute).
 // Mostra tipo, nome utente, date, badge stato e azioni (autorizza/non autorizza).
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { Alert, View, Text, TouchableOpacity } from "react-native";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
 import { stiliElementoRichiesta } from "../../../core/style/commonStyles";
 import {
   normalizzaTipo,
   getColoreTipo,
 } from "../../../shared/utils/coloriTipoRichiesta";
-
-// Colori per il badge stato
-const COLORE_APPROVATO = "#16a34a";
-const COLORE_RIFIUTATO = "#dc2626";
-const COLORE_IN_ATTESA = "#f59e0b";
-
-function capitalizza(testo?: string): string {
-  if (!testo) return "";
-  return testo
-    .toLowerCase()
-    .split(" ")
-    .map((parola) => parola.charAt(0).toUpperCase() + parola.slice(1))
-    .join(" ");
-}
+import { capitalizza } from "../../../shared/utils/stringUtils";
+import { calcolaColoreBadge } from "../../../shared/utils/badgeUtils";
 
 interface PropsElementoRichiestaAdmin {
   elemento: RichiestaFerie;
@@ -30,17 +18,6 @@ interface PropsElementoRichiestaAdmin {
   suAutorizza?: (id: number) => void;
   suNonAutorizza?: (id: number) => void;
   suApri?: () => void;
-}
-
-function calcolaColoreBadge(stato: string): string {
-  const statoMinuscolo = (stato || "").toLowerCase();
-  if (statoMinuscolo.includes("approv") || statoMinuscolo === "approvato") {
-    return COLORE_APPROVATO;
-  }
-  if (statoMinuscolo.includes("rifiut") || statoMinuscolo === "rifiutato") {
-    return COLORE_RIFIUTATO;
-  }
-  return COLORE_IN_ATTESA;
 }
 
 export default function ElementoRichiestaAdmin({
@@ -111,22 +88,64 @@ export default function ElementoRichiestaAdmin({
 
         {/* Azioni admin */}
         <View style={stiliElementoRichiesta.azioniContenitore}>
-          <TouchableOpacity
-            onPress={() => suAutorizza?.(elemento.id_richiesta)}
-            style={stiliElementoRichiesta.azioneAutorizza}
-            activeOpacity={0.7}
-          >
-            <Text style={stiliElementoRichiesta.testoAutorizza}>Autorizza</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => suNonAutorizza?.(elemento.id_richiesta)}
-            style={stiliElementoRichiesta.azioneNonAutorizza}
-            activeOpacity={0.7}
-          >
-            <Text style={stiliElementoRichiesta.testoNonAutorizza}>
-              Non autorizza
-            </Text>
-          </TouchableOpacity>
+          {(() => {
+            const stato = String(
+              elemento.stato_approvazione || "",
+            ).toLowerCase();
+            const isValidated = /valid|approv/i.test(stato);
+            return (
+              <>
+                {!isValidated && (
+                  <TouchableOpacity
+                    onPress={() =>
+                      Alert.alert(
+                        "Conferma autorizzazione",
+                        "Sei sicuro di voler autorizzare questa richiesta?",
+                        [
+                          { text: "Annulla", style: "cancel" },
+                          {
+                            text: "Autorizza",
+                            onPress: () =>
+                              suAutorizza?.(elemento.id_richiesta),
+                          },
+                        ],
+                      )
+                    }
+                    style={stiliElementoRichiesta.azioneAutorizza}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={stiliElementoRichiesta.testoAutorizza}>
+                      Autorizza
+                    </Text>
+                  </TouchableOpacity>
+                )}
+
+                <TouchableOpacity
+                  onPress={() =>
+                    Alert.alert(
+                      "Conferma non autorizzazione",
+                      "Sei sicuro di voler non autorizzare questa richiesta?",
+                      [
+                        { text: "Annulla", style: "cancel" },
+                        {
+                          text: "Non autorizza",
+                          style: "destructive",
+                          onPress: () =>
+                            suNonAutorizza?.(elemento.id_richiesta),
+                        },
+                      ],
+                    )
+                  }
+                  style={stiliElementoRichiesta.azioneNonAutorizza}
+                  activeOpacity={0.7}
+                >
+                  <Text style={stiliElementoRichiesta.testoNonAutorizza}>
+                    Non autorizza
+                  </Text>
+                </TouchableOpacity>
+              </>
+            );
+          })()}
         </View>
       </View>
     </TouchableOpacity>
