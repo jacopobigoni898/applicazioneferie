@@ -137,14 +137,14 @@ export default function GraficoAssenze({ richieste, inCaricamento }: Props) {
 
 const stili = StyleSheet.create({
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: Colori.bianco,
     borderRadius: 16,
     padding: 16,
     marginHorizontal: 16,
     marginTop: 8,
-    borderColor: "#f0f0f0",
+    borderColor: Colori.secondario,
     borderWidth: 1,
-    shadowColor: "#000",
+    shadowColor: Colori.ombra,
     shadowOpacity: 0.05,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },

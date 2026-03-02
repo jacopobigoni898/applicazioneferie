@@ -100,7 +100,7 @@ const stili = StyleSheet.create({
     paddingTop: 12,
   },
   testoErrore: {
-    color: "#d64545",
+    color: Colori.errore,
     marginBottom: 12,
   },
   testoVuoto: {

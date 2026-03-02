@@ -10,9 +10,42 @@ export const Colori = {
   superficiecard: "#ffefd9",
   testoPrimario: "#000000",
   testoSecondario: "#808080",
+  testoDisabilitato: "#999999",
+  segnaposto: "#666666",
   errore: "#d32f2f",
   successo: "#388e3c",
   bordo: "#e0e0e0",
+  ombra: "#000000",
+  bianco: "#ffffff",
+  disabilitato: "#CCCCCC",
+  interruttoreOff: "#d3d6dc",
+  interruttoreThumb: "#f4f4f4",
+  sfondoInput: "#F5F5F5",
+  testoRiga: "#6b7280",
+
+  // Colori badge stato
+  badgeApprovato: "#16a34a",
+  badgeRifiutato: "#dc2626",
+  badgeInAttesa: "#f59e0b",
+  badgeValidata: "#D1FAE5",
+  badgeAutorizzata: "#DBEAFE",
+  badgeRifiutataChiara: "#FEE2E2",
+  badgeInAttesaChiara: "#FEF3C7",
+
+  // Colori azioni
+  azioneModificaSfondo: "#eff6ff",
+  azioneModificaTesto: "#2563eb",
+  azioneEliminaSfondo: "#fef2f2",
+  azioneEliminaTesto: "#dc2626",
+  azioneAutorizzaSfondo: "#f0fdf4",
+  azioneAutorizzaTesto: "#16a34a",
+  azioneValidaSfondo: "#3b82f6",
+
+  // Colori login
+  loginSfondo: "#0e1a2b",
+  loginScheda: "#13233a",
+  loginTesto: "#c7d2e5",
+  loginPulsante: "#2f7cf6",
 };
 
 // Tipografia dell'applicazione
