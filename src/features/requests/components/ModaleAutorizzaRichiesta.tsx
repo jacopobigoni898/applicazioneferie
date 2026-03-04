@@ -1,9 +1,11 @@
-import React from "react";
-import { Alert, Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { stiliElementoRichiesta } from "../../../core/style/commonStyles";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Colori, Tipografia } from "../../../core/theme/theme";
 import { ms } from "../../../core/style/responsive";
 import { RichiestaFerie } from "../../../domain/entities/HolidayRequest";
+import { recuperaDocumento, recuperaTipiRichiesta } from "../services/apiRichieste";
+import { normalizzaTipo } from "../../../shared/utils/coloriTipoRichiesta";
+import { shareAsync } from "expo-sharing";
 
 interface Props {
   visibile: boolean;
@@ -22,6 +24,56 @@ export default function ModaleAutorizzaRichiesta({
   suNonAutorizza,
   suValida,
 }: Props) {
+  const [documentoInCaricamento, impostaDocumentoInCaricamento] = useState(false);
+  const [richiedeDocumento, impostaRichiedeDocumento] = useState(false);
+
+  useEffect(() => {
+    let annulla = false;
+    const valuta = async () => {
+      if (!visibile || !elemento) {
+        impostaRichiedeDocumento(false);
+        return;
+      }
+      try {
+        const tipi = await recuperaTipiRichiesta();
+        const tipoNorm = normalizzaTipo(elemento.tipo_permesso);
+        const trovato = tipi.find(
+          (t) =>
+            normalizzaTipo(t.tipoRichiesta) === tipoNorm ||
+            t.tipoRichiesta
+              ?.toLowerCase()
+              .includes((elemento.tipo_permesso || "").toLowerCase()),
+        );
+        if (!annulla)
+          impostaRichiedeDocumento(Boolean(trovato?.richiedeDocumenti));
+      } catch {
+        if (!annulla) impostaRichiedeDocumento(false);
+      }
+    };
+    valuta();
+    return () => {
+      annulla = true;
+    };
+  }, [visibile, elemento]);
+
+  const scaricaECondividiDocumento = async () => {
+    if (!elemento) return;
+    impostaDocumentoInCaricamento(true);
+    try {
+      const doc = await recuperaDocumento(elemento.id_richiesta);
+      if (!doc) {
+        impostaDocumentoInCaricamento(false);
+        Alert.alert("Documento non disponibile", "Nessun documento allegato a questa richiesta.");
+        return;
+      }
+      await shareAsync(doc.uri, { mimeType: doc.type, dialogTitle: doc.name });
+    } catch (e) {
+      Alert.alert("Errore", "Impossibile scaricare il documento.");
+    } finally {
+      impostaDocumentoInCaricamento(false);
+    }
+  };
+
   if (!elemento) return null;
 
   return (
@@ -39,6 +91,20 @@ export default function ModaleAutorizzaRichiesta({
           <Text style={styles.riga}>
             Al: {elemento.data_fine.toLocaleString()}
           </Text>
+
+          {richiedeDocumento && (
+            <TouchableOpacity
+              style={[styles.btn, styles.btnDocumento]}
+              onPress={scaricaECondividiDocumento}
+              disabled={documentoInCaricamento}
+            >
+              {documentoInCaricamento ? (
+                <ActivityIndicator size="small" color={Colori.bianco} />
+              ) : (
+                <Text style={styles.testoBtn}>Scarica documento</Text>
+              )}
+            </TouchableOpacity>
+          )}
 
           <View style={styles.bottoni}>
             <TouchableOpacity
@@ -147,6 +213,12 @@ const styles = StyleSheet.create({
   btnAutorizza: { backgroundColor: Colori.badgeApprovato },
   btnNonAutorizza: { backgroundColor: Colori.badgeRifiutato },
   btnValida: { backgroundColor: Colori.azioneValidaSfondo },
+  btnDocumento: {
+    backgroundColor: Colori.primario,
+    marginTop: 12,
+    marginHorizontal: 0,
+    flex: 0,
+  },
   testoBtn: { color: Colori.bianco, fontWeight: Tipografia.peso.medio },
   chiudi: { alignItems: "center", paddingVertical: 6 },
 });

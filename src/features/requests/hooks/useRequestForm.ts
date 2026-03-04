@@ -228,12 +228,30 @@ export const useFormRichiesta = (parametri: ParametriFormRichiesta) => {
           ? (parametri.statoIniziale ?? StatoRichiesta.IN_ATTESA)
           : StatoRichiesta.IN_ATTESA,
       );
-      impostaSottoTipo(null);
-      impostaIdTipoRichiesta(null);
       impostaNota("");
       impostaCodiceRichiesta("");
       impostaTuttoIlGiorno(false);
       chiudiSelettori();
+
+      // Auto-seleziona il tipo richiesta "straordinari" quando tipoPrincipale è "straordinari"
+      if (
+        parametri.modalita === "crea" &&
+        parametri.tipoPrincipale === "straordinari"
+      ) {
+        const tipoStraordinario = (parametri.tipiRichiesta || []).find((t) =>
+          t.tipoRichiesta.toLowerCase().includes("straordinari"),
+        );
+        if (tipoStraordinario) {
+          impostaSottoTipo(String(tipoStraordinario.idTipoRichiesta));
+          impostaIdTipoRichiesta(tipoStraordinario.idTipoRichiesta);
+        } else {
+          impostaSottoTipo(null);
+          impostaIdTipoRichiesta(null);
+        }
+      } else {
+        impostaSottoTipo(null);
+        impostaIdTipoRichiesta(null);
+      }
 
       const dataInizioParsata = parametri.dataInizio
         ? parsaData(parametri.dataInizio)
