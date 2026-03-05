@@ -81,18 +81,18 @@ export default function ModalePresenza({ visibile, suChiudi }: Props) {
           <ActivityIndicator style={{ marginVertical: 20 }} />
         ) : (
           <ScrollView>
-            {luoghi.map((l) => (
+            {luoghi.map((luogo) => (
               <TouchableOpacity
-                key={l.idLuogo}
+                key={luogo.idLuogo}
                 style={stiliModaleRichiesta.voceSelettore}
-                onPress={() => gestisciSelezione(l)}
+                onPress={() => gestisciSelezione(luogo)}
               >
                 <Text
                   numberOfLines={1}
                   ellipsizeMode="tail"
                   style={stiliModaleRichiesta.voceSelettoreTesto}
                 >
-                  {l.luogo}
+                  {luogo.luogo}
                 </Text>
               </TouchableOpacity>
             ))}
