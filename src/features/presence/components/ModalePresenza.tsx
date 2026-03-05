@@ -48,9 +48,14 @@ export default function ModalePresenza({ visibile, suChiudi }: Props) {
   const gestisciSelezione = async (luogo: Luogo) => {
     impostaInvioInCorso(true);
     try {
-      await aggiungiPresenza(luogo.idLuogo);
-      Alert.alert("Presenza registrata", `Presenza segnalata presso: ${luogo.luogo}`);
-      suChiudi();
+      const risposta = await aggiungiPresenza(luogo.idLuogo);
+      const successo = risposta.esito && !risposta.esito.toLowerCase().includes("fallita");
+      if (successo) {
+        Alert.alert("Presenza registrata", risposta.motivazione || `Presenza segnalata presso: ${luogo.luogo}`);
+        suChiudi();
+      } else {
+        Alert.alert("Attenzione", risposta.motivazione || risposta.esito);
+      }
     } catch {
       Alert.alert("Errore", "Impossibile registrare la presenza.");
     } finally {
