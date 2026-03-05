@@ -1,5 +1,5 @@
-import React from "react";
-import { Button, Text, View, StatusBar, Platform, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { Button, Text, View, StatusBar, Platform, StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../_providers/AuthProvider";
 import { stiliSchermata } from "../../src/core/style/commonStyles";
@@ -7,11 +7,13 @@ import { Colori, Tipografia, Spaziatura } from "../../src/core/theme/theme";
 import { ms } from "../../src/core/style/responsive";
 import { useRichieste } from "../../src/features/requests/hooks/useRichieste";
 import GraficoAssenze from "../../src/features/requests/components/GraficoAssenze";
+import ModalePresenza from "../../src/features/presence/components/ModalePresenza";
 
 // Schermata del profilo utente
 export default function SchermataProfilo() {
   const { esci, utente, inCaricamentoUtente } = useAuth();
   const inviate = useRichieste("inviate");
+  const [modalePresenzaVisibile, impostaModalePresenza] = useState(false);
 
   return (
     <SafeAreaView style={stiliSchermata.contenitore} edges={["top"]}>
@@ -49,8 +51,21 @@ export default function SchermataProfilo() {
           inCaricamento={inviate.inCaricamento}
         />
         <View style={stiliProfilo.contenitorePulsante}>
+          <TouchableOpacity
+            style={stiliProfilo.pulsantePresenza}
+            onPress={() => impostaModalePresenza(true)}
+          >
+            <Text style={stiliProfilo.testoPulsantePresenza}>
+              Segnala Presenza
+            </Text>
+          </TouchableOpacity>
           <Button title="Esci" onPress={esci} />
         </View>
+
+        <ModalePresenza
+          visibile={modalePresenzaVisibile}
+          suChiudi={() => impostaModalePresenza(false)}
+        />
       </View>
     </SafeAreaView>
   );
@@ -76,5 +91,17 @@ const stiliProfilo = StyleSheet.create({
   },
   contenitorePulsante: {
     paddingHorizontal: Spaziatura.md,
+    gap: Spaziatura.sm,
+  },
+  pulsantePresenza: {
+    backgroundColor: Colori.primario,
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  testoPulsantePresenza: {
+    color: Colori.bianco,
+    fontWeight: Tipografia.peso.grassetto,
+    fontSize: ms(14),
   },
 });
